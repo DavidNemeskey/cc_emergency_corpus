@@ -1,0 +1,3 @@
+[submodule "ia-web-commons"]
+	path = ia-web-commons
+	url = git@github.com:commoncrawl/ia-web-commons.git
