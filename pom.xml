@@ -1,0 +1,98 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>hu.mta.sztaki.hlt</groupId>
+  <artifactId>cc_emergency_corpus</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>cc_emergency_corpus</name>
+  <url>https://github.com/DavidNemeskey/cc_emergency_corpus</url>
+
+   <organization>
+      <name>Budapest HLT</name>
+      <url>http://hlt.bme.hu/</url>
+   </organization>
+   <licenses>
+      <license>
+         <name>The MIT License</name>
+         <url>https://opensource.org/licenses/MIT</url>
+         <distribution>repo</distribution>
+      </license>
+    </licenses>
+   <developers>
+      <developer>
+         <id>DavidNemeskey</id>
+         <name>Dávid Márk Nemeskey</name>
+         <email>nemeskey.david@sztaki.mta.hu</email>
+      </developer>
+   </developers>
+   <issueManagement>
+      <system>GitHub Issues</system>
+      <url>https://github.com/DavidNemeskey/cc_emergency_corpus/issues</url>
+   </issueManagement>
+   <scm>
+      <connection>scm:git:git@github.com:DavidNemeskey/cc_emergency_corpus.git</connection>
+      <developerConnection>scm:git:git@github.com:DavidNemeskey/cc_emergency_corpus.git</developerConnection>
+      <url>git@github.com:DavidNemeskey/cc_emergency_corpus.git</url>
+   </scm>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <build.time>${maven.build.timestamp}</build.time>
+    <maven.build.timestamp.format>yyyyMMddhhmmss</maven.build.timestamp.format>
+    <build.tag />
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+            <source>1.8</source>
+            <target>1.8</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+          <finalName>cc_emergeny_corpus</finalName>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <!-- https://mvnrepository.com/artifact/org.dkpro.c4corpus/dkpro-c4corpus-boilerplate -->
+    <dependency>
+      <groupId>org.dkpro.c4corpus</groupId>
+      <artifactId>dkpro-c4corpus-boilerplate</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.netpreserve.commons/webarchive-commons -->
+    <dependency>
+      <groupId>org.netpreserve.commons</groupId>
+      <artifactId>webarchive-commons</artifactId>
+      <version>1.1.8</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/com.syncthemall/boilerpipe -->
+    <dependency>
+      <groupId>com.syncthemall</groupId>
+      <artifactId>boilerpipe</artifactId>
+      <version>1.2.2</version>
+    </dependency>
+</dependencies>
+</project>
