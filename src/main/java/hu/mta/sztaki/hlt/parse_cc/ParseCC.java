@@ -1,18 +1,23 @@
 package hu.mta.sztaki.hlt.parse_cc;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 
+import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
+import static hu.mta.sztaki.hlt.parse_cc.Commons.formatStackTrace;
+import static hu.mta.sztaki.hlt.parse_cc.Logging.configureLogging;
+import static hu.mta.sztaki.hlt.parse_cc.Logging.getLevels;
 import hu.mta.sztaki.hlt.parse_cc.extractors.Extractor;
 import hu.mta.sztaki.hlt.parse_cc.extractors.BoilerpipeExtractor;
 import hu.mta.sztaki.hlt.parse_cc.extractors.JusTextExtractor;
@@ -20,6 +25,7 @@ import hu.mta.sztaki.hlt.parse_cc.extractors.JusTextExtractor;
 public class ParseCC {
     /** WARC file name pattern. */
     private static Pattern warcP = Pattern.compile("^(.+)[.]warc(?:[.]gz)?$");
+    private static Logger logger;
 
     /** Parses the command line arguments with Commons CLI. */
     public static Namespace parseArguments(String[] args) {
@@ -31,9 +37,13 @@ public class ParseCC {
                 .required(true)
                 .help("the output directory.");
         parser.addArgument("-e", "--extractor")
-                .setDefault("boilerpipe")
                 .choices("boilerpipe", "justext")
+                .setDefault("boilerpipe")
                 .help("the text extractor to use.");
+        parser.addArgument("-l", "--log-level")
+                .choices(getLevels())
+                .setDefault("INFO")
+                .help("the logging level.");
         parser.addArgument("input_file")
                 .nargs("*")
                 .help("an input WARC file. Note that it must have the .warc " +
@@ -78,6 +88,7 @@ public class ParseCC {
 
     public static void main(String[] args) {
         Namespace ns = parseArguments(args);
+        logger = configureLogging(Level.parse(ns.getString("log_level")));
         Extractor extractor = getExtractor(ns.getString("extractor"));
         for (String inputFile : ns.<String>getList("input_file")) {
             try {
@@ -85,17 +96,19 @@ public class ParseCC {
                         ns.getString("output_dir"), inputFile);
                 WARCIterator wi = new WARCIterator(inputFile, extractor);
                 XMLConverter converter = new XMLConverter(outputFile);
+                logger.info(String.format("Converting %s to %s...",
+                                          inputFile, outputFile));
                 for (WARCDocument doc : wi) {
                     converter.convert(doc);
                 }
                 converter.close();
             } catch (IOException ioe) {
-                System.err.printf("IO Exception: %s%n", ioe);
-                ioe.printStackTrace(System.err);
+                logger.severe(String.format("IO Exception: %s%n%s", ioe,
+                                            formatStackTrace(ioe)));
                 System.exit(1);
             } catch (Exception e) {
-                System.err.printf("Exception: %s%n", e);
-                e.printStackTrace(System.err);
+                logger.severe(String.format("Exception: %s%n%s", e,
+                                            formatStackTrace(e)));
                 System.exit(1);
             }
         }

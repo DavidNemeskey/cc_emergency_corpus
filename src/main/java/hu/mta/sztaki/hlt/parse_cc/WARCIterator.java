@@ -7,6 +7,7 @@ import java.io.StringReader;
 
 import java.lang.Iterable;
 import java.util.Iterator;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -78,12 +79,17 @@ public class WARCIterator implements Iterable<WARCDocument>,
                 try {
                     if (parseHTTP(doc, os.toString())) {
                         doc.content = extractor.extract(doc.content);
+                        Logger.getLogger(WARCIterator.class.getName()).finer(
+                                String.format("Found document %s", doc.url));
                         return doc;
                     } else {
-                        System.err.println("HTTP status not OK.");
+                        Logger.getLogger(WARCIterator.class.getName()).fine(
+                                "HTTP status not OK: " + doc.url);
                     }
                 } catch (DataFormatException dfe) {
-                    System.err.printf("Could not parse header %s%n", dfe);
+                    Logger.getLogger(WARCIterator.class.getName()).fine(
+                            String.format("Could not parse header for %s: %s",
+                                          doc.url, dfe));
                 }
             }
         }
