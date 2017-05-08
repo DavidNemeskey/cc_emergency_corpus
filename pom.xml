@@ -4,7 +4,7 @@
   <groupId>hu.mta.sztaki.hlt</groupId>
   <artifactId>cc_emergency_corpus</artifactId>
   <version>0.1.0-SNAPSHOT</version>
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
 
   <name>cc_emergency_corpus</name>
   <url>https://github.com/DavidNemeskey/cc_emergency_corpus</url>
@@ -61,7 +61,12 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
-          <finalName>cc_emergeny_corpus</finalName>
+          <finalName>cc_emergency_corpus</finalName>
+          <archive>
+            <manifest>
+              <mainClass>hu.mta.sztaki.hlt.parse_cc.ParseCC</mainClass>
+            </manifest>
+          </archive>
         </configuration>
         <executions>
           <execution>
@@ -94,5 +99,11 @@
       <artifactId>boilerpipe</artifactId>
       <version>1.2.2</version>
     </dependency>
-</dependencies>
+    <!-- https://mvnrepository.com/artifact/net.sourceforge.argparse4j/argparse4j -->
+    <dependency>
+      <groupId>net.sourceforge.argparse4j</groupId>
+      <artifactId>argparse4j</artifactId>
+      <version>0.7.0</version>
+    </dependency>
+  </dependencies>
 </project>

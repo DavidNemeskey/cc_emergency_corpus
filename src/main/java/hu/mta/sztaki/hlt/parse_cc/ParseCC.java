@@ -1,3 +1,5 @@
+package hu.mta.sztaki.hlt.parse_cc;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,6 +27,11 @@ import org.w3c.dom.Element;
 
 import de.tudarmstadt.ukp.dkpro.c4corpus.boilerplate.BoilerPlateRemoval;
 import de.tudarmstadt.ukp.dkpro.c4corpus.boilerplate.impl.JusTextBoilerplateRemoval;
+
+import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.inf.ArgumentParser;
+import net.sourceforge.argparse4j.inf.ArgumentParserException;
+import net.sourceforge.argparse4j.inf.Namespace;
 
 import org.archive.io.ArchiveRecord;
 import org.archive.io.ArchiveRecordHeader;
@@ -91,63 +98,92 @@ public class ParseCC {
         }
     }
 
+    /** Parses the command line arguments with Commons CLI. */
+    public static Namespace parseArguments(String[] args) {
+        ArgumentParser parser = ArgumentParsers.newArgumentParser("ParseCC")
+                .defaultHelp(true)
+                .description("Parses Common Crawl WARC files into plaintext " +
+                             "documents.");
+        parser.addArgument("-o", "--output-dir")
+                .required(true)
+                .help("the output directory.");
+        parser.addArgument("-e", "--extractor")
+                .setDefault("boilerpipe")
+                .choices("boilerpipe", "justext")
+                .help("the text extractor to use.");
+        parser.addArgument("input_file")
+                .nargs("*")
+                .help("an input WARC file. Note that it must have the .warc " +
+                      "or .warc.gz extension.");
+        try{
+            return parser.parseArgs(args);
+        } catch (ArgumentParserException ape) {
+            parser.handleError(ape);
+            System.exit(1);
+            return null;  // LOL
+        }
+    }
+
     public static void main(String[] args) {
-        try {
-            WARCReader wr = WARCReaderFactory.get(args[0]);
-            Transformer tf = TransformerFactory.newInstance().newTransformer();
-            tf.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-            tf.setOutputProperty(OutputKeys.INDENT, "yes");
-            tf.setOutputProperty(OutputKeys.STANDALONE, "yes");
-            StringWriter out = new StringWriter();
-            StreamResult sr = new StreamResult(out);
-            DocumentBuilderFactory dbf =
-                    DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = dbf.newDocumentBuilder();
-            tf.transform(new DOMSource(builder.newDocument()), sr);
-            tf.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-            for (ArchiveRecord r : wr) {
-                ArchiveRecordHeader header = r.getHeader();
-                if (((String)header.getHeaderValue("WARC-Type")).equalsIgnoreCase("response")) {
-                    MyDocument doc = new MyDocument();
-                    doc.date = (String)header.getHeaderValue("WARC-Date");
-                    ByteArrayOutputStream os = new ByteArrayOutputStream();
-                    r.dump(os);
-                    try {
-                        if (parseHTTP(doc, os.toString())) {
-                            // TODO: add Boilerpipe as an option; jusText
-                            // doesn't work for e.g. Japanese
-                            doc.text = boilerPlateRemoval.getPlainText(
-                                    doc.text, null);
-                            Document d = builder.newDocument();
-                            Element docElement = d.createElement("document");
-                            d.appendChild(docElement);
-                            Element dateElement = d.createElement("date");
-                            docElement.appendChild(dateElement);
-                            dateElement.insertBefore(d.createTextNode(doc.date),
-                                                     dateElement.getLastChild());
-                            Element textElement = d.createElement("text");
-                            docElement.appendChild(textElement);
-                            textElement.insertBefore(d.createTextNode(doc.text),
-                                                     textElement.getLastChild());
-                            tf.transform(new DOMSource(d), sr);
-                            System.out.println(out.toString());
-                            out.getBuffer().setLength(0);
-                        } else {
-                            System.err.println("HTTP status not OK.");
+        Namespace ns = parseArguments(args);
+        for (String inputFile : ns.<String>getList("input_file")) {
+            try {
+                WARCReader wr = WARCReaderFactory.get(args[0]);
+                Transformer tf = TransformerFactory.newInstance().newTransformer();
+                tf.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+                tf.setOutputProperty(OutputKeys.INDENT, "yes");
+                tf.setOutputProperty(OutputKeys.STANDALONE, "yes");
+                StringWriter out = new StringWriter();
+                StreamResult sr = new StreamResult(out);
+                DocumentBuilderFactory dbf =
+                        DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = dbf.newDocumentBuilder();
+                tf.transform(new DOMSource(builder.newDocument()), sr);
+                tf.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+                for (ArchiveRecord r : wr) {
+                    ArchiveRecordHeader header = r.getHeader();
+                    if (((String)header.getHeaderValue("WARC-Type")).equalsIgnoreCase("response")) {
+                        MyDocument doc = new MyDocument();
+                        doc.date = (String)header.getHeaderValue("WARC-Date");
+                        ByteArrayOutputStream os = new ByteArrayOutputStream();
+                        r.dump(os);
+                        try {
+                            if (parseHTTP(doc, os.toString())) {
+                                // TODO: add Boilerpipe as an option; jusText
+                                // doesn't work for e.g. Japanese
+                                doc.text = boilerPlateRemoval.getPlainText(
+                                        doc.text, null);
+                                Document d = builder.newDocument();
+                                Element docElement = d.createElement("document");
+                                d.appendChild(docElement);
+                                Element dateElement = d.createElement("date");
+                                docElement.appendChild(dateElement);
+                                dateElement.insertBefore(d.createTextNode(doc.date),
+                                                         dateElement.getLastChild());
+                                Element textElement = d.createElement("text");
+                                docElement.appendChild(textElement);
+                                textElement.insertBefore(d.createTextNode(doc.text),
+                                                         textElement.getLastChild());
+                                tf.transform(new DOMSource(d), sr);
+                                System.out.println(out.toString());
+                                out.getBuffer().setLength(0);
+                            } else {
+                                System.err.println("HTTP status not OK.");
+                            }
+                        } catch (DataFormatException dfe) {
+                            System.err.printf("Could not parse header %s%n", dfe);
                         }
-                    } catch (DataFormatException dfe) {
-                        System.err.printf("Could not parse header %s%n", dfe);
                     }
                 }
+            } catch (IOException ioe) {
+                System.err.printf("IO Exception: %s%n", ioe);
+                ioe.printStackTrace(System.err);
+                System.exit(1);
+            } catch (Exception e) {
+                System.err.printf("Exception: %s%n", e);
+                e.printStackTrace(System.err);
+                System.exit(1);
             }
-        } catch (IOException ioe) {
-            System.err.printf("IO Exception: %s%n", ioe);
-            ioe.printStackTrace(System.err);
-            System.exit(1);
-        } catch (Exception e) {
-            System.err.printf("Exception: %s%n", e);
-            e.printStackTrace(System.err);
-            System.exit(1);
         }
     }
 }
