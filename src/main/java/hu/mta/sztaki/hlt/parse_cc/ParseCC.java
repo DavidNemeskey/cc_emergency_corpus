@@ -25,9 +25,6 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import de.tudarmstadt.ukp.dkpro.c4corpus.boilerplate.BoilerPlateRemoval;
-import de.tudarmstadt.ukp.dkpro.c4corpus.boilerplate.impl.JusTextBoilerplateRemoval;
-
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
@@ -37,6 +34,9 @@ import org.archive.io.ArchiveRecord;
 import org.archive.io.ArchiveRecordHeader;
 import org.archive.io.warc.WARCReader;
 import org.archive.io.warc.WARCReaderFactory;
+
+import hu.mta.sztaki.hlt.parse_cc.extractors.Extractor;
+import hu.mta.sztaki.hlt.parse_cc.extractors.JusTextExtractor;
 
 public class ParseCC {
     /** Document content + a few fields from the WARC and HTML headers. */
@@ -53,9 +53,6 @@ public class ParseCC {
             "^HTTP[\\S]+ ([\\d]+) [\\S]+$");
     private static Pattern httpHeaderP = Pattern.compile(
             "^([^:]+): (.+)$");
-
-    private static final BoilerPlateRemoval boilerPlateRemoval =
-            new JusTextBoilerplateRemoval();
 
     /**
      * Parses the HTTP response @c httpResponse into the specified @c MyDocument.
@@ -126,6 +123,7 @@ public class ParseCC {
 
     public static void main(String[] args) {
         Namespace ns = parseArguments(args);
+        Extractor extractor = new JusTextExtractor();
         for (String inputFile : ns.<String>getList("input_file")) {
             try {
                 WARCReader wr = WARCReaderFactory.get(args[0]);
@@ -151,8 +149,7 @@ public class ParseCC {
                             if (parseHTTP(doc, os.toString())) {
                                 // TODO: add Boilerpipe as an option; jusText
                                 // doesn't work for e.g. Japanese
-                                doc.text = boilerPlateRemoval.getPlainText(
-                                        doc.text, null);
+                                doc.text = extractor.extract(doc.text);
                                 Document d = builder.newDocument();
                                 Element docElement = d.createElement("document");
                                 d.appendChild(docElement);
