@@ -8,6 +8,7 @@ import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
 import hu.mta.sztaki.hlt.parse_cc.extractors.Extractor;
+import hu.mta.sztaki.hlt.parse_cc.extractors.BoilerpipeExtractor;
 import hu.mta.sztaki.hlt.parse_cc.extractors.JusTextExtractor;
 
 public class ParseCC {
@@ -37,9 +38,18 @@ public class ParseCC {
         }
     }
 
+    /** Returns the extractor named in the argument. */
+    private static Extractor getExtractor(String extractor) {
+        if ("boilerpipe".equalsIgnoreCase(extractor)) {
+            return new BoilerpipeExtractor();
+        } else {
+            return new JusTextExtractor();
+        }
+    }
+
     public static void main(String[] args) {
         Namespace ns = parseArguments(args);
-        Extractor extractor = new JusTextExtractor();
+        Extractor extractor = getExtractor(ns.getString("extractor"));
         for (String inputFile : ns.<String>getList("input_file")) {
             try {
                 WARCIterator wi = new WARCIterator(inputFile, extractor);
