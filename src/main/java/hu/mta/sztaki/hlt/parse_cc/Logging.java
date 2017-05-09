@@ -49,10 +49,10 @@ public class Logging {
         logger.setLevel(level);
         Handler h;
         if (logFile != null) {
-            h = new StreamHandler(System.err, new SimpleFormatter());
-        } else {
             h = new FileHandler(logFile);
             h.setFormatter(new SimpleFormatter());
+        } else {
+            h = new StreamHandler(System.err, new SimpleFormatter());
         }
         h.setLevel(level);
         logger.addHandler(h);
