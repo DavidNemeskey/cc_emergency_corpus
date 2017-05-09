@@ -11,15 +11,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import jnr.posix.POSIX;
-import jnr.posix.POSIXFactory;
-
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
-import static hu.mta.sztaki.hlt.parse_cc.Commons.formatStackTrace;
+import static hu.mta.sztaki.hlt.parse_cc.commons.Lang.formatStackTrace;
+import static hu.mta.sztaki.hlt.parse_cc.commons.System.fullNice;
 import static hu.mta.sztaki.hlt.parse_cc.Logging.configureLogging;
 import static hu.mta.sztaki.hlt.parse_cc.Logging.getLevels;
 import hu.mta.sztaki.hlt.parse_cc.extractors.Extractor;
@@ -126,9 +124,7 @@ public class ParseCC {
         Extractor extractor = getExtractor(ns.getString("extractor"));
         logger = configureLogging(Level.parse(ns.getString("log_level")));
 
-        POSIX posix = POSIXFactory.getNativePOSIX();
-        posix.setpriority(0, 0, 20);
-
+        fullNice();
         for (String inputFile : ns.<String>getList("input_file")) {
             try {
                 String outputFile = getOutputFile(
