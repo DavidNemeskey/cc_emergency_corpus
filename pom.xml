@@ -81,13 +81,13 @@
   </build>
 
   <dependencies>
-    <!-- https://mvnrepository.com/artifact/org.dkpro.c4corpus/dkpro-c4corpus-boilerplate -->
+    <!-- https://mvnrepository.com/artifact/org.dkpro.c4corpus/dkpro-c4corpus-boilerplate : crappy JusText -->
     <dependency>
       <groupId>org.dkpro.c4corpus</groupId>
       <artifactId>dkpro-c4corpus-boilerplate</artifactId>
       <version>1.0.0</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/org.netpreserve.commons/webarchive-commons -->
+    <!-- https://mvnrepository.com/artifact/org.netpreserve.commons/webarchive-commons : warc reader -->
     <dependency>
       <groupId>org.netpreserve.commons</groupId>
       <artifactId>webarchive-commons</artifactId>
@@ -105,7 +105,7 @@
       <artifactId>argparse4j</artifactId>
       <version>0.7.0</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/com.github.jnr/jnr-posix -->
+    <!-- https://mvnrepository.com/artifact/com.github.jnr/jnr-posix : (io)nice -->
     <dependency>
       <groupId>com.github.jnr</groupId>
       <artifactId>jnr-posix</artifactId>
