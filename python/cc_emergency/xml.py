@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # vim: set fileencoding=utf-8 :
+
 """Corpus reader for the new Reuters corpus."""
 
 from __future__ import absolute_import, division, print_function
