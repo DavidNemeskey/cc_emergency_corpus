@@ -11,6 +11,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import jnr.posix.POSIX;
+import jnr.posix.POSIXFactory;
+
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
@@ -122,6 +125,10 @@ public class ParseCC {
         if (logDir != null) createDirectory(logDir);
         Extractor extractor = getExtractor(ns.getString("extractor"));
         logger = configureLogging(Level.parse(ns.getString("log_level")));
+
+        POSIX posix = POSIXFactory.getNativePOSIX();
+        posix.setpriority(0, 0, 20);
+
         for (String inputFile : ns.<String>getList("input_file")) {
             try {
                 String outputFile = getOutputFile(

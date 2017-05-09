@@ -105,5 +105,11 @@
       <artifactId>argparse4j</artifactId>
       <version>0.7.0</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/com.github.jnr/jnr-posix -->
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jnr-posix</artifactId>
+      <version>3.0.38</version>
+    </dependency>
   </dependencies>
 </project>
