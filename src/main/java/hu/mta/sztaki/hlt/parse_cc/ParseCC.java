@@ -16,7 +16,8 @@ import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
-import static hu.mta.sztaki.hlt.parse_cc.Commons.formatStackTrace;
+import static hu.mta.sztaki.hlt.parse_cc.commons.Lang.formatStackTrace;
+import static hu.mta.sztaki.hlt.parse_cc.commons.System.fullNice;
 import static hu.mta.sztaki.hlt.parse_cc.Logging.configureLogging;
 import static hu.mta.sztaki.hlt.parse_cc.Logging.getLevels;
 import hu.mta.sztaki.hlt.parse_cc.extractors.Extractor;
@@ -122,6 +123,8 @@ public class ParseCC {
         if (logDir != null) createDirectory(logDir);
         Extractor extractor = getExtractor(ns.getString("extractor"));
         logger = configureLogging(Level.parse(ns.getString("log_level")));
+
+        fullNice();
         for (String inputFile : ns.<String>getList("input_file")) {
             try {
                 String outputFile = getOutputFile(
