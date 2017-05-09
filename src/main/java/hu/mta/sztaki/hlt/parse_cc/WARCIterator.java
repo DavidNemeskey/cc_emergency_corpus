@@ -26,7 +26,7 @@ public class WARCIterator implements Iterable<WARCDocument>,
     private static Pattern statusLineP = Pattern.compile(
             "^HTTP[\\S]+ ([\\d]+) [\\S]+$");
     private static Pattern httpHeaderP = Pattern.compile(
-            "^([^:]+): (.*)$");
+            "^([^:]+)::?[ ]?(.+)?$");
 
     /** The extractor to use for text extraction from HTML. */
     private Extractor extractor;
