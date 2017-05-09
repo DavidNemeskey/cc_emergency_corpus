@@ -1,5 +1,6 @@
 package hu.mta.sztaki.hlt.parse_cc;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -40,9 +41,13 @@ public class ParseCC {
                 .choices("boilerpipe", "justext")
                 .setDefault("boilerpipe")
                 .help("the text extractor to use.");
-        parser.addArgument("-l", "--log-level")
+        parser.addArgument("-l", "--log-dir")
+                .help("the log directory. If specified, a separate log file " +
+                      "is created for each input file; otherwise, logs are " +
+                      "written to stderr.");
+        parser.addArgument("-L", "--log-level")
                 .choices(getLevels())
-                .setDefault("INFO")
+                .setDefault("OFF")
                 .help("the logging level.");
         parser.addArgument("input_file")
                 .nargs("*")
@@ -69,11 +74,15 @@ public class ParseCC {
     /**
      * Returns the output file that corresponds to the specified input WARC.
      *
+     * @param outputDirectory the output directory.
+     * @param inputFile the name of the original file.
+     * @param extension the extension of the output file that replaces the
+     *                  .warc(.gz) extension of the original.
      * @throws IllegalArgumentException if the input file name does not end
      *                                  with .warc(.gz).
      */
     private static String getOutputFile(
-            String outputDirectory, String inputFile)
+            String outputDirectory, String inputFile, String extension)
             throws IllegalArgumentException {
         FileSystem fs = FileSystems.getDefault();
         String baseName = fs.getPath(inputFile).getFileName().toString();
@@ -83,17 +92,44 @@ public class ParseCC {
                     String.format("Not a valid input file name: %s; " +
                                   ".warc(.gz) extension missing.", baseName));
         }
-        return fs.getPath(outputDirectory, m.group(1) + ".xml").toString();
+        return fs.getPath(
+                outputDirectory, m.group(1) + "." + extension).toString();
+    }
+
+    /** Creates a directory or exits.  */
+    private static void createDirectory(String directory) {
+        File f = new File(directory);
+        if (!f.isDirectory()) {
+            if (f.exists()) {
+                errorAndExit("A file named " + directory + " already exists.");
+            } else if (!f.mkdirs()) {
+                errorAndExit("Could not create directory " + directory + ".");
+            }
+        }
+    }
+
+    /** Logs the error message and exists the program. */
+    private static void errorAndExit(String message) {
+        logger.severe(message);
+        System.exit(1);
     }
 
     public static void main(String[] args) {
         Namespace ns = parseArguments(args);
-        logger = configureLogging(Level.parse(ns.getString("log_level")));
+        String outDir = ns.getString("output_dir");
+        String logDir = ns.getString("log_dir");
+        createDirectory(outDir);
+        if (logDir != null) createDirectory(logDir);
         Extractor extractor = getExtractor(ns.getString("extractor"));
+        logger = configureLogging(Level.parse(ns.getString("log_level")));
         for (String inputFile : ns.<String>getList("input_file")) {
             try {
                 String outputFile = getOutputFile(
-                        ns.getString("output_dir"), inputFile);
+                        ns.getString("output_dir"), inputFile, "xml");
+                if (logDir != null) {
+                    logger = configureLogging(Level.parse(ns.getString("log_level")),
+                                              getOutputFile(logDir, inputFile, "log"));
+                }
                 WARCIterator wi = new WARCIterator(inputFile, extractor);
                 XMLConverter converter = new XMLConverter(outputFile);
                 logger.info(String.format("Converting %s to %s...",
@@ -103,13 +139,11 @@ public class ParseCC {
                 }
                 converter.close();
             } catch (IOException ioe) {
-                logger.severe(String.format("IO Exception: %s%n%s", ioe,
-                                            formatStackTrace(ioe)));
-                System.exit(1);
+                errorAndExit(String.format("IO Exception: %s%n%s", ioe,
+                                           formatStackTrace(ioe)));
             } catch (Exception e) {
-                logger.severe(String.format("Exception: %s%n%s", e,
-                                            formatStackTrace(e)));
-                System.exit(1);
+                errorAndExit(String.format("Exception: %s%n%s", e,
+                                           formatStackTrace(e)));
             }
         }
     }
