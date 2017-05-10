@@ -105,11 +105,14 @@
       <artifactId>argparse4j</artifactId>
       <version>0.7.0</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/com.github.jnr/jnr-posix : (io)nice -->
+    <!-- https://mvnrepository.com/artifact/com.github.jnr/jnr-posix : (io)nice
+         ionice is only available from version 3.0.40
+         (see https://github.com/jnr/jnr-posix/issues/100)
+      -->
     <dependency>
       <groupId>com.github.jnr</groupId>
       <artifactId>jnr-posix</artifactId>
-      <version>3.0.38</version>
+      <version>3.0.40</version>
     </dependency>
   </dependencies>
 </project>
