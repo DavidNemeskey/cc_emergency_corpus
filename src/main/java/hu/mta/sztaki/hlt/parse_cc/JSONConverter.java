@@ -1,10 +1,7 @@
 package hu.mta.sztaki.hlt.parse_cc;
 
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.PrintWriter;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -16,7 +13,7 @@ public class JSONConverter {
     /** The converter object. */
     private Gson gson;
     /** The writer to the output file. */
-    private Writer writer;
+    private PrintWriter writer;
 
     /**
      * Creates the object.
@@ -24,9 +21,8 @@ public class JSONConverter {
      * @param outputFile the name of the output file.
      */
     public JSONConverter(String outputFile) throws IOException {
-        gson = new GsonBuilder().setPrettyPrinting().create();
-        writer = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(outputFile), "utf-8"));
+        gson = new GsonBuilder().create();
+        writer = new PrintWriter(outputFile, "utf-8");
     }
 
     /**
@@ -36,7 +32,7 @@ public class JSONConverter {
      */
     public void convert(WARCDocument document) throws IOException {
         String json = gson.toJson(document);
-        writer.write(json);
+        writer.println(json);
     }
 
     /** Closes the output stream. */
