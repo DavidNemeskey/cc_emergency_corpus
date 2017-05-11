@@ -128,7 +128,7 @@ public class ParseCC {
         for (String inputFile : ns.<String>getList("input_file")) {
             try {
                 String outputFile = getOutputFile(
-                        ns.getString("output_dir"), inputFile, "xml");
+                        ns.getString("output_dir"), inputFile, "json");
                 if (logDir != null) {
                     logger = configureLogging(Level.parse(ns.getString("log_level")),
                                               getOutputFile(logDir, inputFile, "log"));
