@@ -75,13 +75,19 @@ def walk_non_hidden(directory):
             if lst[i][0] == '.':
                 del lst[i]
 
+    for tup in os.walk(directory):
+        dirpath, dirnames, filenames = tup
+        delete_hidden(dirnames)
+        delete_hidden(filenames)
+        yield tup
+
 
 def main():
     args = parse_arguments()
     os.nice(20)  # Play nice
 
-    source_target_files = source_target_file_list(args.source_dir, args.target_dir)
-    run_queued(process_file, 'en', args.processes, source_target_files, args.log_level)
+    source_target_files = source_target_file_list(args.input_dir, args.output_dir)
+    run_queued(process_file, 'en', args.processes, source_target_files, 'debug') # args.log_level)
 
 
 if __name__ == '__main__':
