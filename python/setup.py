@@ -56,6 +56,7 @@ setup(name='cc_emergency',
       },
       # Install the scripts
       scripts=[
+          'scripts/filter_language.py',
       ],
       # Tensorflow and numpy can be installed from requirement files, as they
       # are only required if the nn module / scripts are used.
