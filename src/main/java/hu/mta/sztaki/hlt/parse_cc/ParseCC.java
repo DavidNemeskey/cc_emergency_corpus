@@ -134,7 +134,7 @@ public class ParseCC {
                                               getOutputFile(logDir, inputFile, "log"));
                 }
                 WARCIterator wi = new WARCIterator(inputFile, extractor);
-                XMLConverter converter = new XMLConverter(outputFile);
+                JSONConverter converter = new JSONConverter(outputFile);
                 logger.info(String.format("Converting %s to %s...",
                                           inputFile, outputFile));
                 for (WARCDocument doc : wi) {
