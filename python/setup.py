@@ -12,7 +12,7 @@ def readme():
         return f.read()
 
 setup(name='cc_emergency',
-      version='1.0',
+      version='0.5',
       description='Scripts and tools for emergency corpus building',
       long_description=readme(),
       url='https://github.com/DavidNemeskey/cc_emergency_corpus',
@@ -66,6 +66,8 @@ setup(name='cc_emergency',
           # An earlier version was broken (don't remember which); also,
           # iterparse is broken in 3.7.3. :)
           'lxml==3.6.4',
+          # Language identification
+          'langid',
       ],
       # zip_safe=False,
       use_2to3=False)
