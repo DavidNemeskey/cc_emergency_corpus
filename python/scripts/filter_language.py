@@ -6,6 +6,7 @@
 from __future__ import absolute_import, division, print_function
 import argparse
 import os
+import os.path as op
 from queue import Empty
 
 from cc_emergency.utils import openall
@@ -65,6 +66,14 @@ def source_target_file_list(source_dir, target_dir):
             os.makedirs(td)
         target_files.append(tf)
     return zip(source_files, target_files)
+
+
+def walk_non_hidden(directory):
+    """Walks directory as os.walk, skipping hidden files and directories."""
+    def delete_hidden(lst):
+        for i in range(len(lst) - 1, -1, -1):
+            if lst[i][0] == '.':
+                del lst[i]
 
 
 def main():
