@@ -5,15 +5,12 @@
 
 from __future__ import absolute_import, division, print_function
 import argparse
-from collections import OrderedDict
-import json
 import os
 import os.path as op
 from queue import Empty
 
-import langid
-
-from cc_emergency.utils import openall
+from cc_emergency.functional.io import JsonReader, JsonWriter
+from cc_emergency.functional.transforms import LanguageFilter
 from cc_emergency.utils import run_queued, setup_queue_logger
 
 
@@ -40,13 +37,17 @@ def process_file(language, queue, logging_level=None, logging_queue=None):
         while True:
             try:
                 infile, outfile = queue.get_nowait()
+                jin = JsonReader(infile)
+                lf = LanguageFilter('content', 'en')
+                jout = JsonWriter(outfile)
                 logger.info('Started processing {}'.format(infile))
-                with openall(infile, 'rt') as inf, openall(outfile, 'wt') as outf:
-                    decoder = json.JSONDecoder(object_pairs_hook=OrderedDict)
-                    for doc in map(decoder.decode, inf):
-                        lang = langid.classify(doc['content'])[0]
-                        if lang == 'en':
-                            print(json.dumps(doc), file=outf)
+                jin.initialize()
+                lf.initialize()
+                jout.initialize()
+                jout.collect(filter(lf, jin))
+                jout.cleanup()
+                lf.cleanup()
+                jin.cleanup()
                 logger.info('Done processing {}'.format(infile))
             except Empty:
                 logger.debug('Queue depleted.')
