@@ -40,6 +40,7 @@ class Resource(object):
         """
         Initializes any resources the object might use. This should be
         done here so that it is only run once in a multiprocessing setting.
+        Exceptions should be thrown here instead of in the constructor.
         """
         pass
 
@@ -52,7 +53,7 @@ class Source(Resource):
     """
     Produces an iterable. Each transformation pipeline starts with a Source.
     """
-    def __iter__(self, it):
+    def __iter__(self):
         raise NotImplementedError(
             "__iter__() is not implemented in " + self.__class__.__name__)
 
