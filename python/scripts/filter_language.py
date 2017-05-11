@@ -5,13 +5,16 @@
 
 from __future__ import absolute_import, division, print_function
 import argparse
+from collections import OrderedDict
+import json
 import os
 import os.path as op
 from queue import Empty
 
+import langid
+
 from cc_emergency.utils import openall
 from cc_emergency.utils import run_queued, setup_queue_logger
-from cc_emergency.xml import parse_xml
 
 
 def parse_arguments():
@@ -23,6 +26,9 @@ def parse_arguments():
                         help='the output directory.')
     parser.add_argument('--processes', '-P', type=int, default=1,
                         help='the number of files to process parallelly.')
+    parser.add_argument('--log-level', '-L', type=str, default=None,
+                        choices=['debug', 'info', 'warning', 'error', 'critical'],
+                        help='the logging level.')
     args = parser.parse_args()
 
     return args
@@ -35,11 +41,12 @@ def process_file(language, queue, logging_level=None, logging_queue=None):
             try:
                 infile, outfile = queue.get_nowait()
                 logger.info('Started processing {}'.format(infile))
-                with openall(infile, 'rb') as inf:
-                    doc_it = parse_xml(inf, True)
-                    header = next(doc_it)
-                    for doc in doc_it:
-                        print(doc['url'])
+                with openall(infile, 'rt') as inf, openall(outfile, 'wt') as outf:
+                    decoder = json.JSONDecoder(object_pairs_hook=OrderedDict)
+                    for doc in map(decoder.decode, inf):
+                        lang = langid.classify(doc['content'])[0]
+                        if lang == 'en':
+                            print(json.dumps(doc), file=outf)
                 logger.info('Done processing {}'.format(infile))
             except Empty:
                 logger.debug('Queue depleted.')
@@ -87,7 +94,7 @@ def main():
     os.nice(20)  # Play nice
 
     source_target_files = source_target_file_list(args.input_dir, args.output_dir)
-    run_queued(process_file, 'en', args.processes, source_target_files, 'debug') # args.log_level)
+    run_queued(process_file, 'en', args.processes, source_target_files, args.log_level)
 
 
 if __name__ == '__main__':
