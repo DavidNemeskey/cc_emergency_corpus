@@ -24,9 +24,10 @@ class LanguageFilter(Transform):
         self.languages = set(languages)
         self.fields = fields
 
-    def initialize(self):
+    def __enter__(self):
         try:
             self.langid = importlib.import_module('langid')
+            return self
         except ImportError:
             raise ImportError('The langid module is needed for LanguageFilter '
                               'to work.')

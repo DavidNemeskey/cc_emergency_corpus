@@ -21,7 +21,7 @@ class FileWrapper(Resource):
     def __enter__(self):
         """Opens the file."""
         self.stream = openall(self.file, mode=self.mode)
-        return self.stream
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Closes the input stream."""
@@ -54,6 +54,6 @@ class JsonWriter(Collector, FileWrapper):
     def __init__(self, output_file):
         super(JsonWriter, self).__init__(output_file, 'wt')
 
-    def collect(self, it):
+    def __call__(self, it):
         for obj in it:
             print(json.dumps(obj), file=self.stream)

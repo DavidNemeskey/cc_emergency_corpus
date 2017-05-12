@@ -25,11 +25,11 @@ class Resource(object):
         done here so that it is only run once in a multiprocessing setting.
         Exceptions should be thrown here instead of in the constructor.
         """
-        pass
+        return self
 
-    def __exit__(self):
-        """The opposite of initialize()."""
-        pass
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Cleans up the resources."""
+        return False
 
 
 class Source(Resource):
