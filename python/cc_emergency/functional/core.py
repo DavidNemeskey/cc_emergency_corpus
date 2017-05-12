@@ -74,5 +74,8 @@ class Collector(Resource):
     returns a single value, if any.
     """
     def collect(self, it):
+        return self(it)
+
+    def __call__(self, param):
         raise NotImplementedError(
-            "collect() is not implemented in " + self.__class__.__name__)
+            "__call__() is not implemented in " + self.__class__.__name__)

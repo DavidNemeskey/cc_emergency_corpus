@@ -44,7 +44,7 @@ def process_file(language, queue, logging_level=None, logging_queue=None):
                 jin.initialize()
                 lf.initialize()
                 jout.initialize()
-                jout.collect(filter(lf, jin))
+                jout(filter(lf, jin))
                 jout.cleanup()
                 lf.cleanup()
                 jin.cleanup()
