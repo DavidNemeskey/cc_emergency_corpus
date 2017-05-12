@@ -9,7 +9,7 @@ import os
 import os.path as op
 from queue import Empty
 
-from cc_emergency.functional.core import Pipeline
+from cc_emergency.functional.core import Pipeline, create_resource
 from cc_emergency.functional.io import JsonReader, JsonWriter
 from cc_emergency.functional.transforms import LanguageFilter
 from cc_emergency.utils import run_queued, setup_queue_logger
@@ -39,7 +39,9 @@ def process_file(language, queue, logging_level=None, logging_queue=None):
             try:
                 infile, outfile = queue.get_nowait()
                 pipeline = Pipeline(JsonReader(infile),
-                                    LanguageFilter('content', 'en'),
+                                    create_resource({
+                                        'class': 'cc_emergency.functional.transforms.LanguageFilter',
+                                        'args': ['content', 'en']}),
                                     JsonWriter(outfile))
                 logger.info('Started processing {}'.format(infile))
                 with pipeline as (jin, lf, jout):

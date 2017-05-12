@@ -46,7 +46,7 @@ class JsonReader(Source, FileWrapper):
 
     def __iter__(self):
         for line in self.stream:
-            yield json.loads(line)
+            yield self.decoder.decode(line)
 
 
 class JsonWriter(Collector, FileWrapper):

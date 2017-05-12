@@ -13,7 +13,8 @@ TODO: check out PyFunctional. It seems to have implemented this already, but
       huge datasets.
 """
 
-from contextlib2 import contextmanager, ExitStack
+from contextlib2 import ExitStack
+import importlib
 
 
 class Resource(object):
@@ -81,3 +82,17 @@ class Pipeline(ExitStack):
         for resource in self.resources:
             self.enter_context(resource)
         return self.resources
+
+
+def create_resource(config):
+    """
+    Creates a Resource object from the specified configuration dictionary.
+    Its format is:
+
+        class: The fully qualified path name.
+        args: A dictionary of keyword arguments.
+    """
+    module_name, _, class_name = config['class'].rpartition('.')
+    module = importlib.import_module(module_name)
+    cls = getattr(module, class_name)
+    return cls(*config.get('args', []), **config.get('kwargs', {}))
