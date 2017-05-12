@@ -18,13 +18,15 @@ class FileWrapper(Resource):
         self.file = file
         self.mode = mode
 
-    def initialize(self):
+    def __enter__(self):
         """Opens the file."""
         self.stream = openall(self.file, mode=self.mode)
+        return self.stream
 
-    def cleanup(self):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         """Closes the input stream."""
         self.stream.close()
+        return False
 
 
 class JsonReader(Source, FileWrapper):

@@ -41,13 +41,8 @@ def process_file(language, queue, logging_level=None, logging_queue=None):
                 lf = LanguageFilter('content', 'en')
                 jout = JsonWriter(outfile)
                 logger.info('Started processing {}'.format(infile))
-                jin.initialize()
-                lf.initialize()
-                jout.initialize()
-                jout(filter(lf, jin))
-                jout.cleanup()
-                lf.cleanup()
-                jin.cleanup()
+                with JsonReader(infile) as jin, JsonWriter(outfile) as jout, LanguageFilter('content', 'en') as lf:
+                    jout(filter(lf, jin))
                 logger.info('Done processing {}'.format(infile))
             except Empty:
                 logger.debug('Queue depleted.')

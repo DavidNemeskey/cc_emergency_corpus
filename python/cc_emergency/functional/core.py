@@ -5,9 +5,8 @@
 Defines the streams classes that can be used to implement functional data
 transformation schemes, such as map-reduce.
 
-The names of the classes are influenced by the Java Stream framework, but this
-is only "skin-deep"; the user should not expect that the classes here work in
-the same way as their Java not-counterparts.
+The Source implements __iter__ and Transform and Collector implement __call__,
+so it is very easy to mix regular Python functions into the pipeline.
 
 TODO: check out PyFunctional. It seems to have implemented this already, but
       it seems to store everything in memory, which might be suboptimal with
@@ -15,28 +14,12 @@ TODO: check out PyFunctional. It seems to have implemented this already, but
 """
 
 
-class Stream(object):
-    """
-    An iterator that defines functions map and filter as convenience.
-
-    NOTE: do we need this?
-    """
-    def __init__(self, it):
-        self.it = it
-
-    def map(self, transform):
-        return map(transform, self.it)
-
-    def filter(self, transform):
-        return filter(transform, self.it)
-
-
 class Resource(object):
     """
     The base class for the processing steps in the pipeline. Provides functions
     to initialize and clean up the underlying resources.
     """
-    def initialize(self):
+    def __enter__(self):
         """
         Initializes any resources the object might use. This should be
         done here so that it is only run once in a multiprocessing setting.
@@ -44,7 +27,7 @@ class Resource(object):
         """
         pass
 
-    def cleanup(self):
+    def __exit__(self):
         """The opposite of initialize()."""
         pass
 
