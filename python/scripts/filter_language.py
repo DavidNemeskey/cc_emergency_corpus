@@ -9,6 +9,7 @@ import os
 import os.path as op
 from queue import Empty
 
+from cc_emergency.functional.core import Pipeline
 from cc_emergency.functional.io import JsonReader, JsonWriter
 from cc_emergency.functional.transforms import LanguageFilter
 from cc_emergency.utils import run_queued, setup_queue_logger
@@ -37,11 +38,11 @@ def process_file(language, queue, logging_level=None, logging_queue=None):
         while True:
             try:
                 infile, outfile = queue.get_nowait()
-                jin = JsonReader(infile)
-                lf = LanguageFilter('content', 'en')
-                jout = JsonWriter(outfile)
+                pipeline = Pipeline(JsonReader(infile),
+                                    LanguageFilter('content', 'en'),
+                                    JsonWriter(outfile))
                 logger.info('Started processing {}'.format(infile))
-                with JsonReader(infile) as jin, JsonWriter(outfile) as jout, LanguageFilter('content', 'en') as lf:
+                with pipeline as (jin, lf, jout):
                     jout(filter(lf, jin))
                 logger.info('Done processing {}'.format(infile))
             except Empty:

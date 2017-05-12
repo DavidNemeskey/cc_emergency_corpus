@@ -2,7 +2,7 @@
 # vim: set fileencoding=utf-8 :
 
 """
-Defines the streams classes that can be used to implement functional data
+Defines the classes that can be used to implement functional data
 transformation schemes, such as map-reduce.
 
 The Source implements __iter__ and Transform and Collector implement __call__,
@@ -12,6 +12,8 @@ TODO: check out PyFunctional. It seems to have implemented this already, but
       it seems to store everything in memory, which might be suboptimal with
       huge datasets.
 """
+
+from contextlib2 import contextmanager, ExitStack
 
 
 class Resource(object):
@@ -62,3 +64,20 @@ class Collector(Resource):
     def __call__(self, param):
         raise NotImplementedError(
             "__call__() is not implemented in " + self.__class__.__name__)
+
+
+class Pipeline(ExitStack):
+    """
+    Provides context management for Resources. When used in a with statement,
+    the managed resources can be bound with "as" in the same order they were
+    passed to the constructor."""
+    def __init__(self, *resources):
+        super(Pipeline, self).__init__()
+        if not all(isinstance(r, Resource) for r in resources):
+            raise ValueError('Pipeline() only accepts instances of Resource.')
+        self.resources = resources
+
+    def __enter__(self):
+        for resource in self.resources:
+            self.enter_context(resource)
+        return self.resources
