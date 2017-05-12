@@ -33,7 +33,7 @@ def parse_arguments():
 
 
 def process_file(language, queue, logging_level=None, logging_queue=None):
-    logger = setup_queue_logger(logging_level, logging_queue)
+    logger = setup_queue_logger(logging_level, logging_queue, 'cc_emergency')
     try:
         while True:
             try:

@@ -4,6 +4,7 @@
 """Useful Transforms."""
 
 import importlib
+import logging
 
 from cc_emergency.functional.core import Transform
 
@@ -26,6 +27,8 @@ class LanguageFilter(Transform):
 
     def __enter__(self):
         try:
+            logging.getLogger('cc_emergency.functional').debug(
+                'Loading langid...')
             self.langid = importlib.import_module('langid')
             return self
         except ImportError:
