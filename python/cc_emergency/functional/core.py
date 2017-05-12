@@ -13,6 +13,7 @@ TODO: check out PyFunctional. It seems to have implemented this already, but
       huge datasets.
 """
 
+from builtins import filter, map
 from contextlib2 import ExitStack
 import importlib
 
@@ -96,3 +97,25 @@ def create_resource(config):
     module = importlib.import_module(module_name)
     cls = getattr(module, class_name)
     return cls(*config.get('args', []), **config.get('kwargs', {}))
+
+
+def build_pipeline(resources, connections):
+    """
+    Builds a map / filter pipeline between resources. Resources holds the
+    resource objects, connections the 'map' or 'filter' string for each
+    connection.
+    `len(resources) == len(connections) + 2`, because only the connections
+    between the transforms are configurable.
+
+    Returns the collector object and the pipeline.
+    TODO: this is idiotic.
+    """
+    if len(resources) != len(connections) + 2:
+        raise ValueError(
+            'The number of resources ({}) '.format(len(resources)) +
+            'and connections ({}) is not '.format(len(connections)) +
+            'compatible (r = c + 2).')
+    pipe = resources[0]
+    for r, c in zip(resources[1:-1], connections):
+        pipe = (map if c == 'map' else filter)(r, pipe)
+    return resources[-1], pipe

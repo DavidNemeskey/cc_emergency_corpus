@@ -1,23 +1,30 @@
 #!/usr/bin/env python3
 # vim: set fileencoding=utf-8 :
 
-"""Filters the corpus for language."""
+"""Runs a pipeline specified as a JSON file on files in a directory."""
 
 from __future__ import absolute_import, division, print_function
 import argparse
+import json
 import os
 import os.path as op
 from queue import Empty
 
-from cc_emergency.functional.core import Pipeline, create_resource
-from cc_emergency.functional.io import JsonReader, JsonWriter
-from cc_emergency.functional.transforms import LanguageFilter
-from cc_emergency.utils import run_queued, setup_queue_logger
+from cc_emergency.functional.core import Pipeline, create_resource, build_pipeline
+from cc_emergency.utils import openall, run_queued, setup_queue_logger
 
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
-        description='Filters the corpus for language.')
+        description='Runs a pipeline specified as a JSON file on files in a '
+                    'directory.')
+    parser.add_argument('--configuration', '-c', required=True,
+                        help='the JSON configuration file. It should store an '
+                             'object with the following two keys: pipeline -- '
+                             'a list of resource object descriptors (class, '
+                             'args and kwargs) and reducer -- a resource '
+                             'objet descriptor for the final reducer, if '
+                             'needed.')
     parser.add_argument('--input-dir', '-i', required=True,
                         help='the input directory.')
     parser.add_argument('--output-dir', '-o', required=True,
@@ -32,20 +39,19 @@ def parse_arguments():
     return args
 
 
-def process_file(language, queue, logging_level=None, logging_queue=None):
+def process_file(configuration, queue, logging_level=None, logging_queue=None):
     logger = setup_queue_logger(logging_level, logging_queue, 'cc_emergency')
     try:
+        resources = [create_resource(desc) for desc in configuration['pipeline']]
+        connections = configuration['connections']
+        pipeline = Pipeline(resources)
         while True:
             try:
                 infile, outfile = queue.get_nowait()
-                pipeline = Pipeline(JsonReader(infile),
-                                    create_resource({
-                                        'class': 'cc_emergency.functional.transforms.LanguageFilter',
-                                        'args': ['content', 'en']}),
-                                    JsonWriter(outfile))
+                with pipeline:
+                    collector, pipe = build_pipeline(resources, connections)
                 logger.info('Started processing {}'.format(infile))
-                with pipeline as (jin, lf, jout):
-                    jout(filter(lf, jin))
+                collector(pipe)
                 logger.info('Done processing {}'.format(infile))
             except Empty:
                 logger.debug('Queue depleted.')
@@ -90,10 +96,13 @@ def walk_non_hidden(directory):
 
 def main():
     args = parse_arguments()
+    with openall(args.configuration) as inf:
+        configuration = json.load(inf)
     os.nice(20)  # Play nice
 
     source_target_files = source_target_file_list(args.input_dir, args.output_dir)
-    run_queued(process_file, 'en', args.processes, source_target_files, args.log_level)
+    run_queued(process_file, configuration, args.processes,
+               source_target_files, args.log_level)
 
 
 if __name__ == '__main__':
