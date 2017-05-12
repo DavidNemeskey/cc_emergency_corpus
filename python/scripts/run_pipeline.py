@@ -5,6 +5,7 @@
 
 from __future__ import absolute_import, division, print_function
 import argparse
+import copy
 import json
 import os
 import os.path as op
@@ -22,7 +23,9 @@ def parse_arguments():
                         help='the JSON configuration file. It should store an '
                              'object with the following two keys: pipeline -- '
                              'a list of resource object descriptors (class, '
-                             'args and kwargs) and reducer -- a resource '
+                             'args and kwargs), (the transforms augmented with '
+                             'a "connection" key whose value is either "map" '
+                             'or "filter") and reducer -- a resource '
                              'objet descriptor for the final reducer, if '
                              'needed.')
     parser.add_argument('--input-dir', '-i', required=True,
@@ -42,17 +45,20 @@ def parse_arguments():
 def process_file(configuration, queue, logging_level=None, logging_queue=None):
     logger = setup_queue_logger(logging_level, logging_queue, 'cc_emergency')
     try:
-        resources = [create_resource(desc) for desc in configuration['pipeline']]
-        connections = configuration['connections']
-        pipeline = Pipeline(resources)
         while True:
             try:
                 infile, outfile = queue.get_nowait()
+                substitutions = {'%input': infile, '%output': outfile}
+                resources = [create_resource(desc, **substitutions) for desc in
+                             configuration['pipeline']]
+                connections = [desc.get('connection') for desc
+                               in configuration['pipeline']][1:-1]
+                pipeline = Pipeline(*resources)
                 with pipeline:
                     collector, pipe = build_pipeline(resources, connections)
-                logger.info('Started processing {}'.format(infile))
-                collector(pipe)
-                logger.info('Done processing {}'.format(infile))
+                    logger.info('Started processing {}'.format(infile))
+                    collector(pipe)
+                    logger.info('Done processing {}'.format(infile))
             except Empty:
                 logger.debug('Queue depleted.')
                 break
@@ -100,9 +106,10 @@ def main():
         configuration = json.load(inf)
     os.nice(20)  # Play nice
 
+    params = [copy.deepcopy(configuration) for _ in range(args.processes)]
     source_target_files = source_target_file_list(args.input_dir, args.output_dir)
-    run_queued(process_file, configuration, args.processes,
-               source_target_files, args.log_level)
+    res = run_queued(process_file, params, args.processes,
+                     source_target_files, args.log_level)
 
 
 if __name__ == '__main__':

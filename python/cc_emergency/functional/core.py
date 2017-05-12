@@ -85,7 +85,13 @@ class Pipeline(ExitStack):
         return self.resources
 
 
-def create_resource(config):
+def __substitute(s, **substitutions):
+    for k, v in substitutions.items():
+        s = s.replace(k, v)
+    return s
+
+
+def create_resource(config, **substitutions):
     """
     Creates a Resource object from the specified configuration dictionary.
     Its format is:
@@ -96,7 +102,12 @@ def create_resource(config):
     module_name, _, class_name = config['class'].rpartition('.')
     module = importlib.import_module(module_name)
     cls = getattr(module, class_name)
-    return cls(*config.get('args', []), **config.get('kwargs', {}))
+    # Do the substitutions
+    args = [__substitute(arg, **substitutions) for arg in
+            config.get('args', [])]
+    kwargs = {k: __substitute(v, **substitutions) for k, v in
+              config.get('kwargs', {}).items()}
+    return cls(*args, **kwargs)
 
 
 def build_pipeline(resources, connections):
