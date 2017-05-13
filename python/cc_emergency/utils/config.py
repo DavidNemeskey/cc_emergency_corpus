@@ -14,7 +14,7 @@ def get_config_file(config_file):
     """
     if os.path.isfile(config_file):
         return config_file
-    elif resource_exists('conf', config_file):
-        return resource_filename('conf', config_file)
+    elif resource_exists('cc_emergency.conf', config_file):
+        return resource_filename('cc_emergency.conf', config_file)
     else:
         raise ValueError('Could not find configuration file {}'.format(config_file))
