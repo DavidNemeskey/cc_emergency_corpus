@@ -13,6 +13,7 @@ from queue import Empty
 
 from cc_emergency.functional.core import Pipeline, create_resource, build_pipeline
 from cc_emergency.utils import openall, run_queued, setup_queue_logger
+from cc_emergency.utils.config import get_config_file
 
 
 def parse_arguments():
@@ -102,7 +103,7 @@ def walk_non_hidden(directory):
 
 def main():
     args = parse_arguments()
-    with openall(args.configuration) as inf:
+    with openall(get_config_file(args.configuration)) as inf:
         configuration = json.load(inf)
     os.nice(20)  # Play nice
 
