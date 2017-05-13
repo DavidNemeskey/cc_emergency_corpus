@@ -52,7 +52,7 @@ setup(name='cc_emergency',
       # Include the configuration -- unfortunately, MANIFEST.in doesn't seem
       # to do it for bdist (and package_data for sdist)
       package_data={
-          'conf': ['*'],
+          'cc_emergency.conf': ['*'],
       },
       # Install the scripts
       scripts=[
