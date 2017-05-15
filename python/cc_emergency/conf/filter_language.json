@@ -2,7 +2,7 @@
 	"pipeline": [
 		{
 			"class": "cc_emergency.functional.io.JsonReader",
-			"args": ["%input"]
+			"args": ["$input"]
 		},
 		{
 			"class": "cc_emergency.functional.transforms.LanguageFilter",
@@ -10,7 +10,7 @@
 		},
 		{
 			"class": "cc_emergency.functional.io.JsonWriter",
-			"args": ["%output"]
+			"args": ["$output"]
 		}
 	]
 }
