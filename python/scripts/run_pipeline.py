@@ -5,11 +5,11 @@
 
 from __future__ import absolute_import, division, print_function
 import argparse
-import copy
 import json
 import os
 import os.path as op
 from queue import Empty
+from string import Template
 
 from cc_emergency.functional.core import Pipeline, create_resource, build_pipeline
 from cc_emergency.utils import openall, run_queued, setup_queue_logger
@@ -43,14 +43,15 @@ def parse_arguments():
     return args
 
 
-def process_file(configuration, queue, logging_level=None, logging_queue=None):
+def process_file(config_str, queue, logging_level=None, logging_queue=None):
     logger = setup_queue_logger(logging_level, logging_queue, 'cc_emergency')
     try:
         while True:
             try:
                 infile, outfile = queue.get_nowait()
-                substitutions = {'%input': infile, '%output': outfile}
-                resources = [create_resource(desc, **substitutions) for desc in
+                configuration = json.loads(Template(config_str).safe_substitute(
+                    input=infile, output=outfile))
+                resources = [create_resource(desc) for desc in
                              configuration['pipeline']]
                 connections = [desc.get('connection') for desc
                                in configuration['pipeline']][1:-1]
@@ -104,10 +105,11 @@ def walk_non_hidden(directory):
 def main():
     args = parse_arguments()
     with openall(get_config_file(args.configuration)) as inf:
-        configuration = json.load(inf)
+        config_str = inf.read()
     os.nice(20)  # Play nice
 
-    params = [copy.deepcopy(configuration) for _ in range(args.processes)]
+    params = [Template(config_str).safe_substitute(process=p)
+              for p in range(args.processes)]
     source_target_files = source_target_file_list(args.input_dir, args.output_dir)
     res = run_queued(process_file, params, args.processes,
                      source_target_files, args.log_level)
