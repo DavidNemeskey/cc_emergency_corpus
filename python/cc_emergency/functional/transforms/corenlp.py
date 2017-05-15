@@ -23,29 +23,24 @@ class CoreNLP(object):
     """Stanford CoreNLP interface object."""
     def __init__(self, corenlp_props):
         """
-        corenlp_props is a configuration file that contains the properties for
+        corenlp_props is a dictionary that contains the properties for
         the CoreNLP server under the [URL] section. There must also be three keys
-        under the [CoreNLP] section:
+        under the [server] section:
           - directory, that specifies the CoreNLP installation path;
           - port, which is the port the CoreNLP server is on localhost;
           - memory, for the java process (the default is 4g).
         """
         self.logger = logging.getLogger(
             self.__class__.__module__ + '.' + self.__class__.__name__)
-        self.config = self.__load_config(corenlp_props)
-        self.port = self.config.get('CoreNLP', 'port')
+        self.directory = corenlp_props['server']['directory']
+        self.memory = corenlp_props['server'].get('memory', '4g')
+        self.port = corenlp_props['server'].get('port', 9000)
         self.url = 'http://localhost:{}'.format(self.port)
-        self.props = str(dict(self.config.items('URL')))
+        self.props = str(corenlp_props['URL'])
         self.server = None
         self.shutdown_key = None
         self.parsed = 0
         self.__start_server()
-
-    def __load_config(self, props_file):
-        cp = RawConfigParser({'memory': '4g'})
-        cp.optionxform = str  # So no lowercasing occurs
-        cp.read(props_file)
-        return cp
 
     def __del__(self):
         # See also http://stackoverflow.com/questions/865115/how-do-i-correctly-clean-up-a-python-object
@@ -56,10 +51,10 @@ class CoreNLP(object):
         self.logger.debug("Starting server {}...".format(self.url))
         # TODO eat the server's output -- in this case, there is no need to wait
         self.server = Popen(
-            ['java', '-mx{}'.format(self.config.get('CoreNLP', 'memory')),
+            ['java', '-mx{}'.format(self.memory),
              '-cp', '*', 'edu.stanford.nlp.pipeline.StanfordCoreNLPServer',
              '--port', self.port, '--quiet'],
-            cwd=self.config.get('CoreNLP', 'directory')
+            cwd=self.directory
         )
         self.parsed = 0
         time.sleep(5)

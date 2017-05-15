@@ -12,7 +12,7 @@ class CoreNlpPreprocessor(Transform):
     NAME = 'CoreNLP'
     DESCRIPTION = 'CoreNLP preprocessor'
 
-    def __init__(self, corenlp_props, fields, max_length=10000):
+    def __init__(self, props, fields, max_length=10000):
         """
         Parameters:
         - corenlp_props the properties file for the server (see CoreNLP).
@@ -20,7 +20,7 @@ class CoreNlpPreprocessor(Transform):
                  field + '_corenlp'
         - max_length: the maximum chunk size.
         """
-        self.corenlp_props = corenlp_props
+        self.corenlp_props = props
         self.fields = fields
         self.max_length = max_length
         self.corenlp = None

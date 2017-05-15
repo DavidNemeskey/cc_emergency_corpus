@@ -1,0 +1,30 @@
+{
+	"pipeline": [
+		{
+			"class": "cc_emergency.functional.io.JsonReader",
+			"args": ["$input"]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.corenlp_preprocessor.CoreNlpPreprocessor",
+			"kwargs": {
+				"props": {
+					"server": {
+						"directory": "/mnt/store/hlt/Tool/Stanford_CoreNLP/stanford-corenlp-full-2016-10-31/",
+						"port": "9${process}73",
+						"memory": "15g"
+					},
+					"URL": {
+						"annotators": "tokenize,ssplit,pos,lemma,ner",
+						"outputFormat": "conll",
+						"tokenize.language": "English"
+					}
+				},
+				"fields": "content"
+			}
+		},
+		{
+			"class": "cc_emergency.functional.io.JsonWriter",
+			"args": ["$output"]
+		}
+	]
+}
