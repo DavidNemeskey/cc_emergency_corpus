@@ -3,9 +3,9 @@
 
 """Useful Transforms."""
 
-from corenlp import CoreNLP
-from language_filter import LanguageFilter
-from filter_empty import FilterEmpty
+from .corenlp import CoreNLP
+from .language_filter import LanguageFilter
+from .filter_empty import FilterEmpty
 
 
 __all__ = [CoreNLP, FilterEmpty, LanguageFilter]

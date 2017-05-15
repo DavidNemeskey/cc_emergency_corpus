@@ -6,7 +6,9 @@
 		},
 		{
 			"class": "cc_emergency.functional.transforms.FilterEmpty",
-			"args": ["content"],
+			"kwargs": {
+				"fields": ["content"]
+			},
 			"connection": "filter"
 		},
 		{
