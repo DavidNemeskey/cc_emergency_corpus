@@ -5,7 +5,12 @@
 			"args": ["$input"]
 		},
 		{
-			"class": "cc_emergency.functional.transforms.corenlp_preprocessor.CoreNLP",
+			"class": "cc_emergency.functional.transforms.FilterEmpty",
+			"args": ["content"],
+			"connection": "filter"
+		},
+		{
+			"class": "cc_emergency.functional.transforms.corenlp.CoreNLP",
 			"kwargs": {
 				"props": {
 					"server": {
