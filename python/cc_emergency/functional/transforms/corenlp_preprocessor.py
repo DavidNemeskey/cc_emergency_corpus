@@ -44,7 +44,7 @@ class CoreNlpPreprocessor(Transform):
     def __call__(self, obj):
         try:
             for field in self.fields:
-                if field in obj:
+                if field in obj and obj[field]:
                     obj[field + '_corenlp'] = []
                     for parsed in self.__parse_with_corenlp(obj[field]):
                         obj[field + '_corenlp'].extend(parsed)
