@@ -2,6 +2,7 @@
 """A preprocessor that invokes a Stanford CoreNLP server for analysis."""
 
 from __future__ import absolute_import, division, print_function
+import logging
 
 from cc_emergency.functional.core import Transform
 from cc_emergency.functional.transforms.corenlp import CoreNLP
@@ -24,6 +25,8 @@ class CoreNlpPreprocessor(Transform):
         self.fields = fields
         self.max_length = max_length
         self.corenlp = None
+        self.logger = logging.getLogger(
+            self.__class__.__module__ + '.' + self.__class__.__name__)
 
     def __enter__(self):
         """
@@ -39,11 +42,14 @@ class CoreNlpPreprocessor(Transform):
         self.corenlp = None
 
     def __call__(self, obj):
-        for field in self.fields:
-            if field in obj:
-                obj[field + '_corenlp'] = []
-                for parsed in self.__parse_with_corenlp(obj[field]):
-                    obj[field + '_corenlp'].extend(parsed)
+        try:
+            for field in self.fields:
+                if field in obj:
+                    obj[field + '_corenlp'] = []
+                    for parsed in self.__parse_with_corenlp(obj[field]):
+                        obj[field + '_corenlp'].extend(parsed)
+        except Exception as e:
+            self.logger.exception('Error in document {}'.format(obj['url']))
         return obj
 
     def __parse_with_corenlp(self, text):
