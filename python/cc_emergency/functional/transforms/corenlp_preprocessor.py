@@ -44,6 +44,7 @@ class CoreNlpPreprocessor(Transform):
                 obj[field + '_corenlp'] = []
                 for parsed in self.__parse_with_corenlp(obj[field]):
                     obj[field + '_corenlp'].extend(parsed)
+        return obj
 
     def __parse_with_corenlp(self, text):
         """

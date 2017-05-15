@@ -19,8 +19,9 @@
 						"tokenize.language": "English"
 					}
 				},
-				"fields": "content"
-			}
+				"fields": ["content"]
+			},
+			"connection": "map"
 		},
 		{
 			"class": "cc_emergency.functional.io.JsonWriter",

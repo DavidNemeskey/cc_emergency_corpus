@@ -53,7 +53,7 @@ class CoreNLP(object):
         self.server = Popen(
             ['java', '-mx{}'.format(self.memory),
              '-cp', '*', 'edu.stanford.nlp.pipeline.StanfordCoreNLPServer',
-             '--port', self.port, '--quiet'],
+             '--port', self.port, '--server_id', self.port, '--quiet'],
             cwd=self.directory
         )
         self.parsed = 0
