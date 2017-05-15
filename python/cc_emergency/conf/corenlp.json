@@ -5,7 +5,7 @@
 			"args": ["$input"]
 		},
 		{
-			"class": "cc_emergency.functional.transforms.corenlp_preprocessor.CoreNlpPreprocessor",
+			"class": "cc_emergency.functional.transforms.corenlp_preprocessor.CoreNLP",
 			"kwargs": {
 				"props": {
 					"server": {
