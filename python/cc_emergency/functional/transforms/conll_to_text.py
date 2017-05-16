@@ -19,7 +19,7 @@ class ConvertCoNLL(Transform):
 
     TODO: convert to an ABC.
     """
-    def __init__(self, fields_columns, delete=False):
+    def __init__(self, fields_columns):
         """
         The fields_columns dictionary:
         {field: [column, lower, delete, new_field]}
@@ -27,7 +27,6 @@ class ConvertCoNLL(Transform):
         token. The column can be a number, or the words "word" (0) and
         "lemma" (1). lower indicates whether the token should be lowercased,
         while new_field is the name of the field where the result is put.
-        Setting delete to True asks the Transform to delete the original field.
         """
         self.fields_columns = {
             field: [self.__column(spec[0])] + spec[1:]
