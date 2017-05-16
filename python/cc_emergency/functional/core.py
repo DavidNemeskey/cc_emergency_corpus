@@ -107,6 +107,10 @@ def build_pipeline(resources, connections):
     `len(resources) == len(connections) + 2`, because only the connections
     between the transforms are configurable.
 
+    Mapping resources also get a filter around them that drop empty objects.
+    This allows mappers to just return nothing for erroneous records and get
+    away with it.
+
     Returns the collector object and the pipeline.
     TODO: this is idiotic.
     """
@@ -117,5 +121,8 @@ def build_pipeline(resources, connections):
             'compatible (r = c + 2).')
     pipe = resources[0]
     for r, c in zip(resources[1:-1], connections):
-        pipe = (map if c == 'map' else filter)(r, pipe)
+        if c == 'map':
+            pipe = filter(lambda e: e, map(r, pipe))
+        else:
+            pipe = filter(r, pipe)
     return resources[-1], pipe
