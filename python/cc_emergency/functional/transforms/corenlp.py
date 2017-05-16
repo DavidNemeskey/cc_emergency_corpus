@@ -9,7 +9,7 @@ from cc_emergency.functional.transforms.corenlp_backend import CoreNLPBackend
 
 
 class CoreNLP(Transform):
-    """A preprocessor that invokes a Stanford CoreNLP server for analysis."""
+    """A Transform that invokes a Stanford CoreNLP server for analysis."""
     def __init__(self, props, fields, max_length=10000):
         """
         Parameters:
