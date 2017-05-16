@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# vim: set fileencoding=utf-8 :
 """Converts CoNLL-format field(s) to text."""
 
 from __future__ import absolute_import, division, print_function
@@ -18,16 +19,18 @@ class ConvertCoNLL(Transform):
 
     TODO: convert to an ABC.
     """
-    def __init__(self, fields_columns):
+    def __init__(self, fields_columns, delete=False):
         """
-        The fields_columns dictionary: {field: [column, lower, new_field]}
+        The fields_columns dictionary:
+        {field: [column, lower, delete, new_field]}
         specifies which fields to convert, and then which column to use as the
         token. The column can be a number, or the words "word" (0) and
         "lemma" (1). lower indicates whether the token should be lowercased,
         while new_field is the name of the field where the result is put.
+        Setting delete to True asks the Transform to delete the original field.
         """
         self.fields_columns = {
-            field: [self.__column(spec[0]), spec[1], spec[2]]
+            field: [self.__column(spec[0])] + spec[1:]
             for field, spec in fields_columns.items()
         }
         self.logger = logging.getLogger(
@@ -36,7 +39,7 @@ class ConvertCoNLL(Transform):
     def __call__(self, obj):
         try:
             for field, spec in self.fields_columns.items():
-                column, lower, new_field = spec
+                column, lower, delete, new_field = spec
                 if field in obj:
                     tokens = [[token[column].lower() if lower else token[column]
                               for token in sentence] for sentence in obj[field]]

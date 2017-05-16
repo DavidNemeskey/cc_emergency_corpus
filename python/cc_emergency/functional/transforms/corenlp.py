@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# vim: set fileencoding=utf-8 :
 """A preprocessor that invokes a Stanford CoreNLP server for analysis."""
 
 from __future__ import absolute_import, division, print_function
