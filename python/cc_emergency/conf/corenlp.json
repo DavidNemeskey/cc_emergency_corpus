@@ -12,7 +12,7 @@
 			"connection": "filter"
 		},
 		{
-			"class": "cc_emergency.functional.transforms.corenlp.CoreNLP",
+			"class": "cc_emergency.functional.transforms.CoreNLP",
 			"kwargs": {
 				"props": {
 					"server": {

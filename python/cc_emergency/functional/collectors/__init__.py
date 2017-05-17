@@ -2,3 +2,9 @@
 # vim: set fileencoding=utf-8 :
 
 """Useful Collectors."""
+
+from .dict_aggregator import DictAggregator
+from .tf_df_counter import TFDFCollector
+
+
+__all__ = [DictAggregator, TFDFCollector]
