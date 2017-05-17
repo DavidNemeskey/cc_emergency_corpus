@@ -6,9 +6,9 @@
 from .conll_converter import CoNLLToCounts, CoNLLToList, CoNLLToLists
 from .conll_converter import CoNLLToSet, CoNLLToText
 from .corenlp import CoreNLP
+from .dict_transforms import DeleteFields, RetainFields, FilterEmpty
 from .language_filter import LanguageFilter
-from .filter_empty import FilterEmpty
 
 
-__all__ = [CoreNLP, FilterEmpty, LanguageFilter, CoNLLToCounts, CoNLLToList,
-           CoNLLToLists, CoNLLToSet, CoNLLToText]
+__all__ = [CoreNLP, FilterEmpty, DeleteFields, RetainFields, LanguageFilter,
+           CoNLLToCounts, CoNLLToList, CoNLLToLists, CoNLLToSet, CoNLLToText]
