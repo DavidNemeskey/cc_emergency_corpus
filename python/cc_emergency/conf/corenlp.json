@@ -8,8 +8,7 @@
 			"class": "cc_emergency.functional.transforms.FilterEmpty",
 			"kwargs": {
 				"fields": ["content"]
-			},
-			"connection": "filter"
+			}
 		},
 		{
 			"class": "cc_emergency.functional.transforms.CoreNLP",
@@ -27,8 +26,7 @@
 					}
 				},
 				"fields": ["content"]
-			},
-			"connection": "map"
+			}
 		},
 		{
 			"class": "cc_emergency.functional.io.JsonWriter",

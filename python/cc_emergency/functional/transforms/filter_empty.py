@@ -3,10 +3,10 @@
 
 """Filters empty records."""
 
-from cc_emergency.functional.core import Transform
+from cc_emergency.functional.core import Filter
 
 
-class FilterEmpty(Transform):
+class FilterEmpty(Filter):
     """
     Filters empty records: if none of the specified fields contain data, the
     record is dropped.

@@ -56,6 +56,23 @@ class Transform(Resource):
             "__call__() is not implemented in " + self.__class__.__name__)
 
 
+class Map(Transform):
+    """
+    A single mapping transformation. Can be used both in map() and filter(),
+    but build_pipeline defaults to the former.
+    """
+    pass
+
+
+class Filter(Transform):
+    """
+    A single filtering transformation. Can be used both in map() (mostly for
+    mapping to boolean values though) and filter(), but build_pipeline defaults
+    to the latter.
+    """
+    pass
+
+
 class Collector(Resource):
     """
     Collects the iterable presented to it. This is a terminal operation, as it
@@ -107,13 +124,15 @@ def create_resource(config):
         )
 
 
-def build_pipeline(resources, connections):
+def build_pipeline(resources, connections=None):
     """
     Builds a map / filter pipeline between resources. Resources holds the
     resource objects, connections the 'map' or 'filter' string for each
     connection.
     `len(resources) == len(connections) + 2`, because only the connections
     between the transforms are configurable.
+    If the value is None, map or filter will be selected based on the class of
+    the Transform (Map or Filter).
 
     Mapping resources also get a filter around them that drop empty objects.
     This allows mappers to just return nothing for erroneous records and get
@@ -129,6 +148,14 @@ def build_pipeline(resources, connections):
             'compatible (r = c + 2).')
     pipe = resources[0]
     for r, c in zip(resources[1:-1], connections):
+        if not c:
+            if isinstance(r, Map):
+                c = 'map'
+            elif isinstance(r, Filter):
+                c = 'filter'
+            else:
+                raise ValueError(
+                    'No connection specified to resource {}'.format(r))
         if c == 'map':
             pipe = filter(lambda e: e, map(r, pipe))
         else:

@@ -5,11 +5,11 @@
 from __future__ import absolute_import, division, print_function
 import logging
 
-from cc_emergency.functional.core import Transform
+from cc_emergency.functional.core import Map
 from cc_emergency.functional.transforms.corenlp_backend import CoreNLPBackend
 
 
-class CoreNLP(Transform):
+class CoreNLP(Map):
     """A Transform that invokes a Stanford CoreNLP server for analysis."""
     def __init__(self, props, fields, max_length=10000):
         """

@@ -6,9 +6,9 @@
 import importlib
 import logging
 
-from cc_emergency.functional.core import Transform
+from cc_emergency.functional.core import Filter
 
-class LanguageFilter(Transform):
+class LanguageFilter(Filter):
     """Filters objects for language(s)."""
     def __init__(self, fields, languages):
         """

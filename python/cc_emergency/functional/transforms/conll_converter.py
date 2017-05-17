@@ -6,10 +6,10 @@ from __future__ import absolute_import, division, print_function
 from collections import Counter
 import logging
 
-from cc_emergency.functional.core import Transform
+from cc_emergency.functional.core import Map
 
 
-class ConvertCoNLL(Transform):
+class ConvertCoNLL(Map):
     """
     Converts CoNLL-format field(s) to text. Each sentence is mapped to a list
     of tokens.
