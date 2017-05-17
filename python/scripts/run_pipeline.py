@@ -5,6 +5,7 @@
 
 from __future__ import absolute_import, division, print_function
 import argparse
+from itertools import chain
 import json
 import os
 import os.path as op
@@ -122,7 +123,8 @@ def get_reducer(args, config_str):
         print('The argument --reduced-file is only valid when a reducer is '
               'specified in the configuration file, and vice versa.')
         sys.exit(1)
-    return create_resource(reducer)
+    flat = reducer.get('flat', False)
+    return create_resource(reducer), flat
 
 
 def main():
@@ -133,7 +135,7 @@ def main():
         config_str = inf.read()
     params = [Template(config_str).safe_substitute(process=p)
               for p in range(args.processes)]
-    reducer = get_reducer(args, params[0])
+    reducer, flat = get_reducer(args, params[0])
 
     source_files = source_file_list(args.input_dir)
     if not reducer:
@@ -147,7 +149,7 @@ def main():
                      source_target_files, args.log_level)
     if reducer:
         with openall(args.reduced_file, 'wt') as outf, reducer:
-            res = reducer(res)
+            res = reducer(chain(*res) if flat else res)
             json.dump(res, outf)
 
 
