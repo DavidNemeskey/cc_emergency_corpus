@@ -18,7 +18,7 @@ class Sorter(Collector):
         self.fields = fields
 
     def __key(self, obj):
-        return (-obj.get(f) if r else obj.get(f) for f, r in self.fields)
+        return [-obj.get(f) if r else obj.get(f) for f, r in self.fields]
 
     def __call__(self, it):
         return sorted(it, key=self.__key)
