@@ -8,7 +8,9 @@ from .conll_converter import CoNLLToSet, CoNLLToText
 from .corenlp import CoreNLP
 from .dict_transforms import DeleteFields, RetainFields, FilterEmpty
 from .language_filter import LanguageFilter
+from .search import Search
 
 
 __all__ = [CoreNLP, FilterEmpty, DeleteFields, RetainFields, LanguageFilter,
-           CoNLLToCounts, CoNLLToList, CoNLLToLists, CoNLLToSet, CoNLLToText]
+           CoNLLToCounts, CoNLLToList, CoNLLToLists, CoNLLToSet, CoNLLToText,
+           Search]

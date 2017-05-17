@@ -1,0 +1,29 @@
+{
+	"pipeline": [
+		{
+			"class": "cc_emergency.functional.io.JsonReader",
+			"args": ["$input"]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.Search",
+			"kwargs": {
+				"field_weights": {"counts": 1},
+				"query": "emergency"
+			}
+		},
+		{
+			"class": "cc_emergency.functional.transforms.RetainFields",
+			"args": ["url", "score"]
+		},
+		{
+			"class": "cc_emergency.functional.collectors.Sorter",
+			"args": [["score", true]]
+		}
+	],
+	"reducer": {
+		"class": "cc_emergency.functional.collectors.Sorter",
+		"args": [["score", true]]
+	}
+}
+
+
