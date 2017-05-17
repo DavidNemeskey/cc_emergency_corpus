@@ -12,6 +12,10 @@
 			}
 		},
 		{
+			"class": "cc_emergency.functional.transforms.FilterEmpty",
+			"args": [["score"]]
+		},
+		{
 			"class": "cc_emergency.functional.transforms.RetainFields",
 			"args": [["url", "score"]]
 		},
