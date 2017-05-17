@@ -13,7 +13,7 @@
 		},
 		{
 			"class": "cc_emergency.functional.transforms.RetainFields",
-			"args": ["url", "score"]
+			"args": [["url", "score"]]
 		},
 		{
 			"class": "cc_emergency.functional.collectors.Sorter",
