@@ -1,0 +1,25 @@
+{
+	"pipeline": [
+		{
+			"class": "cc_emergency.functional.io.JsonReader",
+			"args": ["$input"]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.conll_to_text.CoNLLToCounts",
+			"args": [
+				{"content_corenlp": ["lemma", true, true, "counts"]}
+			]
+		},
+		{
+			"class": "cc_emergency.functional.collectors.tf_df_counter.TFDFCollector",
+			"kwargs": {
+				"field_weights" : {"counts": 1}
+			}
+		}
+	],
+	"reducer": {
+		"class": "cc_emergency.functional.collectors.dict_aggregator.DictAggregator",
+		"args": [["TF", "DF"]]
+	}
+}
+
