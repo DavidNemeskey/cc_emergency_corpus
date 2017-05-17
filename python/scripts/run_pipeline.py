@@ -10,6 +10,7 @@ import os
 import os.path as op
 from queue import Empty
 from string import Template
+import sys
 
 from cc_emergency.functional.core import Pipeline, create_resource, build_pipeline
 from cc_emergency.utils import openall, run_queued, setup_queue_logger
@@ -31,16 +32,19 @@ def parse_arguments():
                              'needed.')
     parser.add_argument('--input-dir', '-i', required=True,
                         help='the input directory.')
-    parser.add_argument('--output-dir', '-o', required=True,
-                        help='the output directory.')
+    out_group = parser.add_mutually_exclusive_group(required=True)
+    out_group.add_argument('--output-dir', '-o',
+                           help='the output directory. Should not specified '
+                                'for a reduction.')
+    out_group.add_argument('--reduced-file', '-r',
+                           help='if a reducer is specified, the result is '
+                                'written here).')
     parser.add_argument('--processes', '-P', type=int, default=1,
                         help='the number of files to process parallelly.')
     parser.add_argument('--log-level', '-L', type=str, default=None,
                         choices=['debug', 'info', 'warning', 'error', 'critical'],
                         help='the logging level.')
-    args = parser.parse_args()
-
-    return args
+    return parser.parse_args()
 
 
 def process_file(config_str, queue, logging_level=None, logging_queue=None):
@@ -72,11 +76,15 @@ def process_file(config_str, queue, logging_level=None, logging_queue=None):
         raise
 
 
-def source_target_file_list(source_dir, target_dir):
+def source_file_list(source_dir):
+    """Returns the source files."""
     source_dir = op.abspath(source_dir)
+    return [op.abspath(op.join(d, f))
+            for d, _, fs in walk_non_hidden(source_dir) for f in fs]
+
+
+def target_file_list(source_files, source_dir, target_dir):
     target_dir = op.abspath(target_dir)
-    source_files = [op.abspath(op.join(d, f))
-                    for d, _, fs in walk_non_hidden(source_dir) for f in fs]
     target_files = []
     for sf in source_files:
         sf_rel = sf[len(source_dir):].lstrip(os.sep)
@@ -85,7 +93,7 @@ def source_target_file_list(source_dir, target_dir):
         if not op.isdir(td):
             os.makedirs(td)
         target_files.append(tf)
-    return zip(source_files, target_files)
+    return target_files
 
 
 def walk_non_hidden(directory):
@@ -102,17 +110,44 @@ def walk_non_hidden(directory):
         yield tup
 
 
+def get_reducer(args, config_str):
+    """
+    Returns with a reducer and exits if reducer in the configuration file and
+    reduced_file are not in accord.
+    """
+    # Reducer, if requested
+    reducer = json.loads(config_str).get('reducer')
+    if bool(reducer) != bool(args['reduced_file']):
+        print('The argument --reduced-file is only valid when a reducer is '
+              'specified in the configuration file, and vice versa.')
+        sys.exit(1)
+    return reducer
+
+
 def main():
     args = parse_arguments()
-    with openall(get_config_file(args.configuration)) as inf:
-        config_str = inf.read()
     os.nice(20)  # Play nice
 
+    with openall(get_config_file(args.configuration)) as inf:
+        config_str = inf.read()
     params = [Template(config_str).safe_substitute(process=p)
               for p in range(args.processes)]
-    source_target_files = source_target_file_list(args.input_dir, args.output_dir)
+    reducer = get_reducer(args, params[0])
+
+    source_files = source_file_list(args.input_dir)
+    if not reducer:
+        target_files = target_file_list(
+            source_files, args.input_dir, args.output_dir)
+    else:
+        target_files = [None for _ in source_files]
+    source_target_files = zip(source_files, target_files)
+
     res = run_queued(process_file, params, args.processes,
                      source_target_files, args.log_level)
+    if reducer:
+        res = reducer(res)
+        with openall(args['reduced_file'], 'wt') as outf:
+            json.dump(res, outf)
 
 
 if __name__ == '__main__':
