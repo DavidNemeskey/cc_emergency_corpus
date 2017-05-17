@@ -21,4 +21,4 @@ class Sorter(Collector):
         return (-obj.get(f) if r else obj.get(f) for f, r in self.fields)
 
     def __call__(self, it):
-        return sorted(it, key=self.key)
+        return sorted(it, key=self.__key)
