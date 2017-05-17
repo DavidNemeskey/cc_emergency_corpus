@@ -63,8 +63,9 @@ def process_file(config_str, queue, logging_level=None, logging_queue=None):
                 with pipeline:
                     collector, pipe = build_pipeline(resources, connections)
                     logger.info('Started processing {}'.format(infile))
-                    collector(pipe)
+                    res = collector(pipe)
                     logger.info('Done processing {}'.format(infile))
+                    return res
             except Empty:
                 logger.debug('Queue depleted.')
                 break
@@ -117,11 +118,11 @@ def get_reducer(args, config_str):
     """
     # Reducer, if requested
     reducer = json.loads(config_str).get('reducer')
-    if bool(reducer) != bool(args['reduced_file']):
+    if bool(reducer) != bool(args.reduced_file):
         print('The argument --reduced-file is only valid when a reducer is '
               'specified in the configuration file, and vice versa.')
         sys.exit(1)
-    return reducer
+    return create_resource(reducer)
 
 
 def main():
@@ -145,8 +146,8 @@ def main():
     res = run_queued(process_file, params, args.processes,
                      source_target_files, args.log_level)
     if reducer:
-        res = reducer(res)
-        with openall(args['reduced_file'], 'wt') as outf:
+        with openall(args.reduced_file, 'wt') as outf, reducer:
+            res = reducer(res)
             json.dump(res, outf)
 
 
