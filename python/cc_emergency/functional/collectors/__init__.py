@@ -4,8 +4,8 @@
 """Useful Collectors."""
 
 from .dict_aggregator import DictAggregator
-from .sorter import Sorter
+from .collections import ListCollector, SetCollector, Sorter
 from .tf_df_counter import TFDFCollector
 
 
-__all__ = [DictAggregator, Sorter, TFDFCollector]
+__all__ = [DictAggregator, ListCollector, SetCollector, Sorter, TFDFCollector]

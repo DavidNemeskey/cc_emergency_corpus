@@ -1,9 +1,21 @@
 #!/usr/bin/env python3
 # vim: set fileencoding=utf-8 :
 
-"""Sorts the documents, based on the field specified by the user."""
+"""Collection collectors."""
 
 from cc_emergency.functional.core import Collector
+
+
+class ListCollector(Collector):
+    """Collects the elements into a list."""
+    def __call__(self, it):
+        return list(it)
+
+
+class SetCollector(Collector):
+    """Collects the elements into a set."""
+    def __call__(self, it):
+        return set(it)
 
 
 class Sorter(Collector):

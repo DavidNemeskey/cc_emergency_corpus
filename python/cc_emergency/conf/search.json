@@ -16,13 +16,12 @@
 			"args": [["url", "score"]]
 		},
 		{
-			"class": "cc_emergency.functional.collectors.Sorter",
-			"args": [["score", true]]
+			"class": "cc_emergency.functional.collectors.ListCollector"
 		}
 	],
 	"reducer": {
 		"class": "cc_emergency.functional.collectors.Sorter",
-		"args": [["score", true]]
+		"args": [[["score", true]]]
 	}
 }
 
