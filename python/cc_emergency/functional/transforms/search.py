@@ -22,6 +22,7 @@ class Search(Map):
         two options correspond to the list / dict distinction above. The two
         arguments cannot be specified at the same time.
         """
+        super(Search, self).__init__()
         if query and query_file:
             raise ValueError(
                 'Only one of query and query_file can be specified.')

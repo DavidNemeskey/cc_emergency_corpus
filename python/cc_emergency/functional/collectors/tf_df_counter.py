@@ -22,6 +22,7 @@ class TFDFCollector(Collector):
         tf_df_names is a tuple that sets the name of the TF and DF fields. The
         default, not surprisingly, is ("TF", "DF").
         """
+        super(TFDFCollector, self).__init__()
         self.field_weights = field_weights
         self.tf_df_names = ("TF", "DF") if not tf_df_names else tf_df_names
 

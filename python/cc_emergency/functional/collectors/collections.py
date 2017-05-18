@@ -27,6 +27,7 @@ class Sorter(Collector):
 
         Note that this class keeps all records in memory.
         """
+        super(Sorter, self).__init__()
         self.fields = fields
 
     def __key(self, obj):

@@ -2,7 +2,6 @@
 """Manages a Stanford CoreNLP server."""
 
 from __future__ import absolute_import, division, print_function
-import logging
 # from future.moves.urllib.parse import urlencode
 import os
 from subprocess import Popen
@@ -26,8 +25,6 @@ class CoreNLPBackend(object):
           - port, which is the port the CoreNLP server is on localhost;
           - memory, for the java process (the default is 4g).
         """
-        self.logger = logging.getLogger(
-            self.__class__.__module__ + '.' + self.__class__.__name__)
         self.directory = corenlp_props['server']['directory']
         self.memory = corenlp_props['server'].get('memory', '4g')
         self.port = corenlp_props['server'].get('port', 9000)

@@ -15,6 +15,7 @@ class DictAggregator(Collector):
         The argument fields specifies which fields to aggregate. If None, the
         collected objects themselves are aggregated.
         """
+        super(DictAggregator, self).__init__()
         self.fields = fields
 
     def __call__(self, it):

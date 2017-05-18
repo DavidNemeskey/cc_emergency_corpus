@@ -10,6 +10,7 @@ from cc_emergency.functional.core import Filter, Map
 class DeleteFields(Map):
     """Deletes fields from a document."""
     def __init__(self, fields):
+        super(self, DeleteFields).__init__()
         self.fields = fields
 
     def __call__(self, obj):
@@ -19,6 +20,7 @@ class DeleteFields(Map):
 class RetainFields(Map):
     """Retains selected fields of a document, dropping all the rest."""
     def __init__(self, fields):
+        super(self, RetainFields).__init__()
         self.fields = fields
 
     def __call__(self, obj):
@@ -31,6 +33,7 @@ class FilterEmpty(Filter):
     record is dropped.
     """
     def __init__(self, fields):
+        super(self, FilterEmpty).__init__()
         self.fields = fields
 
     def __call__(self, obj):

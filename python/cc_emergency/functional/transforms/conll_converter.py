@@ -4,7 +4,6 @@
 
 from __future__ import absolute_import, division, print_function
 from collections import Counter
-import logging
 
 from cc_emergency.functional.core import Map
 
@@ -28,12 +27,11 @@ class ConvertCoNLL(Map):
         "lemma" (1). lower indicates whether the token should be lowercased,
         while new_field is the name of the field where the result is put.
         """
+        super(ConvertCoNLL, self).__init__()
         self.fields_columns = {
             field: [self.__column(spec[0])] + spec[1:]
             for field, spec in fields_columns.items()
         }
-        self.logger = logging.getLogger(
-            self.__class__.__module__ + '.' + self.__class__.__name__)
 
     def __call__(self, obj):
         try:

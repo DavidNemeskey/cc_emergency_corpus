@@ -3,7 +3,6 @@
 """A preprocessor that invokes a Stanford CoreNLP server for analysis."""
 
 from __future__ import absolute_import, division, print_function
-import logging
 
 from cc_emergency.functional.core import Map
 from cc_emergency.functional.transforms.corenlp_backend import CoreNLPBackend
@@ -19,12 +18,11 @@ class CoreNLP(Map):
                  field + '_corenlp'
         - max_length: the maximum chunk size.
         """
+        super(CoreNLP, self).__init__()
         self.corenlp_props = props
         self.fields = fields
         self.max_length = max_length
         self.corenlp = None
-        self.logger = logging.getLogger(
-            self.__class__.__module__ + '.' + self.__class__.__name__)
 
     def __enter__(self):
         """

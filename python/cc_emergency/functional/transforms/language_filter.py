@@ -4,7 +4,6 @@
 """A language filtering transform."""
 
 import importlib
-import logging
 
 from cc_emergency.functional.core import Filter
 
@@ -18,6 +17,7 @@ class LanguageFilter(Filter):
         TODO: should break this up to two objects: one that identifies the
               language, and another to filter the object.
         """
+        super(LanguageFilter, self).__init__()
         if not isinstance(fields, list):
             fields = [fields]
         if not isinstance(languages, list):
@@ -27,8 +27,7 @@ class LanguageFilter(Filter):
 
     def __enter__(self):
         try:
-            logging.getLogger('cc_emergency.functional').debug(
-                'Loading langid...')
+            self.logger.debug('Loading langid...')
             self.langid = importlib.import_module('langid')
             return self
         except ImportError:

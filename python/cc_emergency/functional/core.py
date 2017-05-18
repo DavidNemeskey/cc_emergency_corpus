@@ -17,6 +17,7 @@ from builtins import filter, map
 from contextlib2 import ExitStack
 import importlib
 import json
+import logging
 
 
 class Resource(object):
@@ -24,6 +25,11 @@ class Resource(object):
     The base class for the processing steps in the pipeline. Provides functions
     to initialize and clean up the underlying resources.
     """
+    def __init__(self, *args, **kwargs):
+        super(Resource, self).__init__()
+        self.logger = logging.getLogger(
+            self.__class__.__module__ + '.' + self.__class__.__name__)
+
     def __enter__(self):
         """
         Initializes any resources the object might use. This should be
