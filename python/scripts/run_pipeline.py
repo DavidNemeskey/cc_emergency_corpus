@@ -80,12 +80,12 @@ def process_file(config_str, queue, logging_level=None, logging_queue=None):
 
 def source_file_list(source_dir):
     """Returns the source files."""
-    source_dir = op.abspath(source_dir)
     return [op.abspath(op.join(d, f))
             for d, _, fs in walk_non_hidden(source_dir) for f in fs]
 
 
 def target_file_list(source_files, source_dir, target_dir):
+    source_dir = op.abspath(source_dir)
     target_dir = op.abspath(target_dir)
     target_files = []
     for sf in source_files:
