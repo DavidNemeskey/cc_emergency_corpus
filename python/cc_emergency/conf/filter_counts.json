@@ -1,0 +1,20 @@
+{
+	"pipeline": [
+		{
+			"class": "cc_emergency.functional.io.JsonReader",
+			"args": ["$input"]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.FilterDictField",
+			"args": ["counts", "v >= 5", "stop"]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.FilterEmpty",
+			"args": [["counts"]]
+		},
+		{
+			"class": "cc_emergency.functional.io.JsonWriter",
+			"args": ["$output"]
+		}
+	]
+}
