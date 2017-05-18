@@ -5,12 +5,6 @@
 			"args": ["$input"]
 		},
 		{
-			"class": "cc_emergency.functional.transforms.CoNLLToCounts",
-			"args": [
-				{"content_corenlp": ["lemma", true, true, "counts"]}
-			]
-		},
-		{
 			"class": "cc_emergency.functional.collectors.TFDFCollector",
 			"kwargs": {
 				"field_weights" : {"counts": 1}
