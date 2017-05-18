@@ -36,7 +36,7 @@ class Search(Map):
         self.query = {w: 1 for w in query} if isinstance(query, list) else query
         self.field_weights = field_weights
 
-    def __call__(self, obj):
+    def transform(self, obj):
         score = 0
         for field, weight in self.field_weights.items():
             if field in obj:

@@ -34,6 +34,6 @@ class LanguageFilter(Filter):
             raise ImportError('The langid module is needed for LanguageFilter '
                               'to work.')
 
-    def __call__(self, obj):
+    def transform(self, obj):
         text = '\n'.join(obj.get(field, '') for field in self.fields)
         return self.langid.classify(text)[0] in self.languages

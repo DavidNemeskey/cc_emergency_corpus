@@ -37,7 +37,7 @@ class CoreNLP(Map):
             del self.corenlp
         self.corenlp = None
 
-    def __call__(self, obj):
+    def transform(self, obj):
         for field in self.fields:
             if field in obj and obj[field]:
                 obj[field + '_corenlp'] = []
@@ -48,7 +48,7 @@ class CoreNLP(Map):
     def __parse_with_corenlp(self, text):
         """
         Parses the input with CoreNLP. This generator is called from
-        __call__(). Reads from the text a batch of lines, and
+        transform(). Reads from the text a batch of lines, and
         yields the parsed data chunk.
         """
         chunk, chunk_len = [], 0

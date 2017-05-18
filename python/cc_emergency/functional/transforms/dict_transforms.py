@@ -13,7 +13,7 @@ class DeleteFields(Map):
         super(self, DeleteFields).__init__()
         self.fields = fields
 
-    def __call__(self, obj):
+    def transform(self, obj):
         return {k: v for k, v in obj.items() if k not in self.fields}
 
 
@@ -23,7 +23,7 @@ class RetainFields(Map):
         super(self, RetainFields).__init__()
         self.fields = fields
 
-    def __call__(self, obj):
+    def transform(self, obj):
         return {k: v for k, v in obj.items() if k in self.fields}
 
 
@@ -36,5 +36,5 @@ class FilterEmpty(Filter):
         super(self, FilterEmpty).__init__()
         self.fields = fields
 
-    def __call__(self, obj):
+    def transform(self, obj):
         return any(field in obj and obj[field] for field in self.fields)

@@ -33,7 +33,7 @@ class ConvertCoNLL(Map):
             for field, spec in fields_columns.items()
         }
 
-    def __call__(self, obj):
+    def transform(self, obj):
         for field, spec in self.fields_columns.items():
             column, lower, delete, new_field = spec
             if field in obj:
