@@ -50,6 +50,7 @@ def parse_arguments():
 
 def process_file(config_str, queue, logging_level=None, logging_queue=None):
     logger = setup_queue_logger(logging_level, logging_queue, 'cc_emergency')
+    results = []
     try:
         while True:
             try:
@@ -65,11 +66,11 @@ def process_file(config_str, queue, logging_level=None, logging_queue=None):
                     collector, pipe = build_pipeline(resources, connections)
                     logger.info('Started processing {}'.format(infile))
                     res = collector(pipe)
+                    results += res
                     logger.info('Done processing {}'.format(infile))
-                    return res
             except Empty:
                 logger.debug('Queue depleted.')
-                break
+                return results
             except:
                 logger.exception('Exception in file {}'.format(
                     infile))
