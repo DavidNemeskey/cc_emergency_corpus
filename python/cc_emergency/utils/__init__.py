@@ -17,7 +17,7 @@ from queue import Queue
 import re
 import sys
 
-from emLam.utils.queue_handler import QueueListener, QueueHandler
+from cc_emergency.utils.queue_handler import QueueListener, QueueHandler
 
 __allname_p = re.compile(r'^(.+?)(\.gz|\.bz2)?$')
 
@@ -171,19 +171,25 @@ def run_queued(fn, params, processes=1, queued_params=None, logging_level=None):
     return ret
 
 
-def setup_queue_logger(logging_level, logging_queue, name='script'):
-    """Sets a queue logger up."""
+def setup_queue_logger(logging_level, logging_queue, root, name='script'):
+    """
+    Sets a queue logger up. For the semantics of the last two parameters, see
+    setup_logger().
+    """
     qh = QueueHandler(logging_queue)
-    return setup_logger(logging_level, qh, name)
+    return setup_logger(logging_level, qh, root, name)
 
 
-def setup_stream_logger(logging_level, name='script'):
-    """Sets a stream logger up."""
+def setup_stream_logger(logging_level, root, name='script'):
+    """
+    Sets a stream logger up. For the semantics of the last two parameters, see
+    setup_logger().
+    """
     sh = logging.StreamHandler()
     formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     sh.setFormatter(formatter)
-    return setup_logger(logging_level, sh, name)
+    return setup_logger(logging_level, sh, root, name)
 
 
 def __get_logging_level(logging_level):
@@ -194,9 +200,12 @@ def __get_logging_level(logging_level):
         return logging_level
 
 
-def setup_logger(logging_level, handler, name='script'):
-    """Setups logging for scripts."""
-    logger = logging.getLogger('emLam')
+def setup_logger(logging_level, handler, root, name='script'):
+    """
+    Setups logging for scripts. root is the name of root logger for the
+    program; name is the suffix, e.g. script (the default), or a package name.
+    """
+    logger = logging.getLogger(root)
     # Remove old handlers
     while logger.handlers:
         logger.removeHandler(logger.handlers[-1])
@@ -212,7 +221,7 @@ def setup_logger(logging_level, handler, name='script'):
     logger.setLevel(log_level)
 
     # Set up the specific logger requested
-    logger = logging.getLogger('emLam.' + name)
+    logger = logging.getLogger(root + '.' + name)
     logger.setLevel(log_level)
     return logger
 

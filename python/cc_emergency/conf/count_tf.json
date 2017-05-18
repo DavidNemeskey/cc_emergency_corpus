@@ -1,0 +1,23 @@
+{
+	"pipeline": [
+		{
+			"class": "cc_emergency.functional.io.JsonReader",
+			"args": ["$input"]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.CoNLLToCounts",
+			"args": [
+				{"content_corenlp": ["lemma", true, true, "counts"]}
+			]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.RetainFields",
+			"args": [["url", "counts"]]
+		},
+		{
+			"class": "cc_emergency.functional.io.JsonWriter",
+			"args": ["$output"]
+		}
+	]
+}
+

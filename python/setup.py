@@ -52,22 +52,26 @@ setup(name='cc_emergency',
       # Include the configuration -- unfortunately, MANIFEST.in doesn't seem
       # to do it for bdist (and package_data for sdist)
       package_data={
-          # 'conf': ['*'],
+          'cc_emergency.conf': ['*'],
       },
       # Install the scripts
       scripts=[
-          'scripts/filter_language.py',
+          'scripts/run_pipeline.py',
       ],
       # Tensorflow and numpy can be installed from requirement files, as they
       # are only required if the nn module / scripts are used.
       install_requires=[
           # Python 2/3 compatibility
           'future', 'six',
+          # ExitStack for Python 3.3-
+          'contextlib2',
+          # Language identification
+          'langid',
           # An earlier version was broken (don't remember which); also,
           # iterparse is broken in 3.7.3. :)
           'lxml==3.6.4',
-          # Language identification
-          'langid',
+          # For networking
+          'requests'
       ],
       # zip_safe=False,
       use_2to3=False)
