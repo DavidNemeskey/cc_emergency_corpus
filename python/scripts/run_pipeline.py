@@ -152,8 +152,8 @@ def main():
                      source_target_files, args.log_level)
     if reducer:
         with openall(args.reduced_file, 'wt') as outf, reducer:
-            res = reducer(chain(*res))
-            json.dump(res, outf)
+            for obj in reducer(chain(*res)):
+                json.dump(obj, outf)
 
 
 if __name__ == '__main__':
