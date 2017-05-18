@@ -38,14 +38,11 @@ class CoreNLP(Map):
         self.corenlp = None
 
     def __call__(self, obj):
-        try:
-            for field in self.fields:
-                if field in obj and obj[field]:
-                    obj[field + '_corenlp'] = []
-                    for parsed in self.__parse_with_corenlp(obj[field]):
-                        obj[field + '_corenlp'].extend(parsed)
-        except Exception as e:
-            self.logger.exception('Error in document {}'.format(obj['url']))
+        for field in self.fields:
+            if field in obj and obj[field]:
+                obj[field + '_corenlp'] = []
+                for parsed in self.__parse_with_corenlp(obj[field]):
+                    obj[field + '_corenlp'].extend(parsed)
         return obj
 
     def __parse_with_corenlp(self, text):

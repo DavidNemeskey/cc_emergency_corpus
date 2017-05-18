@@ -34,16 +34,13 @@ class ConvertCoNLL(Map):
         }
 
     def __call__(self, obj):
-        try:
-            for field, spec in self.fields_columns.items():
-                column, lower, delete, new_field = spec
-                if field in obj:
-                    tokens = [[token[column].lower() if lower else token[column]
-                              for token in sentence] for sentence in obj[field]]
-                obj[new_field] = self.format(tokens)
-            return obj
-        except Exception as e:
-            self.logger.exception('Error in document {}'.format(obj['url']))
+        for field, spec in self.fields_columns.items():
+            column, lower, delete, new_field = spec
+            if field in obj:
+                tokens = [[token[column].lower() if lower else token[column]
+                          for token in sentence] for sentence in obj[field]]
+            obj[new_field] = self.format(tokens)
+        return obj
 
     def format(self, tokens):
         """Formats the token lists."""

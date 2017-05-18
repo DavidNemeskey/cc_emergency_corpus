@@ -57,9 +57,21 @@ class Transform(Resource):
     A single transformation. map() and filter() call this function with a
     different purpose.
     """
-    def __call__(self, param):
+    def __call__(self, obj):
+        """
+        Wraps transform(). This default implementation catches exceptions and
+        returns None if one was raised, so that execution does not stop.
+        Subclasses may overrule this behavior by overriding __call__.
+        """
+        try:
+            return self.transform(obj)
+        except Exception as e:
+            self.logger.exception('Error in document {}'.format(obj))
+
+    def transform(self, obj):
+        """This is the functions subclasses should override."""
         raise NotImplementedError(
-            "__call__() is not implemented in " + self.__class__.__name__)
+            "transform() is not implemented in " + self.__class__.__name__)
 
 
 class Map(Transform):
