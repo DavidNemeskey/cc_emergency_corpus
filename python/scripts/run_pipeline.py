@@ -123,7 +123,10 @@ def get_reducer(args, config_str):
         print('The argument --reduced-file is only valid when a reducer is '
               'specified in the configuration file, and vice versa.')
         sys.exit(1)
-    return create_resource(reducer)
+    if reducer:
+        return create_resource(reducer)
+    else:
+        return None
 
 
 def main():
