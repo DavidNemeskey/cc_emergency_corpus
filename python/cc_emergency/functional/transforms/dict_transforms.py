@@ -5,6 +5,7 @@
 from __future__ import absolute_import, division, print_function
 
 from cc_emergency.functional.core import Filter, Map
+from cc_emergency.utils import openall
 
 
 class DeleteFields(Map):
@@ -38,3 +39,27 @@ class FilterEmpty(Filter):
 
     def transform(self, obj):
         return any(field in obj and obj[field] for field in self.fields)
+
+
+class FilterDictField(Map):
+    """
+    Filters a dictionary field by a lambda expression. The latter consists of
+    a single statement that returns a boolean value. The only variables
+    available to it are k and v, and the set s that results from reading
+    set_file.
+    """
+    def __init__(self, field, function, set_file=None):
+        self.field = field
+        self.function = compile(function, '<string>', 'eval')
+        if set_file:
+            with openall(set_file) as inf:
+                self.s = set(inf.read().split('\n'))
+        else:
+            self.s = None
+
+    def transform(self, obj):
+        if self.field in obj:
+            obj[self.field] = {k: v for k, v in obj[self.field].items()
+                               if eval(self.function,
+                                       {'k': k, 'v': v, 's': self.s})}
+        return obj
