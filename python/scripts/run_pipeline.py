@@ -123,8 +123,7 @@ def get_reducer(args, config_str):
         print('The argument --reduced-file is only valid when a reducer is '
               'specified in the configuration file, and vice versa.')
         sys.exit(1)
-    flat = reducer.get('flat', False)
-    return create_resource(reducer), flat
+    return create_resource(reducer)
 
 
 def main():
@@ -135,7 +134,7 @@ def main():
         config_str = inf.read()
     params = [Template(config_str).safe_substitute(process=p)
               for p in range(args.processes)]
-    reducer, flat = get_reducer(args, params[0])
+    reducer = get_reducer(args, params[0])
 
     source_files = source_file_list(args.input_dir)
     if not reducer:
@@ -149,7 +148,7 @@ def main():
                      source_target_files, args.log_level)
     if reducer:
         with openall(args.reduced_file, 'wt') as outf, reducer:
-            res = reducer(chain(*res) if flat else res)
+            res = reducer(chain(*res))
             json.dump(res, outf)
 
 

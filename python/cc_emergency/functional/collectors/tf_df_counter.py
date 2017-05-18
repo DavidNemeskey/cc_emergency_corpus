@@ -34,4 +34,4 @@ class TFDFCollector(Collector):
                 dfs |= viewkeys(obj[field])
                 tf.update({w: f * weight for w, f in obj[field].items()})
             df.update(dfs)
-        return {self.tf_df_names[0]: tf, self.tf_df_names[1]: df}
+        return [{self.tf_df_names[0]: tf, self.tf_df_names[1]: df}]

@@ -93,8 +93,11 @@ class Filter(Transform):
 
 class Collector(Resource):
     """
-    Collects the iterable presented to it. This is a terminal operation, as it
-    returns a single value, if any.
+    Collects the iterable presented to it. This is a terminal operation, so
+    theoretically it should return a single value, if any. However, since with
+    multiprocessing we need to have a final reduction step anyway, Collectors
+    should return a list (or set) of results. In this way, they are more
+    similar to Reducers in e.g. Hadoop.
     """
     def collect(self, it):
         return self(it)

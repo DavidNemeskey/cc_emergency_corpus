@@ -28,14 +28,14 @@ class DictAggregator(Collector):
         collected = {}
         for obj in it:
             self.__aggregate(collected, obj)
-        return collected
+        return [collected]
 
     def __collect_fields(self, it):
         collected = {field: {} for field in self.fields}
         for obj in it:
             for field in self.fields:
                 self.__aggregate(collected[field], obj.get(field, {}))
-        return collected
+        return [collected]
 
     @staticmethod
     def __aggregate(collected, obj):
