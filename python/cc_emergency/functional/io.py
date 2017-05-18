@@ -57,3 +57,4 @@ class JsonWriter(Collector, FileWrapper):
     def __call__(self, it):
         for obj in it:
             print(json.dumps(obj), file=self.stream)
+        return []
