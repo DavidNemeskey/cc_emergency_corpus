@@ -1,0 +1,34 @@
+{
+	"pipeline": [
+		{
+			"class": "cc_emergency.functional.io.JsonReader",
+			"args": ["$input"]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.CoNLLToList",
+			"args": [
+				{"content_corenlp": ["lemma", true, true, "lemmas"]}
+			]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.RetainFields",
+			"args": [["url", "lemmas"]]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.FilterEmpty",
+			"args": [["lemmas"]]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.MinHash",
+			"kwargs": {
+				"fields": ["lemmas"],
+				"shingles": 5
+			}
+		},
+		{
+			"class": "cc_emergency.functional.io.JsonWriter",
+			"args": ["$output"]
+		}
+	]
+}
+
