@@ -3,6 +3,7 @@
 """Deletes fields from a document."""
 
 from __future__ import absolute_import, division, print_function
+import json
 
 from cc_emergency.functional.core import Filter, Map
 from cc_emergency.utils import openall
@@ -28,38 +29,58 @@ class RetainFields(Map):
         return {k: v for k, v in obj.items() if k in self.fields}
 
 
-class FilterEmpty(Filter):
+class LambdaFilterBase(object):
     """
-    Filters empty records: if none of the specified fields contain data, the
-    record is dropped.
+    Initialization for lambda expression-based filters. It reads the expression
+    and an optional set_file argument.
     """
-    def __init__(self, fields):
-        super(FilterEmpty, self).__init__()
-        self.fields = fields
-
-    def transform(self, obj):
-        return any(field in obj and obj[field] for field in self.fields)
-
-
-class FilterDictField(Map):
-    """
-    Filters a dictionary field by a lambda expression. The latter consists of
-    a single statement that returns a boolean value. The only variables
-    available to it are k and v, and the set s that results from reading
-    set_file.
-    """
-    def __init__(self, field, function, set_file=None):
-        self.field = field
-        self.function = compile(function, '<string>', 'eval')
+    def __init__(self, expression, set_file=None):
+        super(LambdaFilterBase, self).__init__(*args, **kwargs)
+        self.expression = compile(expression, '<string>', 'eval')
         if set_file:
             with openall(set_file) as inf:
                 self.s = set(inf.read().split('\n'))
         else:
             self.s = None
 
+
+class FilterDocument(Filter, LambdaFilterBase):
+    """
+    Filters a document by a lambda expression.  The latter consists of
+    a single statement that returns a boolean value. The only variables
+    available to it are obj, and the set s that results from reading
+    set_file.
+    """
+    def transform(self, obj):
+        return eval(self.expression, {'obj': obj, 's': self.s})
+
+
+class FilterEmpty(FilterDocument):
+    """
+    Filters empty records: if none of the specified fields contain data, the
+    record is dropped.
+    """
+    def __init__(self, fields):
+        # JSON's list format is the same as Python's
+        super(FilterEmpty, self).__init__(
+            'any(field in obj and obj[field] for field in set({}))'.format(
+                json.dumps(fields)))
+
+
+class FilterDictField(Map, LambdaFilterBase):
+    """
+    Filters a dictionary field by a lambda expression. The latter consists of
+    a single statement that returns a boolean value. The only variables
+    available to it are k and v, and the set s that results from reading
+    set_file.
+    """
+    def __init__(self, field, expression, set_file=None):
+        super(FilterDictField, self).__init__(expression, set_file)
+        self.field = field
+
     def transform(self, obj):
         if self.field in obj:
             obj[self.field] = {k: v for k, v in obj[self.field].items()
-                               if eval(self.function,
+                               if eval(self.expression,
                                        {'k': k, 'v': v, 's': self.s})}
         return obj
