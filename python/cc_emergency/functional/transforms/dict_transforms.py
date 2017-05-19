@@ -29,26 +29,13 @@ class RetainFields(Map):
         return {k: v for k, v in obj.items() if k in self.fields}
 
 
-class FilterEmpty(Filter):
-    """
-    Filters empty records: if none of the specified fields contain data, the
-    record is dropped.
-    """
-    def __init__(self, fields):
-        super(FilterEmpty, self).__init__()
-        self.fields = fields
-
-    def transform(self, obj):
-        return any(field in obj and obj[field] for field in self.fields)
-
-
 class LambdaFilterBase(object):
     """
     Initialization for lambda expression-based filters. It reads the expression
     and an optional set_file argument.
     """
     def __init__(self, expression, set_file=None):
-        super(LambdaFilterBase, self).__init__()
+        super(LambdaFilterBase, self).__init__(*args, **kwargs)
         self.expression = compile(expression, '<string>', 'eval')
         if set_file:
             with openall(set_file) as inf:
@@ -68,14 +55,14 @@ class FilterDocument(Filter, LambdaFilterBase):
         return eval(self.expression, {'obj': obj, 's': self.s})
 
 
-class FilterEmpty2(FilterDocument):
+class FilterEmpty(FilterDocument):
     """
     Filters empty records: if none of the specified fields contain data, the
     record is dropped.
     """
     def __init__(self, fields):
         # JSON's list format is the same as Python's
-        super(FilterEmpty2, self).__init__(
+        super(FilterEmpty, self).__init__(
             'any(field in obj and obj[field] for field in set({}))'.format(
                 json.dumps(fields)))
 

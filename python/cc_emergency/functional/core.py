@@ -26,7 +26,8 @@ class Resource(object):
     to initialize and clean up the underlying resources.
     """
     def __init__(self, *args, **kwargs):
-        super(Resource, self).__init__()
+        # TODO: create an Object base class that eats unused arguments?
+        super(Resource, self).__init__(*args, **kwargs)
         self.logger = logging.getLogger(
             self.__class__.__module__ + '.' + self.__class__.__name__)
 
