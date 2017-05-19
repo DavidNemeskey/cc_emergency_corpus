@@ -2,6 +2,7 @@
 """Manages a Stanford CoreNLP server."""
 
 from __future__ import absolute_import, division, print_function
+from builtins import range
 # from future.moves.urllib.parse import urlencode
 import os
 from subprocess import Popen

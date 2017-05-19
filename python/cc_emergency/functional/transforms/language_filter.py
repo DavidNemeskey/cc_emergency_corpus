@@ -7,6 +7,7 @@ import importlib
 
 from cc_emergency.functional.core import Filter
 
+
 class LanguageFilter(Filter):
     """Filters objects for language(s)."""
     def __init__(self, fields, languages):

@@ -4,6 +4,7 @@
 """Runs a pipeline specified as a JSON file on files in a directory."""
 
 from __future__ import absolute_import, division, print_function
+from builtins import range
 import argparse
 from itertools import chain
 import json
