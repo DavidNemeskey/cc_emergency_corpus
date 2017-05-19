@@ -61,6 +61,8 @@ setup(name='cc_emergency',
       # Tensorflow and numpy can be installed from requirement files, as they
       # are only required if the nn module / scripts are used.
       install_requires=[
+          # Duplicate detection
+          'datasketch',
           # Python 2/3 compatibility
           'future', 'six',
           # ExitStack for Python 3.3-

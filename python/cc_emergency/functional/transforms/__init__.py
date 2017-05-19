@@ -9,9 +9,10 @@ from .corenlp import CoreNLP
 from .dict_transforms import DeleteFields, RetainFields, FilterEmpty
 from .dict_transforms import FilterDictField
 from .language_filter import LanguageFilter
+from .minhash import MinHash
 from .search import Search
 
 
 __all__ = [CoreNLP, FilterEmpty, DeleteFields, RetainFields, FilterDictField,
            LanguageFilter, CoNLLToCounts, CoNLLToList, CoNLLToLists, CoNLLToSet,
-           CoNLLToText, Search]
+           CoNLLToText, MinHash, Search]
