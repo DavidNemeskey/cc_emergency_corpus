@@ -5,7 +5,9 @@
 
 from .dict_aggregator import DictAggregator
 from .collections import ListCollector, SetCollector, Sorter
+from .lsh import LSH
 from .tf_df_counter import TFDFCollector
 
 
-__all__ = [DictAggregator, ListCollector, SetCollector, Sorter, TFDFCollector]
+__all__ = [DictAggregator, ListCollector, SetCollector,
+           Sorter, LSH, TFDFCollector]
