@@ -11,6 +11,7 @@ import json
 import os
 import os.path as op
 from queue import Empty
+import re
 from string import Template
 import sys
 
@@ -46,7 +47,12 @@ def parse_arguments():
     parser.add_argument('--log-level', '-L', type=str, default=None,
                         choices=['debug', 'info', 'warning', 'error', 'critical'],
                         help='the logging level.')
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    if args.reduced_file:
+        if not re.search('[.](?:json|tsv)$', args.reduced_file):
+            parser.error('The reduced file must either be a .json or a .tsv.')
+    return args
 
 
 def process_file(config_str, queue, logging_level=None, logging_queue=None):
@@ -131,6 +137,21 @@ def get_reducer(args, config_str):
         return None
 
 
+def write_json(it, outf):
+    """Writes the contents of it to outf as json lines."""
+    for obj in it:
+        print(json.dumps(obj), file=outf)
+
+
+def write_tsv(it, outf):
+    """Writes the contents of it to outf as tsv lines."""
+    for obj in it:
+        if isinstance(obj, list):
+            print('\t'.join(obj), file=outf)
+        else:
+            print(obj, file=outf)
+
+
 def main():
     args = parse_arguments()
     os.nice(20)  # Play nice
@@ -152,9 +173,9 @@ def main():
     res = run_queued(process_file, params, args.processes,
                      source_target_files, args.log_level)
     if reducer:
+        ofn = write_json if args.reduced_file.endswith('.json') else write_tsv
         with openall(args.reduced_file, 'wt') as outf, reducer:
-            for obj in reducer(chain(*res)):
-                json.dump(obj, outf)
+            ofn(reducer(chain(*res)), outf)
 
 
 if __name__ == '__main__':
