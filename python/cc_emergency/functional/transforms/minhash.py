@@ -9,6 +9,7 @@ signatures. If this turns out very slow, I might attempt that...
 """
 
 from __future__ import absolute_import, division, print_function
+import base64
 from builtins import range
 import pickle
 
@@ -27,6 +28,7 @@ class MinHash(Map):
         - shingles: the N in N-shingles (-grams)
         - num_perm: the number of permutations for minhash.
         """
+        super(MinHash, self).__init__()
         self.fields = fields
         self.shingles = shingles
         self.num_perm = num_perm
@@ -34,12 +36,13 @@ class MinHash(Map):
     def transform(self, obj):
         shingles = set()
         for field in filter(lambda f: f in obj and obj[f], self.fields):
-            shingles |= self.shinglize(obj[field])
+            shingles |= set(self.shinglize(obj[field]))
         if shingles:
             m = MeanHash(num_perm=self.num_perm)
             for sh in shingles:
                 m.update(' '.join(sh).encode('utf-8'))
-            obj['minhash'] = pickle.dumps(LeanMeanHash(m))
+            obj['minhash'] = base64.b85encode(
+                pickle.dumps(LeanMeanHash(m))).decode('us-ascii')
             return obj
 
     def shinglize(self, seq):
