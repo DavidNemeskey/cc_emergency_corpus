@@ -16,7 +16,8 @@ from string import Template
 import sys
 
 from cc_emergency.functional.core import Pipeline, create_resource, build_pipeline
-from cc_emergency.utils import openall, run_queued, setup_queue_logger
+from cc_emergency.utils import openall, run_queued
+from cc_emergency.utils import setup_queue_logger, setup_stream_logger
 from cc_emergency.utils.config import get_config_file
 
 
@@ -154,6 +155,7 @@ def write_tsv(it, outf):
 
 def main():
     args = parse_arguments()
+    setup_stream_logger(args.log_level, 'cc_emergency')  # For logging in the collectors
     os.nice(20)  # Play nice
 
     with openall(get_config_file(args.configuration)) as inf:
