@@ -25,10 +25,12 @@
 			"class": "cc_emergency.functional.transforms.RetainFields",
 			"args": [["url", "minhash"]]
 		},
-		{
-			"class": "cc_emergency.functional.io.JsonWriter",
-			"args": ["$output"]
-		}
-	]
+	],
+	"reducer": {
+			"class": "cc_emergency.functional.collectors.LSH",
+			"kwargs": {
+				"id_field": "url",
+				"threshold": 0.9
+			}
+	}
 }
-
