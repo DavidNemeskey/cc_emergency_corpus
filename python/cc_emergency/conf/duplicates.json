@@ -22,8 +22,8 @@
 			}
 		},
 		{
-			"class": "cc_emergency.functional.transforms.RetainFields",
-			"args": [["url", "minhash"]]
+			"class": "cc_emergency.functional.transforms.DeleteFields",
+			"args": [["lemmas"]]
 		},
 		{
 			"class": "cc_emergency.functional.collectors.ListCollector"
