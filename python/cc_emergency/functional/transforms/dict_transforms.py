@@ -34,7 +34,7 @@ class LambdaFilterBase(object):
     Initialization for lambda expression-based filters. It reads the expression
     and an optional set_file argument.
     """
-    def __init__(self, expression, set_file=None):
+    def __init__(self, expression, set_file=None, *args, **kwargs):
         super(LambdaFilterBase, self).__init__(*args, **kwargs)
         self.expression = compile(expression, '<string>', 'eval')
         if set_file:
