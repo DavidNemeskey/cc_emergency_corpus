@@ -6,6 +6,7 @@
 from __future__ import absolute_import, division, print_function
 from collections import OrderedDict
 import json
+import os
 
 from cc_emergency.utils import openall
 from cc_emergency.functional.core import Collector, Resource, Source
@@ -31,22 +32,30 @@ class FileWrapper(Resource):
 
 class JsonReader(Source, FileWrapper):
     """Reads a text file that has a JSON object on each line."""
-    def __init__(self, input_file, ordered=True):
+    def __init__(self, input_file, ordered=True, add_id=None):
         """
         Parameters:
         - input_file the input file
         - ordered whether the order of keys in a dictionary should be kept or
-                  not; the default is True.
+                  not; the default is True
+        - add_id if specified, a record id with that name is added to the
+                  documents; its value is file_base_name-index.
         """
         super(JsonReader, self).__init__(input_file)
         if ordered:
             self.decoder = json.JSONDecoder(object_pairs_hook=OrderedDict)
         else:
             self.decoder = json.JSONDecoder()
+        self.add_id = add_id
 
     def __iter__(self):
-        for line in self.stream:
-            yield self.decoder.decode(line)
+        if self.add_id:
+            base_name = os.path.basename(self.file)
+        for line_no, line in enumerate(self.stream):
+            doc = self.decoder.decode(line)
+            if self.add_id:
+                doc[self.add_id] = '{}-{}'.format(base_name, line_no)
+            yield doc
 
 
 class JsonWriter(Collector, FileWrapper):

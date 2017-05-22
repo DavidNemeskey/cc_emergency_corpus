@@ -9,24 +9,34 @@ from cc_emergency.functional.core import Filter, Map
 from cc_emergency.utils import openall
 
 
-class DeleteFields(Map):
-    """Deletes fields from a document."""
+class FilterKeys(Map):
+    """Ancestor class for Delete/RetainFields."""
     def __init__(self, fields):
-        super(DeleteFields, self).__init__()
+        super(FilterKeys, self).__init__()
         self.fields = fields
 
     def transform(self, obj):
-        return {k: v for k, v in obj.items() if k not in self.fields}
+        new_obj = type(obj)()
+        for k, v in obj.items():
+            if self.condition(k):
+                new_obj[k] = v
+        return new_obj
+
+    def condition(self, key):
+        """If true, key is kept in the dictionary."""
+        raise NotImplementedError('condition must be implemented.')
+
+
+class DeleteFields(FilterKeys):
+    """Deletes fields from a document."""
+    def condition(self, key):
+        return key not in self.fields
 
 
 class RetainFields(Map):
     """Retains selected fields of a document, dropping all the rest."""
-    def __init__(self, fields):
-        super(RetainFields, self).__init__()
-        self.fields = fields
-
-    def transform(self, obj):
-        return {k: v for k, v in obj.items() if k in self.fields}
+    def condition(self, key):
+        return key in self.fields
 
 
 class LambdaFilterBase(object):
@@ -34,7 +44,7 @@ class LambdaFilterBase(object):
     Initialization for lambda expression-based filters. It reads the expression
     and an optional set_file argument.
     """
-    def __init__(self, expression, set_file=None):
+    def __init__(self, expression, set_file=None, *args, **kwargs):
         super(LambdaFilterBase, self).__init__(*args, **kwargs)
         self.expression = compile(expression, '<string>', 'eval')
         if set_file:
