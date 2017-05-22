@@ -29,18 +29,12 @@ class FilterKeys(Map):
 
 class DeleteFields(FilterKeys):
     """Deletes fields from a document."""
-    def __init__(self, fields):
-        super(DeleteFields, self).__init__(fields)
-
     def condition(self, key):
         return key not in self.fields
 
 
-class RetainFields(Map):
+class RetainFields(FilterKeys):
     """Retains selected fields of a document, dropping all the rest."""
-    def __init__(self, fields):
-        super(RetainFields, self).__init__(fields)
-
     def condition(self, key):
         return key in self.fields
 
