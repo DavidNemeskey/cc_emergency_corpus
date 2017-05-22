@@ -33,7 +33,7 @@ class DeleteFields(FilterKeys):
         return key not in self.fields
 
 
-class RetainFields(Map):
+class RetainFields(FilterKeys):
     """Retains selected fields of a document, dropping all the rest."""
     def condition(self, key):
         return key in self.fields
