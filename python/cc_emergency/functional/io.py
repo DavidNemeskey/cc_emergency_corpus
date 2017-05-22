@@ -6,6 +6,7 @@
 from __future__ import absolute_import, division, print_function
 from collections import OrderedDict
 import json
+import os
 
 from cc_emergency.utils import openall
 from cc_emergency.functional.core import Collector, Resource, Source
@@ -38,7 +39,7 @@ class JsonReader(Source, FileWrapper):
         - ordered whether the order of keys in a dictionary should be kept or
                   not; the default is True
         - add_id if specified, a record id with that name is added to the
-                  documents; its value is file_name-index.
+                  documents; its value is file_base_name-index.
         """
         super(JsonReader, self).__init__(input_file)
         if ordered:
@@ -48,10 +49,12 @@ class JsonReader(Source, FileWrapper):
         self.add_id = add_id
 
     def __iter__(self):
+        if self.add_id:
+            base_name = os.path.basename(self.file)
         for line_no, line in self.stream:
             doc = self.decoder.decode(line)
             if self.add_id:
-                doc[self.add_id] = '{}-{}'.format(self.file, line_no)
+                doc[self.add_id] = '{}-{}'.format(base_name, line_no)
 
 
 class JsonWriter(Collector, FileWrapper):
