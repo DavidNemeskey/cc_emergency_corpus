@@ -55,6 +55,7 @@ class JsonReader(Source, FileWrapper):
             doc = self.decoder.decode(line)
             if self.add_id:
                 doc[self.add_id] = '{}-{}'.format(base_name, line_no)
+            yield doc
 
 
 class JsonWriter(Collector, FileWrapper):
