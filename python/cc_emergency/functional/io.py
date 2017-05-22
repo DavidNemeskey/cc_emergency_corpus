@@ -51,7 +51,7 @@ class JsonReader(Source, FileWrapper):
     def __iter__(self):
         if self.add_id:
             base_name = os.path.basename(self.file)
-        for line_no, line in self.stream:
+        for line_no, line in enumerate(self.stream):
             doc = self.decoder.decode(line)
             if self.add_id:
                 doc[self.add_id] = '{}-{}'.format(base_name, line_no)
