@@ -39,13 +39,13 @@ class RetainFields(FilterKeys):
         return key in self.fields
 
 
-class LambdaFilterBase(object):
+class LambdaBase(object):
     """
-    Initialization for lambda expression-based filters. It reads the expression
-    and an optional set_file argument.
+    Initialization for lambda expression-based transforms. It reads the
+    expression and an optional set_file argument.
     """
     def __init__(self, expression, set_file=None, *args, **kwargs):
-        super(LambdaFilterBase, self).__init__(*args, **kwargs)
+        super(LambdaBase, self).__init__(*args, **kwargs)
         self.expression = compile(expression, '<string>', 'eval')
         if set_file:
             with openall(set_file) as inf:
@@ -54,7 +54,7 @@ class LambdaFilterBase(object):
             self.s = None
 
 
-class FilterDocument(Filter, LambdaFilterBase):
+class FilterDocument(Filter, LambdaBase):
     """
     Filters a document by a lambda expression.  The latter consists of
     a single statement that returns a boolean value. The only variables
@@ -77,7 +77,22 @@ class FilterEmpty(FilterDocument):
                 json.dumps(fields)))
 
 
-class FilterDictField(Map, LambdaFilterBase):
+class NewField(Map, LambdaBase):
+    """
+    Adds a new field to the document, whose value is computed from the
+    expression specified by the user. The only variables available to the
+    expression are obj and s (see FilterDocument).
+    """
+    def __init__(self, expression, new_field):
+        super(NewField, self).__init__(expression)
+        self.new_field = new_field
+
+    def transform(self, obj):
+        obj[self.new_field] = eval(self.expression, {'obj': obj, 's': self.s})
+        return obj
+
+
+class FilterDictField(Map, LambdaBase):
     """
     Filters a dictionary field by a lambda expression. The latter consists of
     a single statement that returns a boolean value. The only variables
