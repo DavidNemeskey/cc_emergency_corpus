@@ -16,16 +16,18 @@ from datasketch import MinHashLSH
 
 
 class LSH(Collector):
-    def __init__(self, id_field, threshold, num_perm=128):
+    def __init__(self, id_field, out_field, threshold, num_perm=128):
         """
         Locality-sensitive hashing that keeps a single document from all
-        clusters and outputs the list of unique urls. Parameters:
+        clusters and outputs the list of unique ids. Parameters:
         - id_field the id field in the document
+        - out_field the id to output in the end
         - threshold the LSH (Jaccard) similarity threshold
         - num_perm the number of permutations in minhash
         """
         super(LSH, self).__init__()
         self.id_field = id_field
+        self.out_field = out_field
         self.threshold = threshold
         self.num_perm = num_perm
 
@@ -40,8 +42,8 @@ class LSH(Collector):
                 try:
                     lsh.insert(obj[self.id_field], mh)
                     del obj['minhash']
-                    objs.append(obj)
+                    objs.append(obj[self.out_field])
                 except ValueError as ve:
-                    self.logger.debug('Error adding id: {} to LSH ({})'.format(
-                        obj[self.id_field], ve.args[0]))
+                    self.logger.debug('Error adding id: {}/{} to LSH ({})'.format(
+                        obj[self.id_field], obj[self.out_field], ve.args[0]))
         return objs
