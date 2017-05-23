@@ -8,7 +8,15 @@
 			"class": "cc_emergency.functional.transforms.Search",
 			"kwargs": {
 				"field_weights": {"counts": 1},
-				"query": "emergency"
+				"query": "emergency",
+				"scorer": {
+					"scorer": "okapi",
+					"params": {
+						"k1": 2,
+						"b": 0.75,
+						"avgdl": 505.174260348
+					}
+				}
 			}
 		},
 		{
