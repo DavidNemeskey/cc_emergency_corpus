@@ -39,8 +39,8 @@ class Search(Map):
     def transform(self, obj):
         score = 0
         for field, weight in self.field_weights.items():
-            if field in obj:
-                obj_field = obj[field]
+            obj_field = obj.get(field)
+            if obj_field:
                 for qword, qweight in self.query.items():
                     score += obj_field.get(qword, 0) * weight * qweight
         # Python 3.5+: return {**obj, **{'score': score}}
