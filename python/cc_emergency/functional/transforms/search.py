@@ -75,7 +75,7 @@ class TFScorer(Scorer):
     """Implements a simple TF scheme, i.e. sum(TF_q) for q in query."""
     def score(self, query, field):
         return sum(field.get(qword, 0) * qweight
-                   for qword, qweight in self.query.items())
+                   for qword, qweight in query.items())
 
 
 class OkapiScorer(Scorer):
@@ -88,7 +88,7 @@ class OkapiScorer(Scorer):
     def score(self, query, field):
         denom = self.k1 * (1 - self.b * (1 - sum(field.values()) / self.avgdl))
         score = 0
-        for qword, qweight in self.query.items():
+        for qword, qweight in query.items():
             tf = field.get(qword, 0)
             score += (self.k1 + 1) * tf / (tf + denom) * qweight
         return score
