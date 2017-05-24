@@ -33,6 +33,6 @@
 	],
 	"reducer": {
 		"class": "cc_emergency.functional.collectors.Sorter",
-		"args": [[["score", true]]]
+		"args": [[["score", true]], 100000]
 	}
 }
