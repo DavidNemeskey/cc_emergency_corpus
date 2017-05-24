@@ -8,6 +8,7 @@ This is the input to the search pipeline.
 
 from __future__ import absolute_import, division, print_function
 from argparse import ArgumentParser
+from operator import itemgetter
 
 from cc_emergency.utils import openall
 
@@ -32,11 +33,12 @@ def main():
         weights = {word: float(weight) for word, weight
                    in (line.strip().split('\t') for line in inf)}
     with openall(args.query_file) as inf:
-        for line in inf:
-            qword = line.strip().split('\t')[0]
-            qweight = weights.get(qword)
-            if qweight:
-                print('{}\t{}'.format(qword, qweight))
+        query = {qword: weights.get(qword) for qword in
+                 map(lambda l: l.strip().split('\t')[0], inf)}
+    query = sorted(filter(lambda ww: ww[1], query.items()),
+                   key=itemgetter(1), reverse=True)
+    for qword, qweight in query:
+        print('{}\t{}'.format(qword, qweight))
 
 
 if __name__ == '__main__':
