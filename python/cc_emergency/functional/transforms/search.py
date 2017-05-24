@@ -31,20 +31,28 @@ class Search(Map):
                 'Only one of query and query_file can be specified.')
         if not query and not query_file:
             raise ValueError('Either query or query_file must be specified.')
+
+        self.field_weights = field_weights
+        self.query = self.__read_query(query, query_file)
+        self.scorer = self.__get_scorer(scorer)
+
+    def __read_query(self, query=None, query_file=None):
         if query_file:
             with openall(query_file, 'rt') as inf:
                 query = [l.strip().split('\t') for l in inf]
                 if len(query[0]) == 2:
                     query = dict(query)
+
         if isinstance(query, list):
-            self.query = {w: 1 for w in query}
+            return {w: 1 for w in query}
         else:
-            self.query = {w: float(f) for w, f in query.items()}
-        self.field_weights = field_weights
+            return {w: float(f) for w, f in query.items()}
+
+    def __get_scorer(self, scorer):
         if scorer.get('scorer') == 'okapi':
-            self.scorer = OkapiScorer(**scorer.get('params', {}))
+            return OkapiScorer(**scorer.get('params', {}))
         elif scorer.get('scorer') == 'tf':
-            self.scorer = TFScorer()
+            return TFScorer()
         else:
             raise ValueError('Invalid scorer "{}"'.format(scorer.get('scorer')))
 
