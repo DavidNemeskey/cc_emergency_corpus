@@ -36,7 +36,10 @@ class Search(Map):
                 query = [l.strip().split('\t') for l in inf]
                 if len(query[0]) == 2:
                     query = dict(query)
-        self.query = {w: 1 for w in query} if isinstance(query, list) else query
+        if isinstance(query, list):
+            self.query = {w: 1 for w in query}
+        else:
+            self.query = {w: float(f) for w, f in query.items()}
         self.field_weights = field_weights
         if scorer.get('scorer') == 'okapi':
             self.scorer = OkapiScorer(**scorer.get('params', {}))
