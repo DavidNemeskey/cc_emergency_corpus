@@ -43,6 +43,9 @@ def parse_arguments():
     out_group.add_argument('--reduced-file', '-r',
                            help='if a reducer is specified, the result is '
                                 'written here).')
+    parser.add_argument('--R', '-R', action='append', default=[],
+                        help='specifies values for template variables in the '
+                             'configuration file. The format is -Rxxx=yyy.')
     parser.add_argument('--processes', '-P', type=int, default=1,
                         help='the number of files to process parallelly.')
     parser.add_argument('--log-level', '-L', type=str, default=None,
@@ -160,7 +163,8 @@ def main():
 
     with openall(get_config_file(args.configuration)) as inf:
         config_str = inf.read()
-    params = [Template(config_str).safe_substitute(process=p)
+    replacements = dict(r.split('=', 1) for r in args.R)
+    params = [Template(config_str).safe_substitute(replacements, process=p)
               for p in range(args.processes)]
     reducer = get_reducer(args, params[0])
 
