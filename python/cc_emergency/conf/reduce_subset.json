@@ -1,0 +1,26 @@
+{
+	"pipeline": [
+		{
+			"class": "cc_emergency.functional.io.JsonReader",
+			"args": ["$input"]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.FilterDocument",
+			"kwargs": {
+			    "expression": "obj['url'] in s",
+			    "set_file": "$url_filter"
+			}
+		},
+		{
+			"class": "cc_emergency.functional.collectors.TFDFCollector",
+			"kwargs": {
+				"field_weights" : {"counts": 1}
+			}
+		}
+	],
+	"reducer": {
+		"class": "cc_emergency.functional.collectors.DictAggregator",
+		"args": [["TF", "DF"]]
+	}
+}
+
