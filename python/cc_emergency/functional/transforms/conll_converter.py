@@ -3,9 +3,30 @@
 """Converts CoNLL-format field(s) to text."""
 
 from __future__ import absolute_import, division, print_function
-from collections import Counter
+from collections import Counter, namedtuple
 
 from cc_emergency.functional.core import Map
+
+
+class Spec(namedtuple('SpecBase', ['column', 'lower',
+                                   'convert_nnps', 'delete', 'new_field'])):
+    """
+    Specifications for a field in ConvertCoNLL (see constructor description).
+    """
+    def get(specification):
+        if isinstance(specification, list):
+            spec = Spec(*specification)
+        else:
+            spec = Spec(**specification)
+        if isinstance(spec.column, int):
+            column = spec.column
+        elif spec.column.lower() == "word":
+            column = ConvertCoNLL.WORD
+        elif spec.column.lower() == "lemma":
+            column = ConvertCoNLL.LEMMA
+        else:
+            raise ValueError('Invalid column specifier "{}"'.format(spec.column))
+        return Spec(column, *spec[1:])
 
 
 class ConvertCoNLL(Map):
@@ -33,8 +54,7 @@ class ConvertCoNLL(Map):
         """
         super(ConvertCoNLL, self).__init__()
         self.fields_columns = {
-            field: [self.__column(spec[0])] + spec[1:]
-            for field, spec in fields_columns.items()
+            field: Spec.get(spec) for field, spec in fields_columns.items()
         }
 
     def transform(self, obj):
@@ -60,17 +80,6 @@ class ConvertCoNLL(Map):
         if convert_nnps and token[ConvertCoNLL.POS].startswith('NNP'):
             ret = convert_nnps
         return ret
-
-    @staticmethod
-    def __column(column):
-        if isinstance(column, int):
-            return column
-        elif column.lower() == "word":
-            return ConvertCoNLL.WORD
-        elif column.lower() == "lemma":
-            return ConvertCoNLL.LEMMA
-        else:
-            raise ValueError('Invalid column specifier "{}"'.format(column))
 
 
 class CoNLLToCounts(ConvertCoNLL):
