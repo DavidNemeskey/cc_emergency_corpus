@@ -50,8 +50,9 @@ def compute_idfs(dfs, num_docs):
             for word, df in dfs.items()}
 
 
-def compute_tf_ratio(tfs, base_tfs):
-    return {word: math.log(tf / base_tfs[word])
+def compute_tf_ratio(tfs, base_tfs, size, base_size):
+    log_size_ratio = math.log(size / base_size)
+    return {word: math.log(tf / base_tfs[word]) - log_size_ratio
             for word, tf in tfs.items() if base_tfs.get(word)}
 
 
@@ -63,8 +64,10 @@ def main():
         to_print = compute_idfs(dfs, args.num_docs)
     else:
         tfs = load_file(args.freq_file, 'TF')
+        size = sum(tfs.values())
         base_tfs = load_file(args.base_freq_file, 'TF')
-        to_print = compute_tf_ratio(tfs, base_tfs)
+        base_size = sum(base_tfs.values())
+        to_print = compute_tf_ratio(tfs, base_tfs, size, base_size)
     for word, weight in sorted(to_print.items(), key=lambda kv: (-kv[1], kv[0])):
         print('{}\t{}'.format(word, weight))
 
