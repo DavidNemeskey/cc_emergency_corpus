@@ -8,7 +8,15 @@
 			"class": "cc_emergency.functional.transforms.Search",
 			"kwargs": {
 				"field_weights": {"counts": 1},
-				"query": "emergency"
+				"query": ["emergency"],
+				"scorer": {
+					"scorer": "okapi",
+					"params": {
+						"k1": 2,
+						"b": 0.75,
+						"avgdl": $avgdl
+					}
+				}
 			}
 		},
 		{
@@ -17,7 +25,7 @@
 		},
 		{
 			"class": "cc_emergency.functional.transforms.RetainFields",
-			"args": [["url", "score"]]
+			"args": [["url", "score", "content"]]
 		},
 		{
 			"class": "cc_emergency.functional.collectors.ListCollector"
@@ -25,8 +33,6 @@
 	],
 	"reducer": {
 		"class": "cc_emergency.functional.collectors.Sorter",
-		"args": [[["score", true]]]
+		"args": [[["score", true]], 100000]
 	}
 }
-
-

@@ -6,7 +6,11 @@
 		},
 		{
 			"class": "cc_emergency.functional.transforms.FilterDictField",
-			"args": ["counts", "v >= 5", "stop"]
+			"kwargs": {
+			    "field" :"counts",
+			    "expression": "k in s",
+			    "set_file": "news_df.lst"
+			}
 		},
 		{
 			"class": "cc_emergency.functional.transforms.FilterEmpty",

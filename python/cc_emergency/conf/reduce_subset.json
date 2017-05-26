@@ -5,6 +5,13 @@
 			"args": ["$input"]
 		},
 		{
+			"class": "cc_emergency.functional.transforms.FilterDocument",
+			"kwargs": {
+			    "expression": "obj['url'] in s",
+			    "set_file": "$url_filter"
+			}
+		},
+		{
 			"class": "cc_emergency.functional.collectors.TFDFCollector",
 			"kwargs": {
 				"field_weights" : {"counts": 1}
