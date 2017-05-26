@@ -12,7 +12,7 @@
 		},
 		{
 			"class": "cc_emergency.functional.transforms.RetainFields",
-			"args": [["url", "counts"]]
+			"args": [["url", "counts", "content"]]
 		},
 		{
 			"class": "cc_emergency.functional.io.JsonWriter",
