@@ -7,7 +7,7 @@
 		{
 			"class": "cc_emergency.functional.transforms.CoNLLToCounts",
 			"args": [
-				{"content_corenlp": ["lemma", true, true, "counts"]}
+				{"content_corenlp": ["lemma", true, "NNP", true, "counts"]}
 			]
 		},
 		{
