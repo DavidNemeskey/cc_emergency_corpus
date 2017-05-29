@@ -9,7 +9,7 @@
 			"kwargs": {
 			    "field" :"counts",
 			    "expression": "k in s",
-			    "set_file": "news_df.lst"
+			    "set_file": "stats/news_df.lst"
 			}
 		},
 		{
