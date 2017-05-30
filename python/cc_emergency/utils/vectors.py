@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+# vim: set fileencoding=utf-8 :
+
+"""Word vector-related functions."""
+
+from __future__ import absolute_import, division, print_function
+from builtins import filter
+
+import numpy as np
+from scipy.sparse import csr_matrix
+from sklearn import manifold
+from sklearn.preprocessing import normalize as normalize_data
+
+from cc_emergency.utils import openall
+
+
+def read_vectors(vectors_file, word_filter=None, normalize=True, sparse=False):
+    """
+    Reads the vectors in vectors_file (txt format) and returns the list of
+    words and X (num_vec x vec_dim).
+
+    Parameters:
+    - normalize: if True (the default), all vectors are normalized to unit L2
+                 length;
+    - sparse: if True, a csr matrix is returned.
+    """
+    words, data = [], []
+    if sparse:
+        row_ind, col_ind = [], []
+    it = __enumerate_vector_lines(vectors_file)
+    if word_filter:
+        it = filter(lambda wv: wv[0] in word_filter, it)
+    for row, word_vector in enumerate(it):
+        word, vector = word_vector
+        words.append(word)
+        row_data = np.array(vector)
+        if sparse:
+            cols = row_data.nonzero()[0]
+            row_ind.extend([row] * len(cols))
+            col_ind.extend(cols)
+            data.extend(row_data[cols])
+        else:
+            data.append(row_data)
+
+    if sparse:
+        X = csr_matrix((data, (row_ind, col_ind)),
+                       shape=(row + 1, len(vector) - 1))
+    else:
+        X = np.array(data)
+    if normalize:
+        X = normalize_data(X)
+    return words, X
+
+
+def __enumerate_vector_lines(vectors_file):
+    """Reads vectors_file and returns the word--float vector pairs in it."""
+    with openall(vectors_file) as inf:
+        for line in inf:
+            fields = line.strip().split()
+            yield fields[0], [float(f) for f in fields[1:]]
+
+
+def write_vectors(words, vectors, vectors_file):
+    """Writes words and vectors to a .txt vector file."""
+    with openall(vectors_file, 'wt') as outf:
+        for word, vector in zip(words, vectors):
+            print('{} {}'.format(word, ' '.join(str(f) for f in vectors)),
+                  file=outf)
+
+
+def compute_mds(vectors, dist_type, processes=1):
+    mds = manifold.MDS(metric=True, n_jobs=processes)
+
+
+def __compute_cos(vectors):
+    """Computes the cosine similarities for the vectors."""
+
