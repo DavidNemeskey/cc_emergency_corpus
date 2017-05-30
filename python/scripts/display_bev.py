@@ -8,6 +8,7 @@ import argparse
 
 import matplotlib.pyplot as plt
 
+from cc_emergency.utils import setup_stream_logger
 from cc_emergency.utils.vectors import read_vectors, write_vectors
 from cc_emergency.utils.vectors import compute_mds
 
@@ -49,6 +50,7 @@ def vector_stuff(vector_file, bev_file, write_file):
 
 def main():
     args = parse_arguments()
+    setup_stream_logger(args.log_level, 'cc_emergency')
     words, vectors = vector_stuff(args.vector_file, args.bev, args.write_vectors)
     coords = compute_mds(vectors, args.distance)
 

@@ -5,7 +5,7 @@
 
 from __future__ import absolute_import, division, print_function
 from builtins import filter
-import sys
+import logging
 
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -55,20 +55,21 @@ def read_vectors(vectors_file, word_filter=None, normalize=True, sparse=False):
 
 def __enumerate_vector_lines(vectors_file):
     """Reads vectors_file and returns the word--float vector pairs in it."""
+    logger = logging.getLogger(__name__)
     with openall(vectors_file, 'rb') as inf:
         for line_no, raw_line in enumerate(inf):
             try:
                 if line_no > 0 and line_no % 100000 == 0:
-                    print('Line {}'.format(line_no), file=sys.stderr)
+                    logger.debug('Line {}'.format(line_no))
                 line = raw_line.decode('utf-8')
                 fields = line.strip().split(' ')
                 yield fields[0], [float(f) for f in fields[1:]]
             except UnicodeDecodeError as ude:
-                print('Unicode error in line {}: {}\n{}'.format(line_no, ude, line),
-                      file=sys.stderr)
-            except ValueError as ve:
-                print('Error in line {}: {}\n{}'.format(line_no, ve, line),
-                      file=sys.stderr)
+                logger.debug('Unicode error in line {}: {}\n{}'.format(
+                    line_no, ude, line))
+            except ValueError:
+                logger.exception('Error in line {}: {}\n{}'.format(
+                    line_no, line))
                 raise
 
 
