@@ -30,7 +30,7 @@ class CoreNLP(Map):
         in the processing process, not in the main one.
         """
         if not self.corenlp:
-            self.corenlp = CoreNLPBackend(self.corenlp_props)
+            self.corenlp = CoreNLPBackend(self.corenlp_props, self.logger)
 
     def __exit__(self, *args):
         if self.corenlp:
