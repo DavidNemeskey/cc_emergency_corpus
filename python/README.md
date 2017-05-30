@@ -21,9 +21,9 @@ A "functional", parallel stream-based framework that runs on a single, multi-cor
     - `Filter`: returns a boolean that tells the pipeline whether to keep the current record or not
   - `Collector`: aggregates a stream of records. Returns a list of values.
   
-The script [run_pipeline.py](https://github.com/DavidNemeskey/cc_emergency_corpus/blob/master/python/scripts/run_pipeline.py) builds
+The script [run_pipeline.py](scripts/run_pipeline.py) builds
 a pipeline based on a JSON configuration file; there are several examples in the
-[conf](https://github.com/DavidNemeskey/cc_emergency_corpus/tree/master/python/cc_emergency/conf) directory. Some of the configuration
+[conf](cc_emergency/conf) directory. Some of the configuration
 files can be run as-is, while others are parameterized, which parameters the user must provide on the command line via the `-R`
 switch (e.g. `-Rset_file=my_set_file.lst`). The configuration files define the `pipeline` key, whose value is a list of `Resource`s:
 a `Source`, then any number of `Transform`s, ending with a `Collector`. If the goal is not to just transform the data, but to aggregate
@@ -32,6 +32,15 @@ the output over all files, a final `Collector` can be defined under the `reducer
 It is obvious that this framework is very similar to map-reduce, and it proper single-machine (or non-Hadoop cluster) implementations
 of the latter existed, there would be no need for this framework. Later, I might just implement a map-reduce framework for local clusters
 and plug it in instead.
+
+## Installation
+
+Installs just as any Python package. However, to be able to run the script
+[]display_bev.py(scripts/display_bev.py), the `tkinter` (system) package has
+to be installed. On Ubuntu:
+```
+sudo aptitude install python3-tk
+```
 
 ## How to reproduce the runs in the paper
 
