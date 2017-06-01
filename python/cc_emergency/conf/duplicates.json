@@ -10,7 +10,14 @@
 		{
 			"class": "cc_emergency.functional.transforms.CoNLLToList",
 			"args": [
-				{"content_corenlp": ["lemma", true, true, "lemmas"]}
+				{
+					"content_corenlp": {
+						"column": "lemma",
+						"delete": true,
+						"new_field": "lemmas",
+						"lower": true
+					}
+				}
 			]
 		},
 		{

@@ -3,30 +3,52 @@
 """Converts CoNLL-format field(s) to text."""
 
 from __future__ import absolute_import, division, print_function
-from collections import Counter, namedtuple
+from collections import Counter
 
 from cc_emergency.functional.core import Map
+from cc_emergency.utils import openall
 
 
-class Spec(namedtuple('SpecBase', ['column', 'lower',
-                                   'convert_nnps', 'delete', 'new_field'])):
+class Spec(object):
     """
     Specifications for a field in ConvertCoNLL (see constructor description).
     """
+    def __init__(self, column, delete, new_field,
+                 lower=False, convert_nnps=False, filter_file=None):
+        if isinstance(column, int):
+            self.column = column
+        elif column.lower() == "word":
+            self.column = ConvertCoNLL.WORD
+        elif column.lower() == "lemma":
+            self.column = ConvertCoNLL.LEMMA
+        else:
+            raise ValueError('Invalid column specifier "{}"'.format(column))
+
+        self.delete = delete
+        self.new_field = new_field
+        self.lower = lower
+        self.convert_nnps = convert_nnps
+        if filter_file:
+            with openall(filter_file) as inf:
+                self.filter = set(line.strip().split('\t')[0] for line in inf)
+        else:
+            self.filter = None
+
+    def convert(self, token):
+        t = token[self.column]
+        if self.lower:
+            t = t.lower()
+        if self.convert_nnps and token[ConvertCoNLL.POS].startswith('NNP'):
+            t = self.convert_nnps
+        if self.filter and t not in self.filter:
+            return None
+        return t
+
     def get(specification):
         if isinstance(specification, list):
-            spec = Spec(*specification)
+            return Spec(*specification)
         else:
-            spec = Spec(**specification)
-        if isinstance(spec.column, int):
-            column = spec.column
-        elif spec.column.lower() == "word":
-            column = ConvertCoNLL.WORD
-        elif spec.column.lower() == "lemma":
-            column = ConvertCoNLL.LEMMA
-        else:
-            raise ValueError('Invalid column specifier "{}"'.format(spec.column))
-        return Spec(column, *spec[1:])
+            return Spec(**specification)
 
 
 class ConvertCoNLL(Map):
@@ -44,13 +66,15 @@ class ConvertCoNLL(Map):
     def __init__(self, fields_columns):
         """
         The fields_columns dictionary:
-        {field: [column, lower, convert_nnps, delete, new_field]}
+        {field: [column, lower, convert_nnps, filter, delete, new_field]}
         specifies which fields to convert, and then which column to use as the
         token. The column can be a number, or the words "word" (0) and
         "lemma" (1). lower indicates whether the token should be lowercased,
         while new_field is the name of the field where the result is put.
 
         If convert_nnps is specified, all NNP tokens are replaced by its value.
+        The filter field can be used to specify a set file; tokens not in the
+        set are dropped.
         """
         super(ConvertCoNLL, self).__init__()
         self.fields_columns = {
@@ -59,27 +83,18 @@ class ConvertCoNLL(Map):
 
     def transform(self, obj):
         for field, spec in self.fields_columns.items():
-            column, lower, convert_nnps, delete, new_field = spec
             if field in obj:
-                tokens = [[self.__convert(token, column, lower, convert_nnps)
-                           for token in sentence] for sentence in obj[field]]
-                obj[new_field] = self.format(tokens)
-                if delete:
-                    del obj[field]
+                tokens = [[spec.convert(token) for token in sentence]
+                          for sentence in obj[field]]
+                obj[spec.new_field] = self.format(tokens)
+                if spec.delete:
+                    del spec.obj[field]
         return obj
 
     def format(self, tokens):
         """Formats the token lists."""
         raise NotImplementedError(
             'format is not implemented; use one of the subclasses.')
-
-    def __convert(self, token, column, lower, convert_nnps):
-        ret = token[column]
-        if lower:
-            ret = ret.lower()
-        if convert_nnps and token[ConvertCoNLL.POS].startswith('NNP'):
-            ret = convert_nnps
-        return ret
 
 
 class CoNLLToCounts(ConvertCoNLL):

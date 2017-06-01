@@ -49,7 +49,7 @@ class LambdaBase(object):
         self.expression = compile(expression, '<string>', 'eval')
         if set_file:
             with openall(set_file) as inf:
-                self.s = set(inf.read().split('\n'))
+                self.s = set(line.strip().split('\t')[0] for line in inf)
         else:
             self.s = None
 
