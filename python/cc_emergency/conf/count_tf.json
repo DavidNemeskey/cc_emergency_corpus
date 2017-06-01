@@ -9,11 +9,11 @@
 			"args": [
 				{
 				    "content_corenlp": {
-					"column": "lemma",
-					"lower": true,
-					"convert_nnps": "NNP",
-					"delete": true,
-					"new_field": "counts"
+						"column": "lemma",
+						"lower": true,
+						"convert_nnps": "NNP",
+						"delete": true,
+						"new_field": "counts"
 				    }
 				}
 			]
