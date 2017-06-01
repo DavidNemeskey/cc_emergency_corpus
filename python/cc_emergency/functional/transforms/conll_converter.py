@@ -88,7 +88,7 @@ class ConvertCoNLL(Map):
                           for sentence in obj[field]]
                 obj[spec.new_field] = self.format(tokens)
                 if spec.delete:
-                    del spec.obj[field]
+                    del obj[field]
         return obj
 
     def format(self, tokens):
