@@ -109,3 +109,20 @@ class FilterDictField(Map, LambdaBase):
                                if eval(self.expression,
                                        {'k': k, 'v': v, 's': self.s})}
         return obj
+
+
+class FilterListField(Map, LambdaBase):
+    """
+    Filters a list field by a lambda expression. The latter consists of
+    a single statement that returns a boolean value. The only variables
+    available to it are e and the set s that results from reading set_file.
+    """
+    def __init__(self, field, expression, set_file=None):
+        super(FilterListField, self).__init__(expression, set_file)
+        self.field = field
+
+    def transform(self, obj):
+        if self.field in obj:
+            obj[self.field] = {e for e in obj[self.field]
+                               if eval(self.expression, {'e': e, 's': self.s})}
+        return obj
