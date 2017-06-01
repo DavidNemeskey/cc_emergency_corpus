@@ -226,6 +226,11 @@ def setup_logger(logging_level, handler, root, name='script'):
     return logger
 
 
+def idfn(_):
+    """Identity function."""
+    return _
+
+
 class AttrDict(dict):
     """Makes our life easier."""
     def __getattr__(self, key):
