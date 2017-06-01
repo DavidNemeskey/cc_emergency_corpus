@@ -86,6 +86,7 @@ class ConvertCoNLL(Map):
             if field in obj:
                 tokens = [[spec.convert(token) for token in sentence]
                           for sentence in obj[field]]
+                tokens = [token for token in tokens if token]
                 obj[spec.new_field] = self.format(tokens)
                 if spec.delete:
                     del obj[field]
