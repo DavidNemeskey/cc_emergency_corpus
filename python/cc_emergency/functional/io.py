@@ -32,6 +32,8 @@ class FileWrapper(Resource):
         parts = file_name.rsplit('.', 1)
         if len(parts) > 1 and parts[1] in extensions and parts[1] != extension:
             return parts[0] + '.' + extension
+        else:
+            return file_name
 
     def __enter__(self):
         """Opens the file."""
