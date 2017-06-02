@@ -86,6 +86,9 @@ class CoreNLPBackend(object):
             reply = self.__send_request(text)
             if reply:
                 return self.__split_result(reply.decode('utf-8'))
+            else:
+                # E.g. if the input text consists solely of whitespaces
+                return []
         except CoreNLPError as cnlpe:
             self.__stop_server()
             raise
