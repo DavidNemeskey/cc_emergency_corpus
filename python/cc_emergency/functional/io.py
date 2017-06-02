@@ -12,12 +12,26 @@ from cc_emergency.utils import openall
 from cc_emergency.functional.core import Collector, Resource, Source
 
 
+# The extensions recognized by the classes here
+extensions = set(['json', 'txt'])
+
+
 class FileWrapper(Resource):
     """Wraps a file stream."""
     def __init__(self, file, mode='rt', *args, **kwargs):
         super(FileWrapper, self).__init__(*args, **kwargs)
         self.file = file
         self.mode = mode
+
+    @staticmethod
+    def replace_extension(file_name, extension):
+        """
+        Replaces the extension of the file in question. Only extensions in
+        the global extensions set are replaced.
+        """
+        parts = file_name.rsplit('.', 1)
+        if len(parts) > 1 and parts[1] in extensions and parts[1] != extension:
+            return parts[0] + '.' + extension
 
     def __enter__(self):
         """Opens the file."""
@@ -61,9 +75,17 @@ class JsonReader(Source, FileWrapper):
 class JsonWriter(Collector, FileWrapper):
     """Writes a text file that has a JSON object on each line."""
     def __init__(self, output_file):
-        super(JsonWriter, self).__init__(output_file, 'wt')
+        super(JsonWriter, self).__init__(
+            self.replace_extension(output_file, 'json'), 'wt')
 
     def __call__(self, it):
         for obj in it:
             print(json.dumps(obj), file=self.stream)
         return []
+
+
+class TextReader(Source, FileWrapper):
+    """Reads a text file into a single document."""
+    def __iter__(self):
+        yield {'id': os.path.basename(self.file),
+               'content': self.stream.read()}
