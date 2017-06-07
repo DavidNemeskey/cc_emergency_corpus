@@ -51,7 +51,7 @@ else:
         See https://bugs.python.org/issue10791.
         """
         def read1(self, n):
-                return self.read(n)
+            return self.read(n)
 
     def openall(
         filename, mode='rt', encoding=None, errors=None, newline=None,
