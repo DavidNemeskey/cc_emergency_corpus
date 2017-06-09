@@ -83,7 +83,7 @@ have already been done, so if you are going to be working there, just skip ahead
 The Common Crawl news dataset is not filtered to any language, and unfortunately the data does not contain a language tag. So language
 detection is needed, since we only concern ourselves with English for now. Provided the repository is clone to the data directory,
 the following command does just that:
-```
+```bash
 python cc_emergency_corpus/python/scripts/run_pipeline.py -i news_json -o news_filtered -P 4 -L debug -c filter_language.json
 ```
 We use [langid](https://pypi.python.org/pypi/langid) for language detection, which is quite slow -- be prepared to wait a lot.
@@ -93,7 +93,7 @@ We use [langid](https://pypi.python.org/pypi/langid) for language detection, whi
 The second step is parsing the data. For this, we employ [Stanford CoreNLP](https://stanfordnlp.github.io/CoreNLP/). At this stage,
 only lemmatization and POS induction is performed -- running NER on all the documents would take 3 days at this point, and it is
 not even necessary: we are only interested in emergency-related entities.
-```
+```bash
 python cc_emergency_corpus/python/scripts/run_pipeline.py -i news_filtered/ -o news_parsed/ -P 4 -L debug -c corenlp.json
 ```
 
@@ -105,7 +105,7 @@ As usual, the data is affected by both URL- and content-duplication, so the next
 - minhash encoding of word 4-grams with 128 permutations;
 - locality sensitive hashing with a Jaccard threshold of 85%.
 
-```
+```bash
 python cc_emergency_corpus/python/scripts/run_pipeline.py -i news_parsed/ -r unique.tsv -P8 -L debug -c duplicates.json
 python cc_emergency_corpus/python/scripts/run_pipeline.py -i news_parsed/ -o news_unique/ -P8 -L debug -c unique.json
 ```
@@ -121,7 +121,7 @@ evaluation by hand easier, the unparsed text `content` is kept as well. In the f
 (OK, so this is where proper NER would have been useful) with the `NNP` token, because we are looking for common words that are
 emergency-related, not the accidental entities involved.
 
-```
+```bash
 python cc_emergency_corpus/python/scripts/run_pipeline.py -i news_unique/ -o news_counts/ -P8 -L debug -c count_tf.json
 python cc_emergency_corpus/python/scripts/run_pipeline.py -i news_counts/ -r stats/news_tfdf.json -P8 -L debug -c reduce_tf_df.json
 ```
@@ -130,7 +130,7 @@ python cc_emergency_corpus/python/scripts/run_pipeline.py -i news_counts/ -r sta
 
 In order to make searches faster, all words whose DF is under 10 were removed from the documents. This decreased the vocabulary to
 about 123k without (or so we think) the loss of any important words. Any documents that end up empty are also dropped.
-```
+```bash
 python cc_emergency_corpus/python/scripts/run_pipeline.py -i news_counts/ -o news_lemma_tf/ -P 8 -L debug -c filter_counts.json
 python cc_emergency_corpus/python/scripts/run_pipeline.py -i news_lemma_tf/ -r stats/news_tfdf_update.json -P8 -L debug -c reduce_tf_df.json
 ```
@@ -142,7 +142,7 @@ python cc_emergency_corpus/python/scripts/run_pipeline.py -i news_lemma_tf/ -r s
 #### Basic search
 
 Finally, we can search in the filtered, reduced data:
-```
+```bash
 python cc_emergency_corpus/python/scripts/run_pipeline.py -i news_lemma_tf/ -r results/search_result.json -P8 -L debug -c search_file.json -Ravgdl=498.4 -Rquery_file=queries/query_file.lst
 ```
 Here, `avgdl` is a parameter to the Okapi-BM25 scorer, and it should be computed manually (hint: `sum(tf) / num_docs`); `query_file`
@@ -163,7 +163,7 @@ python cc_emergency_corpus/python/scripts/weight_words.py emergency_corpus_stats
 
 In order to create a weighted query from the word weights, one uses the `weight_query.py` script.
 This script takes as its parameter a query word list and a weighting computed in the previous step.
-```
+```bash
 python cc_emergency_corpus/python/scripts/weight_query.py queries/bev.lst weights/idfs.tsv -s > queries/bev_0.tsv
 ```
 
@@ -171,11 +171,11 @@ python cc_emergency_corpus/python/scripts/weight_query.py queries/bev.lst weight
 
 Typically, we would like to create subset corpora (e.g. emergency-related) from the search results. Since filtering `Transform`s
 usually read their input from a simple list file (one item per line), the first step is to convert the search results to such files:
-```
+```bash
 head -300 search_0.json | python cc_emergency_corpus/python/scripts/json_to_set.py - -f url > search_0_300.urls
 ```
 Then, in order to compute the log TF ratio, we need the TF/DF statistics of the new subcorpus. This is computed as
-```
+```bash
 python cc_emergency_corpus/python/scripts/run_pipeline.py -i news_lemma_tf -r stats/search_0_tfdf.json -P8 -L debug -c reduce_subset.json -Rurl_filter=results/search_0.urls
 ```
 
