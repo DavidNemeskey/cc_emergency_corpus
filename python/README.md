@@ -185,7 +185,7 @@ In what follows, we shall start with a query file, search, acquire the statistic
 reweight the words and search again with the reweighted query. This process can be continued for arbitrarily
 long, adding or removing words from the query manually between searches.
 
-```
+```bash
 ## First iteration
 
 # The first search
@@ -199,10 +199,13 @@ head -10000 results/search_evf_0.json | python cc_emergency_corpus/python/script
 # Compute the TF/DF statistics
 python cc_emergency_corpus/python/scripts/run_pipeline.py -i news_lemma_tf -r stats/search_evf_0_tfdf.json -P8 -L debug -c reduce_subset.json -Rurl_filter=results/search_evf_0.urls
 
-# Acquire the list of words that are candidates for being the most emergency-related, filtered by and UMBC word list
+# Acquire the list of words that are candidates for being the most emergency-related,
+# filtered by and UMBC word list
 python cc_emergency_corpus/python/scripts/weight_words.py stats/search_evf_0_tfdf.json -t 2 -w umbc.min50.words tf --print-dfs stats/news_tfdf_update.json > weights/news_evf_0.tsv
 
-# Have a look at the list, add words from it to the query, etc. You can just copy the lines from weights/news_evf_0.tsv, or add the words to the new query file evf_1.lst, and then
+# Have a look at the list, add words from it to the query, etc. You can just copy the
+# lines from weights/news_evf_0.tsv, or add the words to the new query file evf_1.lst,
+# and then
 python cc_emergency_corpus/python/scripts/weight_query.py queries/evf_1.lst weights/news_evf_0.tsv -t 2 > queries/evf_1.tsv
 
 ## Second iteration
