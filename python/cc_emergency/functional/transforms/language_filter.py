@@ -43,7 +43,7 @@ class LanguageFilter(Filter):
 
 
 class DomainFilter(Filter):
-    def __init_(self, tlds, field='url', retain=True):
+    def __init__(self, tlds, field='url', retain=True):
         """
         Filters all urls (by default) not in, or, if the retain argument
         is False, in the the specified TLDs.
