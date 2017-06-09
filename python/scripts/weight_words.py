@@ -95,7 +95,7 @@ def main():
                 p.append(base_freqs['DF'][w])
 
     for word, payload in sorted(to_print.items(),
-                                key=lambda kv: (-kv[1], kv[0])):
+                                key=lambda kv: (-kv[1][0], kv[0])):
         weight, *the_rest = payload
         if weight >= args.threshold:
             print('{}\t{}'.format(word, '\t'.join(map(str, payload))))
