@@ -30,7 +30,13 @@ def parse_arguments():
     parser.add_argument('--num-docs', '-n', type=int,
                         help='the total number of documents. Only interesting '
                              'for the DF case.')
+    parser.add_argument('--threshold', '-t', type=float, default=float('-inf'),
+                        help='a threshold; words with weights below this are '
+                             'dropped.')
+    parser.add_argument('--word-filter', '-w',
+                        help='a word list file to filter the words we output.')
     args = parser.parse_args()
+
     if args.num_docs and args.base_freq_file:
         parser.error('--num-docs is only valid when the base frequency file '
                      'is not specified.')
@@ -56,20 +62,36 @@ def compute_tf_ratio(tfs, base_tfs, size, base_size):
             for word, tf in tfs.items() if base_tfs.get(word)}
 
 
+class WordFilter(object):
+    def __init__(self, filter_file=None):
+        if filter_file:
+            with openall(filter_file) as inf:
+                self.words = {l.strip().split('\t', 1)[0] for l in inf}
+        else:
+            self.words = set()
+
+    def __call__(self, word):
+        return True if not self.words or word in self.words else False
+
+
 def main():
     args = parse_arguments()
     df_mode = not bool(args.base_freq_file)
+    word_filter = WordFilter(args.word_filter)
     if df_mode:
-        dfs = load_file(args.freq_file, 'DF')
+        dfs = {w: f for w, f in load_file(args.freq_file, 'DF').items()
+               if word_filter(w)}
         to_print = compute_idfs(dfs, args.num_docs)
     else:
-        tfs = load_file(args.freq_file, 'TF')
+        tfs = {w: f for w, f in load_file(args.freq_file, 'TF').items()
+               if word_filter(w)}
         size = sum(tfs.values())
         base_tfs = load_file(args.base_freq_file, 'TF')
         base_size = sum(base_tfs.values())
         to_print = compute_tf_ratio(tfs, base_tfs, size, base_size)
     for word, weight in sorted(to_print.items(), key=lambda kv: (-kv[1], kv[0])):
-        print('{}\t{}'.format(word, weight))
+        if weight >= args.threshold:
+            print('{}\t{}'.format(word, weight))
 
 
 if __name__ == '__main__':
