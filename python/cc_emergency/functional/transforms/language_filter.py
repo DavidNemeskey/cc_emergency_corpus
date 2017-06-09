@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # vim: set fileencoding=utf-8 :
 
-"""A language filtering transform."""
+"""Language / domain filtering transforms."""
 
 import importlib
+
+import tldextract
 
 from cc_emergency.functional.core import Filter
 
@@ -38,3 +40,14 @@ class LanguageFilter(Filter):
     def transform(self, obj):
         text = '\n'.join(obj.get(field, '') for field in self.fields)
         return self.langid.classify(text)[0] in self.languages
+
+
+class DomainFilter(Filter):
+    def __init_(self, tlds, field='url'):
+        """Filters all urls (by default) not in the specified TLDs."""
+        super(DomainFilter, self).__init__()
+        self.field = field
+        self.tlds = set(tlds)
+
+    def transform(self, obj):
+        return tldextract.extract(obj[self.field]).suffix.lower() in self.tlds
