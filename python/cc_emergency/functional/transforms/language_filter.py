@@ -4,6 +4,7 @@
 """Language / domain filtering transforms."""
 
 import importlib
+from operator import attrgetter
 
 import tldextract
 
@@ -43,21 +44,26 @@ class LanguageFilter(Filter):
 
 
 class DomainFilter(Filter):
-    def __init__(self, tlds, field='url', retain=True):
+    def __init__(self, domains, field='url', part='tld', retain=True):
         """
         Filters all urls (by default) not in, or, if the retain argument
-        is False, in the the specified TLDs.
+        is False, in the the specified TLDs. part can be one of 'subdomain',
+        'domain' and 'suffix'; the parts of a domain.
         """
         super(DomainFilter, self).__init__()
         self.field = field
-        self.tlds = set(tlds)
+        self.domains = set(domains)
+        if part not in ['subdomain', 'domain', 'suffix']:
+            raise ValueError('Invalid "part"')
+        self.part = attrgetter(part)
         self.check = self.__in if retain else self.__not_in
 
     def __in(self, tld):
-        return tld in self.tlds
+        return tld in self.domains
 
     def __not_in(self, tld):
-        return tld not in self.tlds
+        return tld not in self.domains
 
     def transform(self, obj):
-        return self.check(tldextract.extract(obj[self.field]).suffix.lower())
+        domain = self.part(tldextract.extract(obj[self.field])).lower()
+        return self.check(domain)
