@@ -43,11 +43,21 @@ class LanguageFilter(Filter):
 
 
 class DomainFilter(Filter):
-    def __init_(self, tlds, field='url'):
-        """Filters all urls (by default) not in the specified TLDs."""
+    def __init_(self, tlds, field='url', retain=True):
+        """
+        Filters all urls (by default) not in, or, if the retain argument
+        is False, in the the specified TLDs.
+        """
         super(DomainFilter, self).__init__()
         self.field = field
         self.tlds = set(tlds)
+        self.check = self.__in if retain else self.__not_in
+
+    def __in(self, tld):
+        return tld in self.tlds
+
+    def __not_in(self, tld):
+        return tld not in self.tlds
 
     def transform(self, obj):
-        return tldextract.extract(obj[self.field]).suffix.lower() in self.tlds
+        return self.check(tldextract.extract(obj[self.field]).suffix.lower())
