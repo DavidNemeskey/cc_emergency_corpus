@@ -43,11 +43,13 @@ class LanguageFilter(Filter):
 
 
 class DomainFilter(Filter):
-    def __init__(self, domains, field='url', expression='tld', retain=True):
+    def __init__(self, domains, field='url', expression='suffix', retain=True):
         """
         Filters all urls (by default) not in, or, if the retain argument
-        is False, in the the specified TLDs. part can be one of 'subdomain',
-        'domain' and 'suffix'; the parts of a domain.
+        is False, in the the specified list. The class allows the user to
+        assemble an expression from the parts of a domain (subdomain,
+        domain and suffix), and the class will compare that agains the list.
+        The default expression is 'suffix', i.e. the TLD.
         """
         super(DomainFilter, self).__init__()
         self.field = field
@@ -55,11 +57,11 @@ class DomainFilter(Filter):
         self.expression = compile(expression, '<string>', 'eval')
         self.check = self.__in if retain else self.__not_in
 
-    def __in(self, tld):
-        return tld in self.domains
+    def __in(self, domain):
+        return domain in self.domains
 
-    def __not_in(self, tld):
-        return tld not in self.domains
+    def __not_in(self, domain):
+        return domain not in self.domains
 
     def transform(self, obj):
         variables = tldextract.extract(obj[self.field].lower())._asdict()
