@@ -90,7 +90,7 @@ def main():
         base_size = sum(base_tfs.values())
         to_print = compute_tf_ratio(tfs, base_tfs, size, base_size)
         if args.print_dfs:
-            for w, p in to_print:
+            for w, p in to_print.items():
                 p.append(freqs['DF'][w])
                 p.append(base_freqs['DF'][w])
 
