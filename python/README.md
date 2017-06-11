@@ -35,6 +35,8 @@ and plug it in instead.
 
 ## How to reproduce the runs in the paper
 
+### General information
+
 For the scripts below, we assume the following directory structure:
 
 - `.`: the working directory
@@ -74,6 +76,9 @@ cd ../..
 
 Finally, we are ready to do some work. Way to go! Note that all scripts accept the `-h` option, which
 prints the options available to it. This can come in handy, if the following examples seem confusing.
+Also note that if a script has to be stopped, due to the idiosyncrasies of Python multiprocessing,
+_Ctrl-C_ is sometimes insufficient to stop the process. In that case, _Ctrl-Z_ plus `kill %1` will
+do the job.
 
 Note that in our case, the working directory is `/mnt/permanent/Language/English/Crawl/Common_Crawl`. Most of the steps below
 have already been done, so if you are going to be working there, just skip ahead to the _Search_ section.
