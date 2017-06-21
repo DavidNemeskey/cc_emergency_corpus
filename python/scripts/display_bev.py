@@ -43,7 +43,7 @@ def parse_arguments():
 
 
 def vector_stuff(vector_file, bev_files, write_file):
-    colors = {1: 'r', 2: 'g', 4: 'b', 3: 'y', 5: 'm', 6: 'c', 7: 'k'}
+    colors = {1: 'ro', 2: 'go', 4: 'bo', 3: 'y^', 5: 'm^', 6: 'c^', 7: 'ks'}
     points = defaultdict(int)
     if bev_files:
         for i, bev_file in enumerate(bev_files):
@@ -54,8 +54,6 @@ def vector_stuff(vector_file, bev_files, write_file):
     words, vectors = read_vectors(vector_file, keep_words=points.keys())
     if write_file:
         write_vectors(words, vectors, write_file)
-    if not points:
-        points = {w: 'r' for w in words}
     return words, vectors, points
 
 
@@ -72,7 +70,16 @@ def main():
     y_min = coords[:, 1].min()
     y_max = coords[:, 1].max()
 
-    plt.plot(coords[:, 0], coords[:, 1], 'bx')
+    if points:
+        per_color_indices = defaultdict(list)
+        for i, word in enumerate(words):
+            color = points[word]
+            per_color_indices[color].append(i)
+        for color, indices in per_color_indices.items():
+            ccoords = coords[indices]
+            plt.plot(ccoords[:, 0], ccoords[:, 1], color)
+    else:
+        plt.plot(coords[:, 0], coords[:, 1], 'rx')
     plt.axis([x_min - 0.1, x_max + 0.1, y_min - 0.1, y_max + 0.1])
     plt.show()
 
