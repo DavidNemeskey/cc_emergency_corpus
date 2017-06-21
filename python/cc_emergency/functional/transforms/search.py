@@ -47,6 +47,8 @@ class Search(Map):
                 query = [l.strip().split('\t') for l in inf]
                 if len(query[0]) == 2:
                     query = dict(query)
+                else:
+                    query = [l[0] for l in query]
 
         if isinstance(query, list):
             return {w: 1 for w in query}

@@ -24,6 +24,9 @@ def parse_arguments():
                              'appended to each line.')
     parser.add_argument('weight_file',
                         help='a weight file, the output of weight_words.py.')
+    parser.add_argument('--threshold', '-t', type=float, default=float('-inf'),
+                        help='a threshold; words with weights below this are '
+                             'dropped.')
     return parser.parse_args()
 
 
@@ -38,7 +41,8 @@ def main():
     query = sorted(filter(lambda ww: ww[1], query.items()),
                    key=itemgetter(1), reverse=True)
     for qword, qweight in query:
-        print('{}\t{}'.format(qword, qweight))
+        if qweight >= args.threshold:
+            print('{}\t{}'.format(qword, qweight))
 
 
 if __name__ == '__main__':

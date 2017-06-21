@@ -17,7 +17,7 @@ class CoreNLPError(Exception):
 
 class CoreNLPBackend(object):
     """Stanford CoreNLP interface object."""
-    def __init__(self, corenlp_props):
+    def __init__(self, corenlp_props, logger):
         """
         corenlp_props is a dictionary that contains the properties for
         the CoreNLP server under the [URL] section. There must also be three keys
@@ -34,6 +34,7 @@ class CoreNLPBackend(object):
         self.server = None
         self.shutdown_key = None
         self.parsed = 0
+        self.logger = logger
         self.__start_server()
 
     def __del__(self):
@@ -85,6 +86,9 @@ class CoreNLPBackend(object):
             reply = self.__send_request(text)
             if reply:
                 return self.__split_result(reply.decode('utf-8'))
+            else:
+                # E.g. if the input text consists solely of whitespaces
+                return []
         except CoreNLPError as cnlpe:
             self.__stop_server()
             raise

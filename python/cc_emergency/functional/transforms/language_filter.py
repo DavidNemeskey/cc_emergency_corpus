@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # vim: set fileencoding=utf-8 :
 
-"""A language filtering transform."""
+"""Language / domain filtering transforms."""
 
 import importlib
+
+import tldextract
 
 from cc_emergency.functional.core import Filter
 
@@ -38,3 +40,29 @@ class LanguageFilter(Filter):
     def transform(self, obj):
         text = '\n'.join(obj.get(field, '') for field in self.fields)
         return self.langid.classify(text)[0] in self.languages
+
+
+class DomainFilter(Filter):
+    def __init__(self, domains, field='url', expression='suffix', retain=True):
+        """
+        Filters all urls (by default) not in, or, if the retain argument
+        is False, in the the specified list. The class allows the user to
+        assemble an expression from the parts of a domain (subdomain,
+        domain and suffix), and the class will compare that agains the list.
+        The default expression is 'suffix', i.e. the TLD.
+        """
+        super(DomainFilter, self).__init__()
+        self.field = field
+        self.domains = set(domains)
+        self.expression = compile(expression, '<string>', 'eval')
+        self.check = self.__in if retain else self.__not_in
+
+    def __in(self, domain):
+        return domain in self.domains
+
+    def __not_in(self, domain):
+        return domain not in self.domains
+
+    def transform(self, obj):
+        variables = tldextract.extract(obj[self.field].lower())._asdict()
+        return self.check(eval(self.expression, variables))

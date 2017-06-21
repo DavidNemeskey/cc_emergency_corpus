@@ -1,0 +1,54 @@
+{
+	"pipeline": [
+		{
+			"class": "cc_emergency.functional.io.JsonReader",
+			"kwargs": {"input_file": "$input"}
+		},
+		{
+			"class": "cc_emergency.functional.transforms.DomainFilter",
+			"kwargs": {
+				"expression": "suffix",
+				"domains": ["md"],
+				"retain": false
+			}
+		},
+		{
+			"class": "cc_emergency.functional.transforms.DomainFilter",
+			"kwargs": {
+				"expression": "domain + '.' + suffix",
+				"domains": ["sputniknews.com"],
+				"retain": false
+			}
+		},
+		{
+			"class": "cc_emergency.functional.transforms.Search",
+			"kwargs": {
+				"field_weights": {"counts": 1},
+				"query_file": "$query_file",
+				"scorer": {
+					"scorer": "okapi",
+					"params": {
+						"k1": 2,
+						"b": 0.75,
+						"avgdl": 498.4
+					}
+				}
+			}
+		},
+		{
+			"class": "cc_emergency.functional.transforms.FilterEmpty",
+			"args": [["score"]]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.RetainFields",
+			"args": [["url", "score", "content"]]
+		},
+		{
+			"class": "cc_emergency.functional.collectors.ListCollector"
+		}
+	],
+	"reducer": {
+		"class": "cc_emergency.functional.collectors.Sorter",
+		"args": [[["score", true]], 100000]
+	}
+}
