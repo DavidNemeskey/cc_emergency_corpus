@@ -29,7 +29,9 @@ def parse_arguments():
                              'colors.')
     parser.add_argument('--write-vectors', '-w',
                         help='if specified, writes the vectors filtered by '
-                             'all the BEVs back to this file.')
+                             'all the BEVs back to this file. In this case, '
+                             'the projection is not computed, and the script '
+                             'exists right away.')
     parser.add_argument('--distance', '-d', choices=['cos', 'euc'],
                         help='the distance metric to use: cosine similarity '
                              'or Euclidean distance.')
@@ -62,26 +64,27 @@ def main():
     setup_stream_logger(args.log_level, 'cc_emergency')
     words, vectors, points = vector_stuff(
         args.vector_file, args.bev, args.write_vectors)
-    coords = compute_mds(vectors, args.distance)
+    if not args.write_vectors:
+        coords = compute_mds(vectors, args.distance)
 
-    # Plotting -- ungh...
-    x_min = coords[:, 0].min()
-    x_max = coords[:, 0].max()
-    y_min = coords[:, 1].min()
-    y_max = coords[:, 1].max()
+        # Plotting -- ungh...
+        x_min = coords[:, 0].min()
+        x_max = coords[:, 0].max()
+        y_min = coords[:, 1].min()
+        y_max = coords[:, 1].max()
 
-    if points:
-        per_color_indices = defaultdict(list)
-        for i, word in enumerate(words):
-            color = points[word]
-            per_color_indices[color].append(i)
-        for color, indices in per_color_indices.items():
-            ccoords = coords[indices]
-            plt.plot(ccoords[:, 0], ccoords[:, 1], color)
-    else:
-        plt.plot(coords[:, 0], coords[:, 1], 'rx')
-    plt.axis([x_min - 0.1, x_max + 0.1, y_min - 0.1, y_max + 0.1])
-    plt.show()
+        if points:
+            per_color_indices = defaultdict(list)
+            for i, word in enumerate(words):
+                color = points[word]
+                per_color_indices[color].append(i)
+            for color, indices in per_color_indices.items():
+                ccoords = coords[indices]
+                plt.plot(ccoords[:, 0], ccoords[:, 1], color)
+        else:
+            plt.plot(coords[:, 0], coords[:, 1], 'rx')
+        plt.axis([x_min - 0.1, x_max + 0.1, y_min - 0.1, y_max + 0.1])
+        plt.show()
 
 
 if __name__ == '__main__':
