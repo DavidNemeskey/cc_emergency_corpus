@@ -7,6 +7,7 @@ from __future__ import absolute_import, division, print_function
 
 import numpy as np
 from sklearn import manifold
+import sys
 
 
 def compute_mds(vectors, dist_type, processes=1):
@@ -14,6 +15,7 @@ def compute_mds(vectors, dist_type, processes=1):
     Uses metric multidimensional scaling with angular distance to map the
     points in vectors to two dimensions.
     """
+    np.set_printoptions(threshold=np.inf)
     if dist_type.lower().startswith('euc'):
         mds = manifold.MDS(metric=True, n_jobs=processes)
         X = vectors
@@ -25,11 +27,11 @@ def compute_mds(vectors, dist_type, processes=1):
         raise ValueError('dist_type must be euc or cos')
 
     results = mds.fit(X)
-    print('Results: {}'.format(results))
     return results.embedding_
 
 
 def __angular_distance(vectors):
     """Computes the angular distances between the vectors."""
-    cosine_similarity = vectors.dot(vectors.T)
+    cosine_similarity = np.clip(vectors.dot(vectors.T), -1, 1)
+    ac = np.arccos(cosine_similarity)
     return np.arccos(cosine_similarity) / np.pi

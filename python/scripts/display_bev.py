@@ -6,6 +6,7 @@
 from __future__ import absolute_import, division, print_function
 import argparse
 from collections import defaultdict
+from functools import partial
 
 import matplotlib.pyplot as plt
 
@@ -44,8 +45,8 @@ def parse_arguments():
     return args
 
 
-def vector_stuff(vector_file, bev_files, write_file):
-    colors = {1: 'ro', 2: 'go', 4: 'bo', 3: 'y^', 5: 'm^', 6: 'c^', 7: 'ks'}
+def vector_stuff(vector_file, bev_files, normalize):
+    colors = {1: 'r^', 2: 'g^', 4: 'b^', 3: 'yo', 5: 'mo', 6: 'co', 7: 'ks'}
     points = defaultdict(int)
     if bev_files:
         for i, bev_file in enumerate(bev_files):
@@ -53,18 +54,26 @@ def vector_stuff(vector_file, bev_files, write_file):
                 for word in set(inf.read().strip().split('\n')):
                     points[word] |= pow(2, i)
         points = {w: colors[c] for w, c in points.items()}
-    words, vectors = read_vectors(vector_file, keep_words=points.keys())
-    if write_file:
-        write_vectors(words, vectors, write_file)
+    words, vectors = read_vectors(
+        vector_file, normalize, keep_words=points.keys())
     return words, vectors, points
+
+
+def onpick(event, artist_indices, words):
+    for i in event.ind:
+        print(words[artist_indices[event.artist][i]])
+    # print(event, event.ind, event.name, event.mouseevent,
+    #       event.guiEvent, event.artist)
 
 
 def main():
     args = parse_arguments()
     setup_stream_logger(args.log_level, 'cc_emergency')
     words, vectors, points = vector_stuff(
-        args.vector_file, args.bev, args.write_vectors)
-    if not args.write_vectors:
+        args.vector_file, args.bev, True if args.distance == 'cos' else False)
+    if args.write_vectors:
+        write_vectors(words, vectors, args.write_vectors)
+    else:
         coords = compute_mds(vectors, args.distance)
 
         # Plotting -- ungh...
@@ -73,6 +82,9 @@ def main():
         y_min = coords[:, 1].min()
         y_max = coords[:, 1].max()
 
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        artist_indices = {}
         if points:
             per_color_indices = defaultdict(list)
             for i, word in enumerate(words):
@@ -80,10 +92,15 @@ def main():
                 per_color_indices[color].append(i)
             for color, indices in per_color_indices.items():
                 ccoords = coords[indices]
-                plt.plot(ccoords[:, 0], ccoords[:, 1], color)
+                art = ax.plot(ccoords[:, 0], ccoords[:, 1], color, picker=3)[0]
+                artist_indices[art] = indices
         else:
-            plt.plot(coords[:, 0], coords[:, 1], 'rx')
-        plt.axis([x_min - 0.1, x_max + 0.1, y_min - 0.1, y_max + 0.1])
+            ax.plot(coords[:, 0], coords[:, 1], 'rx', picker=3)
+            artist_indices[art] = list(range(coords.shape[0]))
+        ax.set_xlim(x_min - 0.1, x_max + 0.1)
+        ax.set_ylim(y_min - 0.1, y_max + 0.1)
+        op = partial(onpick, artist_indices=artist_indices, words=words)
+        fig.canvas.mpl_connect('pick_event', op)
         plt.show()
 
 
