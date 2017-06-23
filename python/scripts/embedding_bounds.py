@@ -4,12 +4,14 @@
 """Computes the bounding sphere around sets of points."""
 
 import argparse
-from collections import OrderedDict
-from itertools import chain
+from collections import Counter, OrderedDict
+from itertools import chain, combinations
 import logging
+import os
 
 import miniball
 import numpy as np
+import pandas as pd
 
 from cc_emergency.utils.vector_io import read_vectors
 from cc_emergency.utils.vectors import angular_distance
@@ -26,11 +28,26 @@ def parse_arguments():
                              'possible to specify more than one file, in '
                              'which case all sets are displayed with different '
                              'colors.')
+    parser.add_argument('--subsets', '-s', action='store_true',
+                        help='also compute the statistics for the various '
+                             'combinations and subsets of the specified '
+                             'lists: intersections and items unique to a set.')
     parser.add_argument('--log-level', '-L', type=str, default='critical',
                         choices=['debug', 'info', 'warning', 'error', 'critical'],
                         help='the logging level.')
     args = parser.parse_args()
+    if len(args.bev) == 0:
+        parser.error('At least one list file should be specified.')
+    if args.subsets and len(args.bev) == 1:
+        parser.error('--subsets doesn\'t make sense if there is only one list.')
     return args
+
+
+def filename_to_set(file_name):
+    """Converts the file name to a set name."""
+    name = os.path.basename(file_name)
+    n, _, ext = name.rpartition('.')
+    return n if len(ext) == 3 else name
 
 
 def read_stuff(vector_file, bev_files, normalize):
@@ -38,7 +55,7 @@ def read_stuff(vector_file, bev_files, normalize):
     if bev_files:
         for bev_file in bev_files:
             with open(bev_file) as inf:
-                sets[bev_file] = set(inf.read().strip().split('\n'))
+                sets[filename_to_set(bev_file)] = set(inf.read().strip().split('\n'))
     words, vectors = read_vectors(
         vector_file, normalize, keep_words=set(chain(*sets.values())))
     return words, vectors, sets
@@ -61,6 +78,7 @@ def centroid_distribution(vectors):
         ('std', dists_std),
         ('pinstd', np.sum(np.logical_and(dists_mean - dists_std < dists,
                                          dists < dists_mean + dists_std)) / len(dists))
+        , ('len', len(vectors))
     ])
 
 
@@ -82,6 +100,29 @@ def bounding_sphere(vectors):
     ])
 
 
+def generate_subsets(set_indices, words):
+    unique_indices = {
+        s + '-unique': [i for i in indices if i not in
+                        set(chain(*[vs for k, vs in set_indices.items() if k != s]))]
+        for s, indices in set_indices.items()
+    }
+    if len(set_indices) > 2:
+        common_indices = {
+            s + '-common': [i for i in indices if i not in unique_indices[s + '-unique']]
+            for s, indices in set_indices.items()
+        }
+    else:
+        common_indices = {}
+    intersections = {
+        '{}-{}'.format(s1, s2):
+        sorted(set(set_indices[s1]) & set(set_indices[s2]))
+        for s1, s2 in combinations(sorted(set_indices.keys()), 2)
+    }
+    set_indices.update(unique_indices)
+    set_indices.update(common_indices)
+    set_indices.update(intersections)
+
+
 def main():
     args = parse_arguments()
 
@@ -91,12 +132,17 @@ def main():
     words, vectors, sets = read_stuff(args.vector_file, args.bev, True)
     vectors = np.asarray(vectors)  # Miniball doesn't work on matrices
     set_indices = OrderedDict((s, []) for s in sets.keys())
+    orig_sets = sorted(set_indices.keys())
 
     for i, word in enumerate(words):
         for s, swords in sets.items():
             if word in swords:
                 set_indices[s].append(i)
 
+    if args.subsets:
+        generate_subsets(set_indices, words)
+
+    centroids = np.zeros((len(orig_sets), vectors.shape[1]), dtype=vectors.dtype)
     for s, indices in set_indices.items():
         v = vectors[indices]
         logging.debug('Computing centroid stats for set {}'.format(s))
@@ -106,12 +152,25 @@ def main():
         # bstats = bounding_sphere(v)
         # logging.debug('Computed bounding sphere for set {}'.format(s))
         centroid = stats.pop('centroid')
+        if s in orig_sets:
+            centroids[orig_sets.index(s)] = centroid
         # center = bstats.pop('center')
         # stats.update(bstats)
         # stats['cdist'] = angular_distance(
         #     np.array([centroid, center / np.linalg.norm(center)]))[0, 1]
         print('Stats for {}:\n  {}'.format(
             s, '\n  '.join(': '.join(map(str, kv)) for kv in stats.items())))
+    
+    # Which centroids do the points lie closest?
+    closest_centroid = angular_distance(centroids, vectors).argmin(axis=0)
+    closest_matrix = np.zeros((len(orig_sets), len(orig_sets)), dtype=int)
+    for i, s in enumerate(orig_sets):
+        for k, v in Counter(closest_centroid[set_indices[s]]).items():
+            closest_matrix[i, k] = v
+    closest_table = pd.DataFrame(data=closest_matrix, index=orig_sets,
+                                 columns=['->' + s for s in orig_sets])
+    print('Confusion matrix based on centroids:')
+    print(closest_table)
 
 
 if __name__ == '__main__':
