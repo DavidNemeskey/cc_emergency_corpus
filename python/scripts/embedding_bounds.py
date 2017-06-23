@@ -4,7 +4,9 @@
 """Computes the bounding sphere around sets of points."""
 
 import argparse
+from collections import OrderedDict
 from itertools import chain
+import logging
 
 import miniball
 import numpy as np
@@ -24,7 +26,7 @@ def parse_arguments():
                              'possible to specify more than one file, in '
                              'which case all sets are displayed with different '
                              'colors.')
-    parser.add_argument('--log-level', '-L', type=str, default=None,
+    parser.add_argument('--log-level', '-L', type=str, default='critical',
                         choices=['debug', 'info', 'warning', 'error', 'critical'],
                         help='the logging level.')
     args = parser.parse_args()
@@ -32,7 +34,7 @@ def parse_arguments():
 
 
 def read_stuff(vector_file, bev_files, normalize):
-    sets = {}
+    sets = OrderedDict()
     if bev_files:
         for bev_file in bev_files:
             with open(bev_file) as inf:
@@ -52,31 +54,43 @@ def centroid_distribution(vectors):
     dists = np.squeeze(angular_distance(centroid[np.newaxis, :], vectors))
     dists_mean = dists.mean()
     dists_std = dists.std()
-    return {
-        'centroid': centroid,
-        'max': dists.max(),
-        'mean': dists_mean,
-        'std': dists_std,
-        'pinstd': np.sum(np.logical_and(dists_mean - dists_std < dists,
-                                        dists < dists_mean + dists_std)) / len(dists)
-    }
+    return OrderedDict([
+        ('centroid', centroid),
+        ('max', dists.max()),
+        ('mean', dists_mean),
+        ('std', dists_std),
+        ('pinstd', np.sum(np.logical_and(dists_mean - dists_std < dists,
+                                         dists < dists_mean + dists_std)) / len(dists))
+    ])
 
 
 def bounding_sphere(vectors):
     """Computes the bounding sphere of the vectors."""
-    vectors /= np.linalg.norm(vectors, axis=1)[:, np.newaxis]
     mb = miniball.Miniball(vectors)
-    return {
-        'center': mb.center(),
-        'radius': np.sqrt(mb.squared_radius())
-    }
+    mb_center = mb.center()
+    dists = np.squeeze(angular_distance(np.array(mb_center)[np.newaxis, :], vectors))
+    dists_mean = dists.mean()
+    dists_std = dists.std()
+    return OrderedDict([
+        ('center', mb_center),
+        ('radius', np.sqrt(mb.squared_radius())),
+        ('bs_max', dists.max()),
+        ('bs_mean', dists_mean),
+        ('bs_std', dists_std),
+        ('bs_pinstd', np.sum(np.logical_and(dists_mean - dists_std < dists,
+                                            dists < dists_mean + dists_std)) / len(dists))
+    ])
 
 
 def main():
     args = parse_arguments()
+
+    logging.basicConfig(level=getattr(logging, args.log_level.upper()),
+                        format='%(asctime)s - %(levelname)s - %(message)s')
+
     words, vectors, sets = read_stuff(args.vector_file, args.bev, True)
     vectors = np.asarray(vectors)  # Miniball doesn't work on matrices
-    set_indices = {s: [] for s in sets.keys()}
+    set_indices = OrderedDict((s, []) for s in sets.keys())
 
     for i, word in enumerate(words):
         for s, swords in sets.items():
@@ -85,13 +99,17 @@ def main():
 
     for s, indices in set_indices.items():
         v = vectors[indices]
-        cstats = centroid_distribution(v)
-        bstats = bounding_sphere(v)
-        centroid = cstats.pop('centroid')
-        center = bstats.pop('center')
-        stats = dict(cstats, **bstats)
-        stats['cdist'] = angular_distance(
-            np.array([centroid, center / np.linalg.norm(center)]))[0, 1]
+        logging.debug('Computing centroid stats for set {}'.format(s))
+        stats = centroid_distribution(v)
+        logging.debug('Done computing centroid stats for set {}'.format(s))
+        # logging.debug('Computing bounding sphere for set {}'.format(s))
+        # bstats = bounding_sphere(v)
+        # logging.debug('Computed bounding sphere for set {}'.format(s))
+        centroid = stats.pop('centroid')
+        # center = bstats.pop('center')
+        # stats.update(bstats)
+        # stats['cdist'] = angular_distance(
+        #     np.array([centroid, center / np.linalg.norm(center)]))[0, 1]
         print('Stats for {}:\n  {}'.format(
             s, '\n  '.join(': '.join(map(str, kv)) for kv in stats.items())))
 
