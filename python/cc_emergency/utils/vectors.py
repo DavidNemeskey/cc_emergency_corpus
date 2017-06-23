@@ -7,7 +7,6 @@ from __future__ import absolute_import, division, print_function
 
 import numpy as np
 from sklearn import manifold
-import sys
 
 
 def compute_mds(vectors, dist_type, processes=1):
@@ -22,7 +21,7 @@ def compute_mds(vectors, dist_type, processes=1):
     elif dist_type.lower().startswith('cos'):
         mds = manifold.MDS(metric=True, n_jobs=processes,
                            dissimilarity='precomputed')
-        X = __angular_distance(vectors)
+        X = angular_distance(vectors)
     else:
         raise ValueError('dist_type must be euc or cos')
 
@@ -30,8 +29,15 @@ def compute_mds(vectors, dist_type, processes=1):
     return results.embedding_
 
 
-def __angular_distance(vectors):
-    """Computes the angular distances between the vectors."""
-    cosine_similarity = np.clip(vectors.dot(vectors.T), -1, 1)
-    ac = np.arccos(cosine_similarity)
-    return np.arccos(cosine_similarity) / np.pi
+def angular_distance(vectors1, vectors2=None):
+    """
+    Computes the angular distance between two sets of vectors (or one, if the
+    second is omitted). Note that the result is only meaningful if the matrix
+    has an L2 row norm of 1.
+    """
+    vectors1 = vectors1.astype(np.float64, copy=False)
+    if vectors2 is None:
+        vectors2 = vectors1
+    else:
+        vectors2 = vectors2.astype(np.float64, copy=False)
+    return np.arccos(np.clip(vectors1.dot(vectors2.T), -1, 1)) / np.pi
