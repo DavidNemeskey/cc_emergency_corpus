@@ -32,6 +32,10 @@ def parse_arguments():
                         help='also compute the statistics for the various '
                              'combinations and subsets of the specified '
                              'lists: intersections and items unique to a set.')
+    parser.add_argument('--write-real', '-w', action='append', default=[],
+                        help='Write the points that "really belong" to these '
+                        'sets (i.e. they are in the diagonals of the confusion '
+                        'matrix) to file.')
     parser.add_argument('--log-level', '-L', type=str, default='critical',
                         choices=['debug', 'info', 'warning', 'error', 'critical'],
                         help='the logging level.')
@@ -76,9 +80,10 @@ def centroid_distribution(vectors):
         ('max', dists.max()),
         ('mean', dists_mean),
         ('std', dists_std),
-        ('pinstd', np.sum(np.logical_and(dists_mean - dists_std < dists,
-                                         dists < dists_mean + dists_std)) / len(dists))
-        , ('len', len(vectors))
+        ('p_in_std', 100 * np.sum(
+            np.logical_and(dists_mean - dists_std < dists,
+                           dists < dists_mean + dists_std)) / len(dists)),
+        ('num_words', len(dists))
     ])
 
 
@@ -160,7 +165,7 @@ def main():
         #     np.array([centroid, center / np.linalg.norm(center)]))[0, 1]
         print('Stats for {}:\n  {}'.format(
             s, '\n  '.join(': '.join(map(str, kv)) for kv in stats.items())))
-    
+
     # Which centroids do the points lie closest?
     closest_centroid = angular_distance(centroids, vectors).argmin(axis=0)
     closest_matrix = np.zeros((len(orig_sets), len(orig_sets)), dtype=int)
@@ -171,6 +176,19 @@ def main():
                                  columns=['->' + s for s in orig_sets])
     print('Confusion matrix based on centroids:')
     print(closest_table)
+
+    for set_to_write in args.write_real:
+        try:
+            c = orig_sets.index(set_to_write)
+            with open('real_' + set_to_write, 'wt') as outf:
+                words_to_print = [
+                    words[i]
+                    for i in set_indices[set_to_write]
+                    if closest_centroid[i] == c
+                ]
+                print('\n'.join(sorted(words_to_print)), file=outf)
+        except ValueError:
+            logging.warning('No such set: {}'.format(set_to_write))
 
 
 if __name__ == '__main__':
