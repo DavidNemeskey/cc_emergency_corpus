@@ -9,7 +9,7 @@ from itertools import chain, combinations
 import logging
 import os
 
-import miniball
+# import miniball
 import numpy as np
 import pandas as pd
 
@@ -87,22 +87,22 @@ def centroid_distribution(vectors):
     ])
 
 
-def bounding_sphere(vectors):
-    """Computes the bounding sphere of the vectors."""
-    mb = miniball.Miniball(vectors)
-    mb_center = mb.center()
-    dists = np.squeeze(angular_distance(np.array(mb_center)[np.newaxis, :], vectors))
-    dists_mean = dists.mean()
-    dists_std = dists.std()
-    return OrderedDict([
-        ('center', mb_center),
-        ('radius', np.sqrt(mb.squared_radius())),
-        ('bs_max', dists.max()),
-        ('bs_mean', dists_mean),
-        ('bs_std', dists_std),
-        ('bs_pinstd', np.sum(np.logical_and(dists_mean - dists_std < dists,
-                                            dists < dists_mean + dists_std)) / len(dists))
-    ])
+# def bounding_sphere(vectors):
+#     """Computes the bounding sphere of the vectors."""
+#     mb = miniball.Miniball(vectors)
+#     mb_center = mb.center()
+#     dists = np.squeeze(angular_distance(np.array(mb_center)[np.newaxis, :], vectors))
+#     dists_mean = dists.mean()
+#     dists_std = dists.std()
+#     return OrderedDict([
+#         ('center', mb_center),
+#         ('radius', np.sqrt(mb.squared_radius())),
+#         ('bs_max', dists.max()),
+#         ('bs_mean', dists_mean),
+#         ('bs_std', dists_std),
+#         ('bs_pinstd', np.sum(np.logical_and(dists_mean - dists_std < dists,
+#                                             dists < dists_mean + dists_std)) / len(dists))
+#     ])
 
 
 def generate_subsets(set_indices, words):
