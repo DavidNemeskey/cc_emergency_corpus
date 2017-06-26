@@ -137,7 +137,8 @@ def main():
     words, vectors, sets = read_stuff(args.vector_file, args.bev, True)
     vectors = np.asarray(vectors)  # Miniball doesn't work on matrices
     set_indices = OrderedDict((s, []) for s in sets.keys())
-    orig_sets = sorted(set_indices.keys())
+    orig_sets = list(set_indices.keys())
+    print(orig_sets)
 
     for i, word in enumerate(words):
         for s, swords in sets.items():
