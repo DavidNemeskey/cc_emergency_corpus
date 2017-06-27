@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 from builtins import input
 from collections import Counter
 from itertools import chain
+import logging
 import sys
 
 import numpy as np
@@ -57,6 +58,9 @@ def parse_arguments():
                              'word form, resprectively. Frequencies can '
                              ' then be used for thresholding '
                              'with the --min-freq option.')
+    parser.add_argument('--log-level', '-L', type=str, default='info',
+                        choices=['debug', 'info', 'warning', 'error', 'critical'],
+                        help='the logging level.')
     args = parser.parse_args()
     if args.self_contained and not args.batch:
         parser.error('--self-contained is only valid for batch mode.')
@@ -150,19 +154,20 @@ def read_freqs(fn):
 
 if __name__ == '__main__':
     args = parse_arguments()
-    import time
+
+    logging.basicConfig(level=getattr(logging, args.log_level.upper()),
+                        format='%(asctime)s - %(levelname)s - %(message)s')
+
     if args.freq_list is not None:
-        print("Reading {}...".format(args.freq_list), file=sys.stderr)
+        logging.info("Reading {}...".format(args.freq_list))
         freqs = read_freqs(args.freq_list)
     else:
         freqs = None
-    print("Reading {}...".format(args.embedding), file=sys.stderr)
-    t = time.time()
+    logging.info("Reading {}...".format(args.embedding))
     words, vectors = read_vectors(
         args.embedding, args.normalize, args.dimension)
-    print(time.time() - t, file=sys.stderr)
     word_index = {word: i for i, word in enumerate(words)}
-    print("Done.", file=sys.stderr)
+    logging.info("Done reading embedding.")
 
     if args.batch:
         for batch in args.batch:

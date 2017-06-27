@@ -101,13 +101,19 @@ def normalize_rows(X):
     csr_matrix.
     """
     if issparse(X):
+        logging.debug('Normalizing sparse matrix...')
         X = csr_matrix(X)
         norms = np.array(np.sqrt(X.multiply(X).sum(axis=1)))[:, 0]
         row_indices, _ = X.nonzero()
         X.data /= norms[row_indices]
+        logging.debug('...done.')
+        X = csr_matrix(X)
         return X
     else:
-        return X / np.linalg.norm(X, axis=1)[:, np.newaxis]
+        logging.debug('Normalizing dense matrix...')
+        X = X / np.linalg.norm(X, axis=1)[:, np.newaxis]
+        logging.debug('...done.')
+        return X
 
 
 def test():
