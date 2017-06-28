@@ -11,9 +11,9 @@ import logging
 import sys
 
 import numpy as np
-from scipy.sparse import spmatrix
 
 from cc_emergency.utils.vector_io import read_vectors, normalize_rows
+from cc_emergency.utils.vectors import similarities
 
 
 def parse_arguments():
@@ -93,27 +93,6 @@ def interactive_knn(words, vectors, word_index, min_similarity, k, freqs,
                     w, s) for w, s in neighbors))
     except EOFError:
         pass
-
-
-def similarities(words, vectors, queries, min_similarity, k, freqs, min_freq):
-    """
-    Queries is a matrix, so that more than one neighbor can be computed.
-    Returns a list of lists.
-    """
-    dists = vectors.dot(queries.T)
-    if isinstance(dists, spmatrix):
-        dists = dists.todense()
-    dists = np.asarray(dists.T)  # Change to rows + array for easier handling
-    sorted_dists = np.argsort(dists, axis=1)
-    best_indices = sorted_dists[:, ::-1][:, :k]
-    neighbors = [list(filter(lambda ws: ws[1] >= min_similarity,
-                             [(words[w], dists[r, w]) for w in row]))
-                 for r, row in enumerate(best_indices)]
-    if freqs is not None:
-        neighbors = [
-            list(filter(lambda ws: freqs[ws[0]] >= min_freq, row))
-            for row in neighbors]
-    return neighbors
 
 
 def batch_knn(words, vectors, word_index, batch_file, min_similarity, k,
