@@ -48,9 +48,8 @@ def get_emscan_params(args, *fn_args):
     emscan = globals()['emscan_' + args.emscan]
     s = inspect.signature(emscan)
     ba = s.bind_partial(*fn_args)
-    for k in s.parameters.keys():
-        if k not in ba.arguments:
-            ba.arguments[k] = getattr(args, k)
+    for k in list(s.parameters)[3:]:
+        ba.arguments[k] = getattr(args, k)
     return partial(emscan, **ba.arguments)
 
 
