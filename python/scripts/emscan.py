@@ -26,6 +26,9 @@ def parse_arguments():
                         help='the maximum cluster size: the stopping criterion.')
     parser.add_argument('--iterations', '-i', type=int, default=10,
                         help='the maximum number of iterations [10].')
+    parser.add_argument('--graph', '-g', type=str,
+                        help='if specified, the "attraction graph" of the '
+                             'cluster is written here.')
     parser.add_argument('--log-level', '-L', type=str, default='critical',
                         choices=['debug', 'info', 'warning', 'error', 'critical'],
                         help='the logging level [critical].')
@@ -69,7 +72,7 @@ def main():
 
     logging.info('Running EMSCAN...')
     indices = list(qindices)
-    G = nx.DiGraph()
+    G = nx.DiGraph() if args.graph else None
     for it in range(args.iterations):
         new_indices = emscan(indices, graph=G)
         logging.info('Iteration {}: {} words.'.format(it + 1, len(new_indices)))
@@ -83,7 +86,8 @@ def main():
     logging.info('Done.')
     for word in sorted(words[indices]):
         print(word)
-    print(G.edges(data='weight'))
+    if args.graph:
+        nx.write_graphml(G, args.graph + '.graphml')
 
 
 if __name__ == '__main__':
