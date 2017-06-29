@@ -72,6 +72,10 @@ setup(name='cc_emergency',
           # An earlier version was broken (don't remember which); also,
           # iterparse is broken in 3.7.3. :)
           'lxml==3.6.4',
+          # For the embedding stuff
+          'numpy', 'scipy', 'sklearn',
+          # Also
+          'networkx',
           # For networking
           'requests',
           # For domain filtering

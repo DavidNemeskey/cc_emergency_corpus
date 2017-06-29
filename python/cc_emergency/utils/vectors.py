@@ -47,7 +47,7 @@ def angular_distance(vectors1, vectors2=None):
     return np.arccos(np.clip(vectors1.dot(vectors2.T), -1, 1)) / np.pi
 
 
-def emscan_first(words, vectors, initial, min_similarity=0.5):
+def emscan_first(words, vectors, initial, min_similarity=0.5, graph=None):
     """
     A dictionary expansion algorithm that works similarly to DBSCAN. Starting
     from an initial cluster, it iteratively adds points (words) to it
@@ -58,6 +58,9 @@ def emscan_first(words, vectors, initial, min_similarity=0.5):
       the cluster are not selected).
 
     Note that initial is a list of indices.
+
+    Graph is a networkx DiGraph. If specified, it is used to record which
+    nodes attracted which into the cluster.
     """
     words = np.asarray(words)
     indices = initial
@@ -80,6 +83,7 @@ def emscan_first(words, vectors, initial, min_similarity=0.5):
         cdists[i, ri] = 0
     selected = {candidate_indices[i]: mi for i, mi
                 in enumerate(np.argmax(cdists, axis=1)) if mi in indices}
+    G.add_weighted_edges_from([(words[k], words[v]) for k, v in selected.items()])
     selected_indices = sorted(set(selected.keys()))
     logging.debug('Selected words: {}'.format(
         ', '.join(words[selected_indices])))
@@ -99,6 +103,9 @@ def emscan_dcg(words, vectors, initial, min_similarity=0.5, dcg_length=5,
       the cluster are not selected).
 
     Note that initial is a list of indices.
+
+    Graph is a networkx DiGraph. If specified, it is used to record which
+    nodes attracted which into the cluster. Note that here it is not a tree.
     """
     def dcg(l):
         return l[0] + sum(l[i] / math.log(i + 1, 2) for i in range(1, len(l)))

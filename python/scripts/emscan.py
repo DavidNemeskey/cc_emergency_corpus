@@ -8,6 +8,8 @@ from functools import partial
 import inspect
 import logging
 
+import networkx as nx
+
 from cc_emergency.utils.vector_io import read_vectors
 from cc_emergency.utils.vectors import emscan_first, emscan_dcg  # noqa
 
@@ -47,7 +49,7 @@ def parse_arguments():
 def get_emscan_params(args, *fn_args):
     emscan = globals()['emscan_' + args.emscan]
     s = inspect.signature(emscan)
-    kwargs = {k: getattr(args, k) for k in list(s.parameters)[3:]}
+    kwargs = {k: getattr(args, k) for k in list(s.parameters)[3:-1]}
     return partial(emscan, *fn_args, **kwargs)
 
 
@@ -67,8 +69,9 @@ def main():
 
     logging.info('Running EMSCAN...')
     indices = list(qindices)
+    G = nx.DiGraph()
     for it in range(args.iterations):
-        new_indices = emscan(indices)
+        new_indices = emscan(indices, graph=G)
         logging.info('Iteration {}: {} words.'.format(it + 1, len(new_indices)))
         if len(new_indices) == len(indices):
             logging.info('No new words found.')
@@ -80,6 +83,7 @@ def main():
     logging.info('Done.')
     for word in sorted(words[indices]):
         print(word)
+    print(G.edges())
 
 
 if __name__ == '__main__':
