@@ -47,10 +47,8 @@ def parse_arguments():
 def get_emscan_params(args, *fn_args):
     emscan = globals()['emscan_' + args.emscan]
     s = inspect.signature(emscan)
-    ba = s.bind_partial(*fn_args)
-    for k in list(s.parameters)[3:]:
-        ba.arguments[k] = getattr(args, k)
-    return partial(emscan, **ba.arguments)
+    kwargs = {k: getattr(args, k) for k in list(s.parameters)[3:]}
+    return partial(emscan, *fn_args, **kwargs)
 
 
 def main():
@@ -58,18 +56,22 @@ def main():
     logging.basicConfig(level=getattr(logging, args.log_level.upper()),
                         format='%(asctime)s - %(levelname)s - %(message)s')
 
+    logging.info('Loading embedding {}...'.format(args.vector_file))
     words, vectors = read_vectors(args.vector_file, normalize=True)
+    logging.info('Loading queries from {}...'.format(args.query_file))
     with open(args.query_file) as inf:
         query = [l.strip() for l in inf]
     qindices = {w: i for i, w in enumerate(words) if w in set(query)}
     emscan = get_emscan_params(args, words, vectors)
 
+    logging.info('Running EMSCAN...')
     indices = qindices
     for it in range(args.iterations):
         indices = emscan(indices)
         logging.info('Iteration {}: {} words.'.format(it + 1, len(indices)))
         if args.max_cluster and len(indices) >= args.max_cluster:
             break
+    logging.info('Done.')
     for word in sorted(words[indices]):
         print(word)
 
