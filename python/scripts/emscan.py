@@ -20,6 +20,10 @@ def parse_arguments():
     parser.add_argument('--min-similarity', '-s', type=float, default=0.5,
                         help='the minimum similarity with a cluster node to '
                              'add a vertex to the candidates.')
+    parser.add_argument('--max-cluster', '-c', type=int, default=None,
+                        help='the maximum cluster size: the stopping criterion.')
+    parser.add_argument('--iterations', '-i', type=int, default=10,
+                        help='the maximum number of iterations.')
     parser.add_argument('--log-level', '-L', type=str, default='critical',
                         choices=['debug', 'info', 'warning', 'error', 'critical'],
                         help='the logging level.')
@@ -57,8 +61,16 @@ def main():
     with open(args.query_file) as inf:
         query = [l.strip() for l in inf]
     qindices = {w: i for i, w in enumerate(words) if w in set(query)}
-    emscan = get_emscan_params(args, words, vectors, qindices)
-    emscan()
+    emscan = get_emscan_params(args, words, vectors)
+
+    indices = qindices
+    for it in range(args.iterations):
+        indices = emscan(indices)
+        logging.info('Iteration {}: {} words.'.format(it + 1, len(indices)))
+        if args.max_cluster and len(indices) >= args.max_cluster:
+            break
+    for word in sorted(words[indices]):
+        print(word)
 
 
 if __name__ == '__main__':
