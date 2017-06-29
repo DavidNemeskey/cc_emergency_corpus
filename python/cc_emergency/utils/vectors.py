@@ -123,9 +123,8 @@ def emscan_dcg(words, vectors, initial, min_similarity=0.5, dcg_length=5,
     # similarities() leaves the original word in the list
     sims = [dcg([w in sindices for w, _ in tuples if w != candidate_indices[r]])
             for r, tuples in enumerate(sims)]
-    selected = [candidate_indices[r] for r, dcg_value in enumerate(sims)
-                if dcg_value >= min_dcg]
-    selected_indices = sorted(set(selected.keys()))
+    selected_indices = [candidate_indices[r] for r, dcg_value in enumerate(sims)
+                        if dcg_value >= min_dcg]
     logging.debug('Selected words: {}'.format(
         ', '.join(words[selected_indices])))
 
