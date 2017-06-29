@@ -86,6 +86,50 @@ def emscan_first(words, vectors, initial, min_similarity=0.5):
     return list(indices) + list(selected_indices)
 
 
+def emscan_dcg(words, vectors, initial, min_similarity=0.5, dcg_length=5,
+               min_dcg=1):
+    """
+    A dictionary expansion algorithm that works similarly to DBSCAN. Starting
+    from an initial cluster, it iteratively adds points (words) to it
+    - whose similarity with a word already in the cluster is above
+      min_similarity;
+    - the first neighbor of a candidate must already be in the cluster
+      (yes, this is too strong, as close pairs that are nevertheless close to
+      the cluster are not selected).
+
+    Note that initial is a list of indices.
+    """
+    def dcg(l):
+        return l[0] + sum(l[i] / math.log(i + 1, 2) for i in range(1, len(l)))
+
+    words = np.asarray(words)
+    indices = initial
+    sindices = set(indices)
+
+    cluster = vectors[indices]
+    dists = vectors.dot(cluster.T)
+    dists = np.where(dists >= min_similarity, dists, 0)
+
+    candidate_indices = np.array(
+        [k for k, _ in groupby(i for i in dists.nonzero()[0]
+                               if i not in sindices)]
+    )
+    logging.debug('Candidate words: {}'.format(
+        ', '.join(words[candidate_indices])))
+
+    cdists = vectors[candidate_indices].dot(vectors.T)
+    cdists = np.where(cdists >= min_similarity, cdists, 0)
+    for i, ri in enumerate(candidate_indices):
+        cdists[i, ri] = 0
+    selected = {candidate_indices[i]: mi for i, mi
+                in enumerate(np.argmax(cdists, axis=1)) if mi in indices}
+    selected_indices = sorted(set(selected.keys()))
+    logging.debug('Selected words: {}'.format(
+        ', '.join(words[selected_indices])))
+
+    return list(indices) + list(selected_indices)
+
+
 def emscan(words, vectors, initial, min_similarity=0.5, cluster_ratio=0.5):
     """
     A dictionary expansion algorithm that works similarly to DBSCAN. Starting
