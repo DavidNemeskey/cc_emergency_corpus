@@ -83,7 +83,7 @@ def emscan_first(words, vectors, initial, min_similarity=0.5, graph=None):
         cdists[i, ri] = 0
     selected = {candidate_indices[i]: mi for i, mi
                 in enumerate(np.argmax(cdists, axis=1)) if mi in indices}
-    G.add_weighted_edges_from([(words[k], words[v]) for k, v in selected.items()])
+    graph.add_edges_from([(words[k], words[v]) for k, v in selected.items()])
     selected_indices = sorted(set(selected.keys()))
     logging.debug('Selected words: {}'.format(
         ', '.join(words[selected_indices])))
