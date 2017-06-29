@@ -19,22 +19,24 @@ def parse_arguments():
     parser.add_argument('query_file', help='the query file, one word per line.')
     parser.add_argument('--min-similarity', '-s', type=float, default=0.5,
                         help='the minimum similarity with a cluster node to '
-                             'add a vertex to the candidates.')
+                             'add a vertex to the candidates [0.5].')
     parser.add_argument('--max-cluster', '-c', type=int, default=None,
                         help='the maximum cluster size: the stopping criterion.')
     parser.add_argument('--iterations', '-i', type=int, default=10,
-                        help='the maximum number of iterations.')
+                        help='the maximum number of iterations [10].')
     parser.add_argument('--log-level', '-L', type=str, default='critical',
                         choices=['debug', 'info', 'warning', 'error', 'critical'],
-                        help='the logging level.')
+                        help='the logging level [critical].')
     subparsers = parser.add_subparsers(
         dest='emscan', description='', help='choose the EMSCAN variant.')
     subparsers.add_parser('first', description='EMSCAN_first')
     dcg_p = subparsers.add_parser('dcg', description='EMSCAN_dcg')
     dcg_p.add_argument('--dcg-length', '-l', type=int, default=5,
-                       help='the number of top results to compute the DCG from.')
+                       help='the number of top results to compute the DCG '
+                            'from [5].')
     dcg_p.add_argument('--min-dcg', '-m', type=float, default=1,
-                       help='the DCG threshold to add a candidate to the cluster.')
+                       help='the DCG threshold to add a candidate to the '
+                            'cluster [1].')
 
     args = parser.parse_args()
     if not args.emscan:
