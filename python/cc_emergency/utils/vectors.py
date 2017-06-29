@@ -71,8 +71,8 @@ def emscan_first(words, vectors, initial, min_similarity=0.5):
         [k for k, _ in groupby(i for i in dists.nonzero()[0]
                                if i not in sindices)]
     )
-    logging.debug('Candidate words: {}'.format(
-        ', '.join(words[candidate_indices])))
+    logging.debug('Found {} candidate words'.format(len(candidate_indices)))
+    #     ', '.join(words[candidate_indices])))
 
     cdists = vectors[candidate_indices].dot(vectors.T)
     cdists = np.where(cdists >= min_similarity, cdists, 0)

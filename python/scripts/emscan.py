@@ -68,9 +68,13 @@ def main():
     logging.info('Running EMSCAN...')
     indices = list(qindices)
     for it in range(args.iterations):
-        indices = emscan(indices)
+        new_indices = emscan(indices)
         logging.info('Iteration {}: {} words.'.format(it + 1, len(indices)))
+        if len(new_indices) == len(indices):
+            logging.info('No new words found.')
+            break
         if args.max_cluster and len(indices) >= args.max_cluster:
+            logging.info('Maximum cluster size exceeded.')
             break
     logging.info('Done.')
     for word in sorted(words[indices]):
