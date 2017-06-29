@@ -66,7 +66,7 @@ def main():
     emscan = get_emscan_params(args, words, vectors)
 
     logging.info('Running EMSCAN...')
-    indices = qindices
+    indices = list(qindices)
     for it in range(args.iterations):
         indices = emscan(indices)
         logging.info('Iteration {}: {} words.'.format(it + 1, len(indices)))
