@@ -83,7 +83,7 @@ def main():
     logging.info('Done.')
     for word in sorted(words[indices]):
         print(word)
-    print(G.edges())
+    print(G.edges(data='weight'))
 
 
 if __name__ == '__main__':
