@@ -44,6 +44,31 @@ def angular_distance(vectors1, vectors2=None):
     return np.arccos(np.clip(vectors1.dot(vectors2.T), -1, 1)) / np.pi
 
 
+def dbscan_like(words, vectors, initial, min_similarity=0.5, cluster_ratio=0.5):
+    """
+    A dictionary expansion algorithm that works similarly to DBSCAN. Starting
+    from an initial cluster, it iteratively adds points (words) to it
+    - whose similarity with a word already in the cluster is above
+      min_similarity;
+    - the ratio of whose neighbors that are already in the cluster is above
+      cluster_ratio.
+
+    Note that initial is a list of indices.
+    """
+    words = np.asarray(words)
+    indices = initial
+    sindices = set(indices)
+
+    cluster = vectors[indices]
+    dists = vectors.dot(cluster.T)
+    dists = np.where(dists >= min_similarity, dists, 0)
+
+    candidate_indices = np.array(i for i in dists.nonzero()[0]
+                                 if i not in sindices)
+    candidate_words = words[candidate_indices]
+    logging.debug('Candidate words: {}'.format(', '.join(candidate_words)))
+
+
 def similarities(words, vectors, queries, min_similarity, k,
                  freqs=None, min_freq=0):
     """
