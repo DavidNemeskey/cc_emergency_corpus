@@ -115,16 +115,18 @@ def emscan(words, vectors, initial, min_similarity=0.5, cluster_ratio=0.5):
 
 
 def similarities(words, vectors, queries, min_similarity, k,
-                 freqs=None, min_freq=0):
+                 freqs=None, min_freq=0, return_words=True):
     """
     Computes k-NN, based on cosine similarity in an embedding.
     Queries is a matrix, so that more than one neighbor can be computed.
-    Returns a list of lists. Paramters:
+    Returns a [[(word, distance)]]. Parameters:
     - words, vectors: the embedding
     - queries: described above
     - min_similarity: similarities below this threshold are not registered
     - k: the k in k-NN
     - freqs, min_freq: word frequency dictionary and threshold. Optional.
+    - return_words: if True (the default), word-distance pairs are returned;
+                    otherwise index-distance tuples.
     """
     dists = vectors.dot(queries.T)
     if isinstance(dists, spmatrix):
@@ -133,10 +135,12 @@ def similarities(words, vectors, queries, min_similarity, k,
     sorted_dists = np.argsort(dists, axis=1)
     best_indices = sorted_dists[:, ::-1][:, :k]
     neighbors = [list(filter(lambda ws: ws[1] >= min_similarity,
-                             [(words[w], dists[r, w]) for w in row]))
+                             [(w, dists[r, w]) for w in row]))
                  for r, row in enumerate(best_indices)]
     if freqs is not None:
         neighbors = [
-            list(filter(lambda ws: freqs[ws[0]] >= min_freq, row))
+            list(filter(lambda ws: freqs[words[ws[0]]] >= min_freq, row))
             for row in neighbors]
+    if return_words:
+        return [[(words[w], d) for w, d in row] for row in neighbors]
     return neighbors
