@@ -6,6 +6,7 @@
 from __future__ import absolute_import, division, print_function
 from itertools import groupby
 import logging
+import math
 
 import numpy as np
 from scipy.sparse import spmatrix
@@ -117,12 +118,13 @@ def emscan_dcg(words, vectors, initial, min_similarity=0.5, dcg_length=5,
     logging.debug('Candidate words: {}'.format(
         ', '.join(words[candidate_indices])))
 
-    cdists = vectors[candidate_indices].dot(vectors.T)
-    cdists = np.where(cdists >= min_similarity, cdists, 0)
-    for i, ri in enumerate(candidate_indices):
-        cdists[i, ri] = 0
-    selected = {candidate_indices[i]: mi for i, mi
-                in enumerate(np.argmax(cdists, axis=1)) if mi in indices}
+    sims = similarities(words, vectors, vectors[candidate_indices],
+                        min_similarity, dcg_length + 1, return_words=False)
+    # similarities() leaves the original word in the list
+    sims = [dcg([w in sindices for w, _ in tuples if w != candidate_indices[r]])
+            for r, tuples in enumerate(sims)]
+    selected = [candidate_indices[r] for r, dcg_value in enumerate(sims)
+                if dcg_value >= min_dcg]
     selected_indices = sorted(set(selected.keys()))
     logging.debug('Selected words: {}'.format(
         ', '.join(words[selected_indices])))
