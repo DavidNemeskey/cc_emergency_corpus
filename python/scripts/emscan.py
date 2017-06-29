@@ -60,8 +60,9 @@ def main():
     words, vectors = read_vectors(args.vector_file, normalize=True)
     logging.info('Loading queries from {}...'.format(args.query_file))
     with open(args.query_file) as inf:
-        query = [l.strip() for l in inf]
-    qindices = {w: i for i, w in enumerate(words) if w in set(query)}
+        query = set(l.strip() for l in inf)
+    qwords, qindices = zip(*[(w, i) for i, w in enumerate(words)
+                             if w in set(query)])
     emscan = get_emscan_params(args, words, vectors)
 
     logging.info('Running EMSCAN...')
