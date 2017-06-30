@@ -134,29 +134,32 @@ def emscan_dcg(words, vectors, initial, min_similarity=0.5, dcg_length=5,
         [k for k, _ in groupby(i for i in dists.nonzero()[0]
                                if i not in sindices)]
     )
-    logging.debug('Candidate words: {}'.format(
-        ', '.join(words[candidate_indices])))
 
     if len(candidate_indices) == 0:
+        logging.debug('No candidates, returning...')
         return list(indices)
+
+    logging.debug('Candidate words: {}'.format(
+        ', '.join(words[candidate_indices])))
 
     sims = similarities(words, vectors, vectors[candidate_indices],
                         min_similarity, dcg_length + 1, return_words=False)
     # similarities() leaves the original word in the list
     dcgs = [dcg([w in sindices for w, _ in tuples if w != candidate_indices[r]])
             for r, tuples in enumerate(sims)]
-    selected_indices = [candidate_indices[r] for r, dcg_value in enumerate(dcgs)
-                        if dcg_value >= min_dcg]
+    selected_rows = [r for r, dcg_value in enumerate(dcgs)
+                     if dcg_value >= min_dcg]
+    selected_indices = [candidate_indices[r] for r in selected_rows]
     logging.debug('Selected words: {}'.format(
         ', '.join(words[selected_indices])))
 
     if graph:
         last_it = max(ndata['it'] for _, ndata in graph.nodes(data=True))
-        for source in selected_indices:
+        for row, source in zip(selected_rows, selected_indices):
             graph.add_node(words[source], it=last_it + 1)
-        for target, dist in sims[source]:
+        for target, dist in sims[row]:
             if target in sindices:
-                graph.add_edge(source, target, weight=dist)
+                graph.add_edge(source, target, weight=float(dist))
 
     return list(indices) + list(selected_indices)
 

@@ -68,6 +68,7 @@ def main():
         query = set(l.strip() for l in inf)
     qwords, qindices = zip(*[(w, i) for i, w in enumerate(words)
                              if w in set(query)])
+    logging.info('Read {} query words.'.format(len(qwords)))
     emscan = get_emscan_params(args, words, vectors)
 
     if args.graph:
