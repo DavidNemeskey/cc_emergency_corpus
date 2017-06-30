@@ -77,6 +77,9 @@ def emscan_first(words, vectors, initial, min_similarity=0.5, graph=None):
     logging.debug('Found {} candidate words'.format(len(candidate_indices)))
     #     ', '.join(words[candidate_indices])))
 
+    if len(candidate_indices) == 0:
+        return list(indices)
+
     cdists = vectors[candidate_indices].dot(vectors.T)
     cdists = np.where(cdists >= min_similarity, cdists, 0)
     for i, ri in enumerate(candidate_indices):
@@ -127,6 +130,9 @@ def emscan_dcg(words, vectors, initial, min_similarity=0.5, dcg_length=5,
     )
     logging.debug('Candidate words: {}'.format(
         ', '.join(words[candidate_indices])))
+
+    if len(candidate_indices) == 0:
+        return list(indices)
 
     sims = similarities(words, vectors, vectors[candidate_indices],
                         min_similarity, dcg_length + 1, return_words=False)
