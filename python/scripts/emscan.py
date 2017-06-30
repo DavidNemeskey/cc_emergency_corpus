@@ -70,9 +70,15 @@ def main():
                              if w in set(query)])
     emscan = get_emscan_params(args, words, vectors)
 
+    if args.graph:
+        G = nx.DiGraph()
+        for qi in qindices:
+            G.add_node(words[qi], it=0)
+    else:
+        G = None
+
     logging.info('Running EMSCAN...')
     indices = list(qindices)
-    G = nx.DiGraph() if args.graph else None
     for it in range(args.iterations):
         new_indices = emscan(indices, graph=G)
         logging.info('Iteration {}: {} words.'.format(it + 1, len(new_indices)))
@@ -84,6 +90,7 @@ def main():
             break
         indices = new_indices
     logging.info('Done.')
+
     for word in sorted(words[indices]):
         print(word)
     if args.graph:

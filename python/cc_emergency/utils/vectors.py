@@ -86,19 +86,24 @@ def emscan_first(words, vectors, initial, min_similarity=0.5, graph=None):
         cdists[i, ri] = 0
     selected = {i: mi for i, mi
                 in enumerate(np.argmax(cdists, axis=1)) if mi in indices}
-    graph.add_weighted_edges_from(
-        [(words[candidate_indices[k]], words[v], float(cdists[k, v]))
-         for k, v in selected.items()]
-    )
     selected_indices = sorted(set(candidate_indices[k] for k in selected))
     logging.debug('Selected words: {}'.format(
         ', '.join(words[selected_indices])))
+
+    if graph:
+        last_it = max(ndata['it'] for _, ndata in graph.nodes(data=True))
+        for k in selected_indices:
+            graph.add_node(words[k], it=last_it + 1)
+        graph.add_weighted_edges_from(
+            [(words[candidate_indices[k]], words[v], float(cdists[k, v]))
+             for k, v in selected.items()]
+        )
 
     return list(indices) + list(selected_indices)
 
 
 def emscan_dcg(words, vectors, initial, min_similarity=0.5, dcg_length=5,
-               min_dcg=1):
+               min_dcg=1, graph=None):
     """
     A dictionary expansion algorithm that works similarly to DBSCAN. Starting
     from an initial cluster, it iteratively adds points (words) to it
@@ -111,7 +116,8 @@ def emscan_dcg(words, vectors, initial, min_similarity=0.5, dcg_length=5,
     Note that initial is a list of indices.
 
     Graph is a networkx DiGraph. If specified, it is used to record which
-    nodes attracted which into the cluster. Note that here it is not a tree.
+    nodes attracted which into the cluster. Note that here it is not a tree,
+    but a DAG.
     """
     def dcg(l):
         return l[0] + sum(l[i] / math.log(i + 1, 2) for i in range(1, len(l)))
@@ -137,12 +143,20 @@ def emscan_dcg(words, vectors, initial, min_similarity=0.5, dcg_length=5,
     sims = similarities(words, vectors, vectors[candidate_indices],
                         min_similarity, dcg_length + 1, return_words=False)
     # similarities() leaves the original word in the list
-    sims = [dcg([w in sindices for w, _ in tuples if w != candidate_indices[r]])
+    dcgs = [dcg([w in sindices for w, _ in tuples if w != candidate_indices[r]])
             for r, tuples in enumerate(sims)]
-    selected_indices = [candidate_indices[r] for r, dcg_value in enumerate(sims)
+    selected_indices = [candidate_indices[r] for r, dcg_value in enumerate(dcgs)
                         if dcg_value >= min_dcg]
     logging.debug('Selected words: {}'.format(
         ', '.join(words[selected_indices])))
+
+    if graph:
+        last_it = max(ndata['it'] for _, ndata in graph.nodes(data=True))
+        for source in selected_indices:
+            graph.add_node(words[source], it=last_it + 1)
+        for target, dist in sims[source]:
+            if target in sindices:
+                graph.add_edge(source, target, weight=dist)
 
     return list(indices) + list(selected_indices)
 
