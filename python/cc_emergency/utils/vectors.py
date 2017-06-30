@@ -155,11 +155,11 @@ def emscan_dcg(words, vectors, initial, min_similarity=0.5, dcg_length=5,
 
     if graph:
         last_it = max(ndata['it'] for _, ndata in graph.nodes(data=True))
-        for row, source in zip(selected_rows, selected_indices):
-            graph.add_node(words[source], it=last_it + 1)
-            for target, dist in sims[row]:
-                if target in sindices:
-                    graph.add_edge(source, target, weight=float(dist))
+        for row, target in zip(selected_rows, selected_indices):
+            graph.add_node(words[target], it=last_it + 1)
+            for source, dist in sims[row]:
+                if source in sindices:
+                    graph.add_edge(words[source], words[target], weight=float(dist))
 
     return list(indices) + list(selected_indices)
 
