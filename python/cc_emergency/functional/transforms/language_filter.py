@@ -15,7 +15,7 @@ class LanguageFilter(Filter):
     """Filters objects for language(s)."""
     LIBRARIES = {'langid': 'langid', 'cld2': 'cld2-cffi'}
 
-    def __init__(self, fields, languages, library='langid'):
+    def __init__(self, fields, languages, library='cld2'):
         """
         - fields: either the name of the field on which to perform the language
                   identification, or a list of fields
@@ -35,7 +35,7 @@ class LanguageFilter(Filter):
 
     def __enter__(self):
         if self.lib not in self.LIBRARIES:
-            raise ValueError('Unsupported library {}'.format(self.library))
+            raise ValueError('Unsupported library {}'.format(self.lib))
         try:
             self.logger.debug('Loading {}...'.format(self.lib))
             self.detector = importlib.import_module(self.lib)
