@@ -35,7 +35,7 @@ class LanguageFilter(Filter):
 
     def __enter__(self):
         if self.lib not in self.LIBRARIES:
-            raise ValueError('Unsupported library {}'.format(self.lib))
+            raise ValueError('Unsupported library "{}"'.format(self.lib))
         try:
             self.logger.debug('Loading {}...'.format(self.lib))
             self.detector = importlib.import_module(self.lib)
