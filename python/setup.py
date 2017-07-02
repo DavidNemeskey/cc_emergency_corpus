@@ -12,7 +12,7 @@ def readme():
         return f.read()
 
 setup(name='cc_emergency',
-      version='0.8',
+      version='0.8.1',
       description='Scripts and tools for emergency corpus building',
       long_description=readme(),
       url='https://github.com/DavidNemeskey/cc_emergency_corpus',
@@ -68,7 +68,7 @@ setup(name='cc_emergency',
           # ExitStack for Python 3.3-
           'contextlib2',
           # Language identification
-          'langid',
+          'cld2-cffi', 'langid',
           # An earlier version was broken (don't remember which); also,
           # iterparse is broken in 3.7.3. :)
           'lxml==3.6.4',

@@ -6,7 +6,7 @@
 		},
 		{
 			"class": "cc_emergency.functional.transforms.LanguageFilter",
-			"args": ["content", "en"]
+			"args": ["content", "en", "cld2"]
 		},
 		{
 			"class": "cc_emergency.functional.io.JsonWriter",
