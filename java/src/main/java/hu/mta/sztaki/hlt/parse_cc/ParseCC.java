@@ -94,7 +94,7 @@ public class ParseCC {
                                   ".warc(.gz) extension missing.", baseName));
         }
         return fs.getPath(
-                outputDirectory, m.group(1) + "." + extension).toString();
+                outputDirectory, m.group(1) + "." + extension + ".gz").toString();
     }
 
     /** Creates a directory or exits.  */

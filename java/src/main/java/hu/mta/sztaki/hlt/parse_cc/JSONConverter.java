@@ -1,13 +1,18 @@
 package hu.mta.sztaki.hlt.parse_cc;
 
 import java.io.IOException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.zip.GZIPOutputStream;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 /**
- * Converts a stream (not @c Stream) of @c WARCDocument objects to a JSON file.
+ * Converts a stream (not @c Stream) of @c WARCDocument objects to a
+ * compressed JSON-per-line file.
  */
 public class JSONConverter {
     /** The converter object. */
@@ -22,7 +27,9 @@ public class JSONConverter {
      */
     public JSONConverter(String outputFile) throws IOException {
         gson = new GsonBuilder().create();
-        writer = new PrintWriter(outputFile, "utf-8");
+        OutputStream os = new FileOutputStream(outputFile);
+        os = new GZIPOutputStream(os) {{def.setLevel(5);}};
+        writer = new PrintWriter(new OutputStreamWriter(os, "utf-8"));
     }
 
     /**
