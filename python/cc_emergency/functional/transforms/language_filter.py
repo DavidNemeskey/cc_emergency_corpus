@@ -4,6 +4,7 @@
 """Language / domain filtering transforms."""
 
 import importlib
+import inspect
 
 import tldextract
 
@@ -12,13 +13,16 @@ from cc_emergency.functional.core import Filter
 
 class LanguageFilter(Filter):
     """Filters objects for language(s)."""
-    def __init__(self, fields, languages):
+    LIBRARIES = {'langid': 'langid', 'cld2': 'cld2-cffi'}
+
+    def __init__(self, fields, languages, library='langid'):
         """
         - fields: either the name of the field on which to perform the language
-                  identification, or a list of fields.
+                  identification, or a list of fields
         - languages: either the name of a language or a list of languages
-        TODO: should break this up to two objects: one that identifies the
-              language, and another to filter the object.
+        - library: the library to use (langid or cld2).
+
+        I know, the libraries should be enclosed in subclasses. C'est la vie.
         """
         super(LanguageFilter, self).__init__()
         if not isinstance(fields, list):
@@ -27,19 +31,33 @@ class LanguageFilter(Filter):
             languages = [languages]
         self.languages = set(languages)
         self.fields = fields
+        self.lib = library
 
     def __enter__(self):
+        if self.lib not in self.LIBRARIES:
+            raise ValueError('Unsupported library {}'.format(self.library))
         try:
-            self.logger.debug('Loading langid...')
-            self.langid = importlib.import_module('langid')
+            self.logger.debug('Loading {}...'.format(self.lib))
+            self.detector = importlib.import_module(self.lib)
+            self.detect = inspect.getmembers(
+                self,
+                lambda o: inspect.ismethod(o) and o.__name__ == '__' + self.lib,
+            )[0][1]
             return self
         except ImportError:
-            raise ImportError('The langid module is needed for LanguageFilter '
-                              'to work.')
+            raise ImportError(
+                'The {} module '.format(self.LIBRARIES[self.lib]) +
+                'is needed for LanguageFilter to work.')
 
     def transform(self, obj):
         text = '\n'.join(obj.get(field, '') for field in self.fields)
-        return self.langid.classify(text)[0] in self.languages
+        return self.detect(text) in self.languages
+
+    def __langid(self, text):
+        return self.detector.classify(text)[0]
+
+    def __cld2(self, text):
+        return self.detector.detect(text).details[0].language_code
 
 
 class DomainFilter(Filter):
