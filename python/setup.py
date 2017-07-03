@@ -72,6 +72,8 @@ setup(name='cc_emergency',
           # An earlier version was broken (don't remember which); also,
           # iterparse is broken in 3.7.3. :)
           'lxml==3.6.4',
+          # For stopword filtering
+          'nltk',
           # Computations
           'numpy', 'scipy', 'sklearn', 'pandas',
           # For networking
