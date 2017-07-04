@@ -3,6 +3,7 @@
 
 """Language / domain filtering transforms."""
 
+from functools import partial
 import importlib
 import inspect
 
@@ -16,14 +17,14 @@ class LanguageFilter(Filter):
     """Filters objects for language(s)."""
     LIBRARIES = {'langid': 'langid', 'cld2': 'cld2-cffi'}
 
-    def __init__(self, fields, languages, library='cld2'):
+    def __init__(self, fields, languages, libraries=None):
         """
         - fields: either the name of the field on which to perform the language
                   identification, or a list of fields
         - languages: either the name of a language or a list of languages
-        - library: the library to use (langid or cld2).
-
-        I know, the libraries should be enclosed in subclasses. C'est la vie.
+        - libraries: the libraries to try, in order. The default is cld2 alone,
+                     but langid is also supported, as well as any combinations
+                     of these two.
         """
         super(LanguageFilter, self).__init__()
         if not isinstance(fields, list):
@@ -32,18 +33,21 @@ class LanguageFilter(Filter):
             languages = [languages]
         self.languages = set(languages)
         self.fields = fields
-        self.lib = library
+        self.libraries = libraries if libraries else ['cld2']
+        self.detectors = []
 
     def __enter__(self):
         if self.lib not in self.LIBRARIES:
             raise ValueError('Unsupported library "{}"'.format(self.lib))
         try:
-            self.logger.debug('Loading {}...'.format(self.lib))
-            self.detector = importlib.import_module(self.lib)
-            self.detect = inspect.getmembers(
-                self,
-                lambda o: inspect.ismethod(o) and o.__name__ == '__' + self.lib,
-            )[0][1]
+            for lib in self.libraries:
+                self.logger.debug('Loading {}...'.format(lib))
+                detector_lib = importlib.import_module(lib)
+                detector_fn = inspect.getmembers(
+                    self,
+                    lambda o: inspect.ismethod(o) and o.__name__ == '__' + lib,
+                )[0][1]
+                self.detectors.append(partial(detector_fn, detector_lib))
             return self
         except ImportError:
             raise ImportError(
@@ -52,19 +56,24 @@ class LanguageFilter(Filter):
 
     def transform(self, obj):
         text = '\n'.join(obj.get(field, '') for field in self.fields)
-        return self.detect(text, first(obj.values())) in self.languages
-
-    def __langid(self, text, maybe_id):
-        return self.detector.classify(text)[0]
-
-    def __cld2(self, text, maybe_id):
-        try:
-            return self.detector.detect(text).details[0].language_code
-        except Exception as e:
+        for detector in self.detectors:
+            try:
+                lang = detector(text)
+                if lang != 'un':
+                    return lang in self.languages
+            except:
+                pass
+        else:
             self.logger.debug(
-                'cld2 could not process document {}:'.format(maybe_id[:100]) +
-                'exception {}'.format(e))
-            return 'un'
+                'Could not detect language for document {}'.format(
+                    first(obj.values())))
+            return False
+
+    def __langid(self, lib, text):
+        return lib.classify(text)[0]
+
+    def __cld2(self, lib, text):
+        return lib.detect(text).details[0].language_code
 
 
 class DomainFilter(Filter):
