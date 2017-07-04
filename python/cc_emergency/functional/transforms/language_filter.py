@@ -37,10 +37,10 @@ class LanguageFilter(Filter):
         self.detectors = []
 
     def __enter__(self):
-        if self.lib not in self.LIBRARIES:
-            raise ValueError('Unsupported library "{}"'.format(self.lib))
-        try:
-            for lib in self.libraries:
+        for lib in self.libraries:
+            if lib not in self.LIBRARIES:
+                raise ValueError('Unsupported library "{}"'.format(lib))
+            try:
                 self.logger.debug('Loading {}...'.format(lib))
                 detector_lib = importlib.import_module(lib)
                 detector_fn = inspect.getmembers(
@@ -48,11 +48,11 @@ class LanguageFilter(Filter):
                     lambda o: inspect.ismethod(o) and o.__name__ == '__' + lib,
                 )[0][1]
                 self.detectors.append(partial(detector_fn, detector_lib))
-            return self
-        except ImportError:
-            raise ImportError(
-                'The {} module '.format(self.LIBRARIES[self.lib]) +
-                'is needed for LanguageFilter to work.')
+            except ImportError:
+                raise ImportError(
+                    'The {} module '.format(self.LIBRARIES[lib]) +
+                    'is needed for LanguageFilter to work.')
+        return self
 
     def transform(self, obj):
         text = '\n'.join(obj.get(field, '') for field in self.fields)
