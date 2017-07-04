@@ -226,6 +226,15 @@ def setup_logger(logging_level, handler, root, name='script'):
     return logger
 
 
+def first(container):
+    """
+    Returns the first element in a set. Even with the overhead of the function
+    call, this is faster than next(iter(container)).
+    """
+    for elem in container:
+        return elem
+
+
 class AttrDict(dict):
     """Makes our life easier."""
     def __getattr__(self, key):

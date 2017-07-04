@@ -9,6 +9,7 @@ import inspect
 import tldextract
 
 from cc_emergency.functional.core import Filter
+from cc_emergency.utils import first
 
 
 class LanguageFilter(Filter):
@@ -51,13 +52,19 @@ class LanguageFilter(Filter):
 
     def transform(self, obj):
         text = '\n'.join(obj.get(field, '') for field in self.fields)
-        return self.detect(text) in self.languages
+        return self.detect(text, first(obj.values())) in self.languages
 
-    def __langid(self, text):
+    def __langid(self, text, maybe_id):
         return self.detector.classify(text)[0]
 
-    def __cld2(self, text):
-        return self.detector.detect(text).details[0].language_code
+    def __cld2(self, text, maybe_id):
+        try:
+            return self.detector.detect(text).details[0].language_code
+        except Exception as e:
+            self.logger.debug(
+                'cld2 could not process document {}:'.format(maybe_id[:100]) +
+                'exception {}'.format(e))
+            return 'un'
 
 
 class DomainFilter(Filter):
