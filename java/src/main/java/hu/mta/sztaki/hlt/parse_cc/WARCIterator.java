@@ -111,11 +111,11 @@ public class WARCIterator implements Iterable<WARCDocument>,
         try {
             BufferedReader br = new BufferedReader(new StringReader(
                         httpResponse.toString(UTF_8.name())));
-            Pair<Boolean, Charset> header = readHeader(br);
-            if (header.first) {
-                if (header.second != UTF_8) {
+            HeaderPair header = readHeader(br);
+            if (header.success) {
+                if (header.charset != UTF_8) {
                     br = new BufferedReader(new StringReader(
-                            httpResponse.toString(header.second.name())));
+                            httpResponse.toString(header.charset.name())));
                     readHeader(br);
                 }
                 doc.content = br.lines().collect(Collectors.joining("\n"));
@@ -133,7 +133,7 @@ public class WARCIterator implements Iterable<WARCDocument>,
      * @return a @c Pair of a boolean (whether the document is valid) and the
      *         charset of the document, if specified. It defaults to utf-8.
      */
-    private static Pair<Boolean, Charset> readHeader(BufferedReader br)
+    private static HeaderPair readHeader(BufferedReader br)
             throws IOException, DataFormatException {
         Charset encoding = UTF_8;
         String line = br.readLine();
@@ -143,7 +143,7 @@ public class WARCIterator implements Iterable<WARCDocument>,
                 throw new DataFormatException(
                         String.format("Invalid status line '%s'.", line));
             else if (!m.group(1).equals("200"))
-                return new Pair<Boolean, Charset>(false, encoding);
+                return new HeaderPair(false, encoding);
         }
         while ((line = br.readLine()) != null) {
             if (line.length() == 0) break;
@@ -164,17 +164,17 @@ public class WARCIterator implements Iterable<WARCDocument>,
                 }
             }
         }
-        return new Pair<Boolean, Charset>(true, encoding);
+        return new HeaderPair(true, encoding);
     }
 
-    /** Quick and dirty pair type. */
-    private static class Pair<F, S> {
-        public F first;
-        public S second;
+    /** Type of the return value from readHeader(). */
+    private static class HeaderPair {
+        public Boolean success;
+        public Charset charset;
 
-        public Pair(F first, S second) {
-            this.first = first;
-            this.second = second;
+        public HeaderPair(Boolean success, Charset charset) {
+            this.success = success;
+            this.charset = charset;
         }
     }
 }
