@@ -108,3 +108,4 @@ ENV/
 ## Vim
 .swp
 .swo
+**/*swp
