@@ -117,12 +117,12 @@ public class ParseCC {
 
     public static void main(String[] args) {
         Namespace ns = parseArguments(args);
+        logger = configureLogging(Level.parse(ns.getString("log_level")));
         String outDir = ns.getString("output_dir");
         String logDir = ns.getString("log_dir");
         createDirectory(outDir);
         if (logDir != null) createDirectory(logDir);
         Extractor extractor = getExtractor(ns.getString("extractor"));
-        logger = configureLogging(Level.parse(ns.getString("log_level")));
 
         fullNice();
         for (String inputFile : ns.<String>getList("input_file")) {
