@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.Charset;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.lang.Iterable;
 import java.util.Iterator;
@@ -77,7 +79,7 @@ public class WARCIterator implements Iterable<WARCDocument>,
                     continue;
                 }
                 try {
-                    if (parseHTTP(doc, os.toString())) {
+                    if (parseHTTP(doc, os)) {
                         doc.content = extractor.extract(doc.content);
                         Logger.getLogger(WARCIterator.class.getName()).finer(
                                 String.format("Found document %s", doc.url));
@@ -103,37 +105,76 @@ public class WARCIterator implements Iterable<WARCDocument>,
      *         @c false otherwise.
      * @throw DataFormatException if the HTTP header is invalid.
      */
-    private static boolean parseHTTP(WARCDocument doc, String httpResponse)
+    private static boolean parseHTTP(WARCDocument doc,
+                                     ByteArrayOutputStream httpResponse)
             throws DataFormatException {
         try {
-            BufferedReader br = new BufferedReader(new StringReader(httpResponse));
-            String line = br.readLine();
-            if (line != null) {
-                Matcher m = statusLineP.matcher(line);
-                if (!m.matches())
-                    throw new DataFormatException(
-                            String.format("Invalid status line '%s'.", line));
-                else if (!m.group(1).equals("200"))
-                    return false;
+            BufferedReader br = new BufferedReader(new StringReader(
+                        httpResponse.toString(UTF_8.name())));
+            Pair<Boolean, Charset> header = readHeader(br);
+            if (header.first) {
+                if (header.second != UTF_8) {
+                    br = new BufferedReader(new StringReader(
+                            httpResponse.toString(header.second.name())));
+                    readHeader(br);
+                }
+                doc.content = br.lines().collect(Collectors.joining("\n"));
+                return true;
             }
-            while ((line = br.readLine()) != null) {
-                if (line.length() == 0) break;
-                Matcher m = httpHeaderP.matcher(line); 
-                if (!m.matches())
-                    throw new DataFormatException(
-                            String.format("Invalid field line '%s'.", line));
-                if (m.group(1).equals("Content-Type")) {
-                    int cPos = m.group(2).lastIndexOf("charset=");
-                    if (cPos != -1) {
-                        // doc.encoding = m.group(2).substring(cPos + 8);
+        } catch (IOException ioe) {
+            assert false : "IOException while reading from String?!";
+        }
+        return false;
+    }
+
+    /**
+     * Parses the HTTP response header loaded into @c br.
+     *
+     * @return a @c Pair of a boolean (whether the document is valid) and the
+     *         charset of the document, if specified. It defaults to utf-8.
+     */
+    private static Pair<Boolean, Charset> readHeader(BufferedReader br)
+            throws IOException, DataFormatException {
+        Charset encoding = UTF_8;
+        String line = br.readLine();
+        if (line != null) {
+            Matcher m = statusLineP.matcher(line);
+            if (!m.matches())
+                throw new DataFormatException(
+                        String.format("Invalid status line '%s'.", line));
+            else if (!m.group(1).equals("200"))
+                return new Pair<Boolean, Charset>(false, encoding);
+        }
+        while ((line = br.readLine()) != null) {
+            if (line.length() == 0) break;
+            Matcher m = httpHeaderP.matcher(line); 
+            if (!m.matches())
+                throw new DataFormatException(
+                        String.format("Invalid field line '%s'.", line));
+            if (m.group(1).equals("Content-Type")) {
+                int cPos = m.group(2).lastIndexOf("charset=");
+                if (cPos != -1) {
+                    String encodingName = m.group(2).substring(cPos + 8).trim();
+                    try {
+                        encoding = Charset.forName(encodingName);
+                    } catch (IllegalArgumentException iae) {
+                        throw new DataFormatException(String.format(
+                                "Invalid encoding name %s", encodingName));
                     }
                 }
             }
-            doc.content = br.lines().collect(Collectors.joining("\n"));
-            return true;
-        } catch (IOException ioe) {
-            assert false : "IOException while reading from String?!";
-            return false;
+        }
+        return new Pair<Boolean, Charset>(true, encoding);
+    }
+
+    /** Quick and dirty pair type. */
+    private static class Pair<F, S> {
+        public F first;
+        public S second;
+
+        public Pair(F first, S second) {
+            this.first = first;
+            this.second = second;
         }
     }
 }
