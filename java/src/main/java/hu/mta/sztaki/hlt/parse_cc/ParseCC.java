@@ -112,6 +112,7 @@ public class ParseCC {
     /** Logs the error message and exists the program. */
     private static void errorAndExit(String message) {
         logger.severe(message);
+        System.err.println(message);
         System.exit(1);
     }
 
