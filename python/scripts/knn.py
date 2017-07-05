@@ -58,17 +58,26 @@ def parse_arguments():
                              'word form, resprectively. Frequencies can '
                              ' then be used for thresholding '
                              'with the --min-freq option.')
+    parser.add_argument('--digits', '-D', type=int, default=3,
+                        help='the number of decimal digits to print.')
     parser.add_argument('--log-level', '-L', type=str, default='info',
                         choices=['debug', 'info', 'warning', 'error', 'critical'],
                         help='the logging level.')
     args = parser.parse_args()
     if args.self_contained and not args.batch:
         parser.error('--self-contained is only valid for batch mode.')
+    if args.digits <= 0:
+        parser.error('--digits must be 1 or greater')
     return args
 
 
+def get_format_str(digits):
+    return '{{}} ({{:.{}f}})'.format(digits)
+
+
 def interactive_knn(words, vectors, word_index, min_similarity, k, freqs,
-                    min_freq):
+                    min_freq, digits=3):
+    format_str = get_format_str(digits)
     try:
         while True:
             word = input('> ')
@@ -89,15 +98,14 @@ def interactive_knn(words, vectors, word_index, min_similarity, k, freqs,
                 #                     sorted_dists[::-1][:k]])
                 # print(', '.join('{}({})'.format(
                 #    w.encode('utf-8'), s) for w, s in neighbors))
-                print(', '.join('{} ({})'.format(
-                    w, s) for w, s in neighbors))
+                print(', '.join(format_str.format(w, s) for w, s in neighbors))
     except EOFError:
         pass
 
 
 def batch_knn(words, vectors, word_index, batch_file, min_similarity, k,
               dimension=0, normalize=False, self_contained=False, freqs=None,
-              min_freq=0):
+              min_freq=0, digits=3):
     """Executes a batch query. For the batch file format, see above."""
     with open(batch_file) as inf:
         batch = [l.strip().split(maxsplit=1) for l in inf]
@@ -117,9 +125,10 @@ def batch_knn(words, vectors, word_index, batch_file, min_similarity, k,
     neighbors = similarities(query_words if self_contained else words,
                              queries if self_contained else vectors,
                              queries, min_similarity, k, freqs, min_freq)
+    format_str = get_format_str(digits)
     for i, neighbor in enumerate(neighbors):
         print('{} '.format(query_words[i]) +
-              ', '.join('{}({})'.format(w, s) for w, s in neighbor))
+              ', '.join(format_str.format(w, s) for w, s in neighbor))
 
 
 def read_freqs(fn):
@@ -153,8 +162,8 @@ if __name__ == '__main__':
             batch_knn(words, vectors, word_index, batch,
                       args.min_similarity, args.k, args.dimension,
                       args.normalize, args.self_contained, freqs,
-                      args.min_freq)
+                      args.min_freq, args.digits)
     else:
         interactive_knn(
             words, vectors, word_index, args.min_similarity, args.k, freqs,
-            args.min_freq)
+            args.min_freq, args.digits)
