@@ -8,6 +8,7 @@ from builtins import input
 from collections import Counter
 from itertools import chain
 import logging
+import os
 import sys
 
 import numpy as np
@@ -68,6 +69,11 @@ def parse_arguments():
         parser.error('--self-contained is only valid for batch mode.')
     if args.digits <= 0:
         parser.error('--digits must be 1 or greater')
+    # Check the existance of the batch files here, so that we exit early,
+    # before trying to load the embedding, which usually takes forever
+    for bf in args.batch:
+        if not os.path.isfile(bf):
+            parser.error('The batch file {} is not a regular file.'.format(bf))
     return args
 
 
