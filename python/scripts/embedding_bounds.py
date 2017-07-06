@@ -22,12 +22,7 @@ def parse_arguments():
         description='Computes the bounding sphere around sets of points.')
     parser.add_argument('vector_file', help='the word vector file.')
     parser.add_argument('--bev', '-b', action='append', default=[],
-                        help='the BEV list file(s) (one word per line). If not '
-                             'specified, the whole vector_file is displayed, '
-                             'which might be too much for the machine. It is '
-                             'possible to specify more than one file, in '
-                             'which case all sets are displayed with different '
-                             'colors.')
+                        help='the BEV list file(s) (one word per line).')
     parser.add_argument('--subsets', '-s', action='store_true',
                         help='also compute the statistics for the various '
                              'combinations and subsets of the specified '
