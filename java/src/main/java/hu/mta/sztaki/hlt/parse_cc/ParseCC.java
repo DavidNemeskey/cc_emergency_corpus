@@ -94,7 +94,7 @@ public class ParseCC {
                                   ".warc(.gz) extension missing.", baseName));
         }
         return fs.getPath(
-                outputDirectory, m.group(1) + "." + extension + ".gz").toString();
+                outputDirectory, m.group(1) + "." + extension).toString();
     }
 
     /** Creates a directory or exits.  */
@@ -129,7 +129,7 @@ public class ParseCC {
         for (String inputFile : ns.<String>getList("input_file")) {
             try {
                 String outputFile = getOutputFile(
-                        ns.getString("output_dir"), inputFile, "json");
+                        ns.getString("output_dir"), inputFile, "json.gz");
                 if (logDir != null) {
                     logger = configureLogging(Level.parse(ns.getString("log_level")),
                                               getOutputFile(logDir, inputFile, "log"));
