@@ -29,6 +29,9 @@ public class WARCIterator implements Iterable<WARCDocument>,
             "^HTTP[\\S]+ ([\\d]+) [\\S]+$");
     private static Pattern httpHeaderP = Pattern.compile(
             "^([^:]+)::?[ ]?(.+)?$");
+    private static Pattern charsetP = Pattern.compile(
+            "charset\\s*=\\s*\"?\\s*([^\";]+?)\\s*\"?(?:;.*)?$",
+            Pattern.CASE_INSENSITIVE);
 
     /** The extractor to use for text extraction from HTML. */
     private Extractor extractor;
@@ -151,20 +154,40 @@ public class WARCIterator implements Iterable<WARCDocument>,
             if (!m.matches())
                 throw new DataFormatException(
                         String.format("Invalid field line '%s'.", line));
-            if (m.group(1).equals("Content-Type")) {
-                int cPos = m.group(2).lastIndexOf("charset=");
-                if (cPos != -1) {
-                    String encodingName = m.group(2).substring(cPos + 8).trim();
+            if (m.group(1).equals("Content-Type") && m.group(2) != null) {
+                Logger.getLogger(WARCIterator.class.getName()).finer(
+                        String.format("Content-Type is >%s<", m.group(2)));
+                m = charsetP.matcher(m.group(2));
+                if (m.find()) {
                     try {
-                        encoding = Charset.forName(encodingName);
+                        Logger.getLogger(WARCIterator.class.getName()).finer(
+                                String.format("Encoding >%s<", m.group(1)));
+                        encoding = Charset.forName(canonicalCharset(m.group(1)));
                     } catch (IllegalArgumentException iae) {
                         throw new DataFormatException(String.format(
-                                "Invalid encoding name %s", encodingName));
+                                "Invalid encoding name %s", m.group(1)));
                     }
+                } else {
+                    Logger.getLogger(WARCIterator.class.getName()).finer(
+                            String.format("No encoding"));
                 }
             }
         }
         return new HeaderPair(true, encoding);
+    }
+
+    /**
+     * Adds a few charset aliases -- to bad this cannot be done in Charset.
+     * This is on a "best effort" basis...
+     */
+    private static String canonicalCharset(String cs) {
+        if (cs.contains(" ")) {
+            cs = cs.replace(" ", "_");
+        }
+        if (cs.toLowerCase().startsWith("cp-")) {
+            cs = "cp" + cs.substring(3);  
+        }
+        return cs;
     }
 
     /** Type of the return value from readHeader(). */
