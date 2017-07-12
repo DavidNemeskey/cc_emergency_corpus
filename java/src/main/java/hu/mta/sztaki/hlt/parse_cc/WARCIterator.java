@@ -83,10 +83,16 @@ public class WARCIterator implements Iterable<WARCDocument>,
                 }
                 try {
                     if (parseHTTP(doc, os)) {
-                        doc.content = extractor.extract(doc.content);
-                        Logger.getLogger(WARCIterator.class.getName()).finer(
-                                String.format("Found document %s", doc.url));
-                        return doc;
+                        try {
+                            doc.content = extractor.extract(doc.content);
+                            Logger.getLogger(WARCIterator.class.getName()).finer(
+                                    String.format("Found document %s", doc.url));
+                            return doc;
+                        } catch (Exception e) {
+                            Logger.getLogger(WARCIterator.class.getName()).fine(
+                                    String.format("Boilerplate removal failed for %s: %s",
+                                                  doc.url, e));
+                        }
                     } else {
                         Logger.getLogger(WARCIterator.class.getName()).fine(
                                 "HTTP status not OK: " + doc.url);
