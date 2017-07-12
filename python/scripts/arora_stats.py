@@ -22,6 +22,9 @@ def parse_arguments():
     parser.add_argument('--values', '-v', action='store_true',
                         help='also print the topic coordinate values for each '
                              'word.')
+    parser.add_argument('--filter-unique', '-f', action='store_true',
+                        help='do not print topics that only encompass a '
+                             'single word.')
     parser.add_argument('--log-level', '-L', type=str, default=None,
                         choices=['debug', 'info', 'warning', 'error', 'critical'],
                         help='the logging level.')
@@ -66,6 +69,12 @@ def main():
                     bev_counter[topic] += 1
             else:
                 not_found.append(word)
+
+        if args.filter_unique:
+            to_delete = [t for t, cnt in bev_counter.items() if cnt == 1]
+            for topic in to_delete:
+                del bev_counter[topic]
+                del topic_words[topic]
 
         print('BEV file: {}'.format(bev_file))
         if not_found:
