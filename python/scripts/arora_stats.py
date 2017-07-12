@@ -5,7 +5,7 @@
 
 from __future__ import absolute_import, division, print_function
 import argparse
-from collections import Counter
+from collections import Counter, defaultdict, OrderedDict
 from functools import reduce
 
 from cc_emergency.utils import openall, setup_stream_logger
@@ -35,16 +35,35 @@ def read_bev(bev_file):
 def main():
     args = parse_arguments()
     setup_stream_logger(args.log_level, 'cc_emergency')
-    bevs = [read_bev(bev_file) for bev_file in args.bev]
-    keep_words = reduce(lambda alls, s: alls.union(s), bevs)
+    bevs = OrderedDict([(bev_file, read_bev(bev_file)) for bev_file in args.bev])
+    keep_words = reduce(lambda alls, s: alls.union(s), bevs.values())
     words, vectors = read_vectors(args.vector_file, normalize=True,
                                   keep_words=keep_words)
+    swords = set(words)
 
-    for bev in bevs:
+    for bev_file, bev in bevs.items():
         bev_counter = Counter()
+        topic_words = defaultdict(set)
+        not_found = []
         for word in bev:
-            bev_counter.update(vectors[words.index(word)].nonzero()[1])
-        print(bev_counter)
+            if word in swords:
+                for topic in vectors[words.index(word)].nonzero()[1]:
+                    topic_words[topic].add(word)
+                    bev_counter[topic] += 1
+            else:
+                not_found.append(word)
+
+        print('BEV file: {}'.format(bev_file))
+        if not_found:
+            print('Words not found in the embedding: {}'.format(
+                ', '.join(not_found)))
+        print('Topic frequencies:\n  {}'.format(
+            '\n  '.join('{}: {}'.format(*p) for p in bev_counter.most_common())))
+        print('\nWords per topic:\n  {}'.format(
+            '\n  '.join('{}: {}'.format(t, ', '.join(sorted(ws)))
+                        for t, ws in sorted(topic_words.items(),
+                                            key=lambda tws: -len(tws[1])))))
+        print('\n')
 
 
 if __name__ == '__main__':
