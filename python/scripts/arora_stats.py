@@ -7,6 +7,7 @@ from __future__ import absolute_import, division, print_function
 import argparse
 from collections import Counter, defaultdict, OrderedDict
 from functools import reduce
+from operator import itemgetter
 
 from cc_emergency.utils import openall, setup_stream_logger
 from cc_emergency.utils.vector_io import read_vectors
@@ -18,6 +19,9 @@ def parse_arguments():
     parser.add_argument('vector_file', help='the (sparse) word vector file.')
     parser.add_argument('--bev', '-b', action='append', default=[],
                         help='the BEV list file(s) (one word per line).')
+    parser.add_argument('--values', '-v', action='store_true',
+                        help='also print the topic coordinate values for each '
+                             'word.')
     parser.add_argument('--log-level', '-L', type=str, default=None,
                         choices=['debug', 'info', 'warning', 'error', 'critical'],
                         help='the logging level.')
@@ -32,6 +36,15 @@ def read_bev(bev_file):
         return set([line.strip() for line in inf])
 
 
+def word_list_repr(word_list, print_values):
+    if print_values:
+        return ', '.join('{} [{:.2f}]'.format(w, c) for w, c
+                         in sorted(word_list.items(), key=itemgetter(1),
+                                   reverse=True))
+    else:
+        return ', '.join(sorted(word_list.keys()))
+
+
 def main():
     args = parse_arguments()
     setup_stream_logger(args.log_level, 'cc_emergency')
@@ -43,12 +56,13 @@ def main():
 
     for bev_file, bev in bevs.items():
         bev_counter = Counter()
-        topic_words = defaultdict(set)
+        topic_words = defaultdict(dict)
         not_found = []
         for word in bev:
             if word in swords:
-                for topic in vectors[words.index(word)].nonzero()[1]:
-                    topic_words[topic].add(word)
+                row = words.index(word)
+                for topic in vectors[row].nonzero()[1]:
+                    topic_words[topic][word] = vectors[row, topic]
                     bev_counter[topic] += 1
             else:
                 not_found.append(word)
@@ -60,7 +74,7 @@ def main():
         print('Topic frequencies:\n  {}'.format(
             '\n  '.join('{}: {}'.format(*p) for p in bev_counter.most_common())))
         print('\nWords per topic:\n  {}'.format(
-            '\n  '.join('{}: {}'.format(t, ', '.join(sorted(ws)))
+            '\n  '.join('{}: {}'.format(t, word_list_repr(ws, args.values))
                         for t, ws in sorted(topic_words.items(),
                                             key=lambda tws: -len(tws[1])))))
         print('\n')
