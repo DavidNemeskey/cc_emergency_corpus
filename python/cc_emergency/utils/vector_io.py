@@ -92,7 +92,7 @@ def read_vectors(vectors_file, normalize=False,
         words, X = read_text_vectors()
     if normalize:
         X = normalize_rows(X)
-    return words, X
+    return list(words), X
 
 
 def normalize_rows(X):
