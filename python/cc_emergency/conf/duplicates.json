@@ -10,7 +10,7 @@
 		{
 			"class": "cc_emergency.functional.transforms.CoNLLToList",
 			"args": [
-				{"content_corenlp": ["lemma", true, true, "lemmas"]}
+				{"content_corenlp": ["lemma", true, "NNP", true, "lemmas"]}
 			]
 		},
 		{
@@ -36,7 +36,7 @@
 			"class": "cc_emergency.functional.collectors.LSH",
 			"kwargs": {
 				"id_field": "url",
-				"threshold": 0.9,
+				"threshold": 0.85,
 				"out_field": "record_id"
 			}
 	}
