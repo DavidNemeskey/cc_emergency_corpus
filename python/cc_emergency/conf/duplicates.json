@@ -36,7 +36,7 @@
 			"class": "cc_emergency.functional.collectors.LSH",
 			"kwargs": {
 				"id_field": "url",
-				"threshold": 0.9,
+				"threshold": 0.85,
 				"out_field": "record_id"
 			}
 	}
