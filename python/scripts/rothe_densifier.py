@@ -111,7 +111,7 @@ def main():
 
         logger.info('Training done.')
 
-        for word, emergency in zip(words, new_Q.dot(vectors.T)[:, 0]):
+        for word, emergency in zip(words, new_Q.dot(vectors.T).T[:, 0]):
             print('{}\t{}'.format(word, emergency))
 
 
