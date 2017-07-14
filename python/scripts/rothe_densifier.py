@@ -4,7 +4,9 @@
 """Implementation of Rothe's DENSIFIER."""
 
 import argparse
-from itertools import cycle, islice, permutations
+from itertools import combinations, cycle, islice
+from operator import itemgetter
+import random
 
 import numpy as np
 import tensorflow as tf
@@ -44,15 +46,23 @@ def main():
     args = parse_arguments()
     logger = setup_stream_logger(args.log_level, 'cc_emergency')
 
+    # Read the vectors
     words, vectors = read_vectors(args.vector_file)
     swords, vectors = set(words), np.asarray(vectors)
+
+    # Read the gold data
+    random.seed(args.seed)
     with openall(args.gold) as inf:
         gold = {words.index(word): int(value) for word, value in
                 (line.strip().split('\t') for line in inf)
                 if word in swords}
-        logger.info('Gold data size: {} words ({} positive, {} negative)'.format(
-            len(gold), sum(gold.values()), len(gold) - sum(gold.values())))
-    input_it = cycle(list(permutations(gold.keys(), 2)))
+    num_pos = sum(1 for v in gold.values() if v > 0)
+    logger.info('Gold data size: {} words ({} positive, {} negative)'.format(
+        len(gold), num_pos, len(gold) - num_pos))
+    gold_pairs = list(combinations(gold.keys(), 2))
+    logger.debug('In all, {} combinations.'.format(len(gold_pairs)))
+    random.shuffle(gold_pairs)
+    input_it = cycle(gold_pairs)
 
     with tf.Graph().as_default() as graph:
         tf.set_random_seed(args.seed)
@@ -96,7 +106,7 @@ def main():
         fetches = [objective_var, optimizer_op, Q_var, lr_var]
         lr = args.lr_initial
         for it in range(args.iterations):
-            vs, ws, rels = zip(*[(v, w, 1 if gold[v] == gold[w] else 0) for v, w
+            vs, ws, rels = zip(*[(v, w, gold[v] * gold[w]) for v, w
                                  in take(args.batch_size, input_it)])
             feed_dict = {v_in: vs, w_in: ws, rel_in: rels}
             cost, _, Q, curr_lr = session.run(fetches, feed_dict)
@@ -111,7 +121,8 @@ def main():
 
         logger.info('Training done.')
 
-        for word, emergency in zip(words, new_Q.dot(vectors.T).T[:, 0]):
+        for word, emergency in sorted(zip(words, new_Q.dot(vectors.T).T[:, 0]),
+                                      key=itemgetter(1), reverse=True):
             print('{}\t{}'.format(word, emergency))
 
 
