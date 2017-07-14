@@ -45,10 +45,13 @@ def main():
     logger = setup_stream_logger(args.log_level, 'cc_emergency')
 
     words, vectors = read_vectors(args.vector_file)
-    vectors = np.asarray(vectors)
+    swords, vectors = set(words), np.asarray(vectors)
     with openall(args.gold) as inf:
-        gold = {words.index(word): value for word, value in
-                (line.strip().split('\t') for line in inf)}
+        gold = {words.index(word): int(value) for word, value in
+                (line.strip().split('\t') for line in inf)
+                if word in swords}
+        logger.info('Gold data size: {} words ({} positive, {} negative)'.format(
+            len(gold), sum(gold.values()), len(gold) - sum(gold.values())))
     input_it = cycle(list(permutations(gold.keys(), 2)))
 
     with tf.Graph().as_default() as graph:
@@ -97,10 +100,10 @@ def main():
                                  in take(args.batch_size, input_it)])
             feed_dict = {v_in: vs, w_in: ws, rel_in: rels}
             cost, _, Q, curr_lr = session.run(fetches, feed_dict)
-            logger.info('Cost at step {}: {:.2f} (lr: {:.2f})'.format(it, cost, curr_lr))
+            logger.debug('Cost at step {}: {:.2f} (lr: {:.2f})'.format(it, cost, curr_lr))
             U, _, V = np.linalg.svd(Q, full_matrices=False)
             new_Q = U.dot(V)
-            logger.info('SVD norm error: {:.2f} of {:.2f}'.format(
+            logger.debug('SVD norm error: {:.2f} of {:.2f}'.format(
                 np.linalg.norm(Q - new_Q), np.linalg.norm(Q)))
             lr *= 0.99
             session.run(assign_lr_op, feed_dict={new_lr_in: lr})
