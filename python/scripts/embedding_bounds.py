@@ -118,7 +118,7 @@ def generate_subsets(set_indices, words):
         sorted(set(set_indices[s1]) & set(set_indices[s2]))
         for s1, s2 in combinations(sorted(set_indices.keys()), 2)
     }
-    intersections = {k: v for k, v in intersections if v}
+    intersections = {k: v for k, v in intersections.items() if v}
     set_indices.update(unique_indices)
     set_indices.update(common_indices)
     set_indices.update(intersections)
