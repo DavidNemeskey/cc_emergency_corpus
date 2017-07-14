@@ -34,11 +34,11 @@ def parse_arguments():
                              'or "filter") and reducer -- a resource '
                              'objet descriptor for the final reducer, if '
                              'needed.')
-    parser.add_argument('--input-dir', '-i', required=True,
+    parser.add_argument('--input-dir', '-i', required=True, action='append',
                         help='the input directory.')
     out_group = parser.add_mutually_exclusive_group(required=True)
     out_group.add_argument('--output-dir', '-o',
-                           help='the output directory. Should not specified '
+                           help='the output directory. Should not be specified '
                                 'for a reduction.')
     out_group.add_argument('--reduced-file', '-r',
                            help='if a reducer is specified, the result is '
@@ -168,12 +168,15 @@ def main():
               for p in range(args.processes)]
     reducer = get_reducer(args, params[0])
 
-    source_files = source_file_list(args.input_dir)
-    if not reducer:
-        target_files = target_file_list(
-            source_files, args.input_dir, args.output_dir)
-    else:
-        target_files = [None for _ in source_files]
+    source_files, target_files = [], []
+    for input_dir in args.input_dir:
+        current_sources = source_file_list(input_dir)
+        source_files.extend(current_sources)
+        if not reducer:
+            target_files.extend(target_file_list(
+                current_sources, input_dir, args.output_dir))
+        else:
+            target_files.extend([None for _ in current_sources])
     source_target_files = zip(source_files, target_files)
 
     res = run_queued(process_file, params, args.processes,
