@@ -3,13 +3,22 @@
 
 """Collection collectors."""
 
+from itertools import islice
+
 from cc_emergency.functional.core import Collector
 
 
 class ListCollector(Collector):
     """Collects the elements into a list."""
+    def __init__(self, fields, num_records=None):
+        super(ListCollector, self).__init__()
+        self.num_records = num_records
+
     def __call__(self, it):
-        return list(it)
+        lst = list(islice(it, self.num_records))
+        for _ in it:
+            pass
+        return lst
 
 
 class SetCollector(Collector):
