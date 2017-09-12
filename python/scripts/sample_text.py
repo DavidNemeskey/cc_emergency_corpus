@@ -51,6 +51,8 @@ def main():
     os.nice(20)
     random.seed(12345)
     out_file = 'file_{{:0{}}}.txt'.format(args.digits)
+    if not op.isdir(args.output_dir):
+        os.makedirs(args.output_dir)
 
     for text_id, text in enumerate(
         iterate_inputs(args.input_file, args.field, args.ratio)
