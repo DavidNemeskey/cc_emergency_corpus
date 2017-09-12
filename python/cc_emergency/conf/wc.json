@@ -1,0 +1,19 @@
+{
+	"pipeline": [
+		{
+			"class": "cc_emergency.functional.io.JsonReader",
+			"args": ["$input"]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.WC",
+			"args": ["text"]
+		},
+		{
+			"class": "cc_emergency.functional.collectors.DictAggregator"
+		}
+	],
+	"reducer": {
+		"class": "cc_emergency.functional.collectors.DictAggregator"
+	}
+}
+
