@@ -34,7 +34,7 @@ def parse_arguments():
     parser.add_argument('--digits', '-d', type=int, default=3,
                         help='the number of digits in the output files\' '
                         'names [3].')
-    parser.add_argument('--extension', '-e', choice={'txt', 'html'},
+    parser.add_argument('--extension', '-e', choices={'txt', 'html'},
                         default='txt',
                         help='the output file format / extension [txt].')
     return parser.parse_args()
