@@ -11,7 +11,7 @@
 			"class": "cc_emergency.functional.transforms.FilterDocument",
 			"kwargs": {
 				"expression": "obj['record_id'] in s",
-				"set_file": "unique.tsv"
+				"set_file": "$set_file"
 			}
 		},
 		{

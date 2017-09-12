@@ -45,11 +45,11 @@
 		},
 		{
 			"class": "cc_emergency.functional.collectors.Sorter",
-			"args": [[["score", true]], $num_docs]
+			"args": [[["score", true]], $num_docs1]
 		}
 	],
 	"reducer": {
 		"class": "cc_emergency.functional.collectors.Sorter",
-		"args": [[["score", true]], $num_docs]
+		"args": [[["score", true]], $num_docs2]
 	}
 }
