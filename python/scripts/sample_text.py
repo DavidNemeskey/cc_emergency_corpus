@@ -34,6 +34,9 @@ def parse_arguments():
     parser.add_argument('--digits', '-d', type=int, default=3,
                         help='the number of digits in the output files\' '
                         'names [3].')
+    parser.add_argument('--extension', '-e', choice={'txt', 'html'},
+                        default='txt',
+                        help='the output file format / extension [txt].')
     return parser.parse_args()
 
 
@@ -46,19 +49,29 @@ def iterate_inputs(input_files, field, ratio):
                     yield obj[field]
 
 
+def write_output(output_file, text, extension):
+    with openall(output_file, 'wt') as outf:
+        if extension == 'html':
+            print('<html><body>', file=outf)
+            print(text, file=outf)
+            print('</body></html>', file=outf)
+        else:
+            print(text, file=outf)
+
+
 def main():
     args = parse_arguments()
     os.nice(20)
     random.seed(12345)
-    out_file = 'file_{{:0{}}}.txt'.format(args.digits)
+    out_file = 'file_{{:0{}}}.{}'.format(args.digits, args.extension)
     if not op.isdir(args.output_dir):
         os.makedirs(args.output_dir)
 
     for text_id, text in enumerate(
         iterate_inputs(args.input_file, args.field, args.ratio)
     ):
-        with openall(op.join(args.output_dir, out_file.format(text_id)), 'wt') as outf:
-            outf.write(text)
+        write_output(op.join(args.output_dir, out_file.format(text_id)),
+                     text, args.extension)
         if text_id == args.number:
             break
 
