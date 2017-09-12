@@ -1,0 +1,16 @@
+{
+	"pipeline": [
+		{
+			"class": "cc_emergency.functional.io.JsonReader",
+			"args": ["$input"]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.LanguageFilter",
+			"args": ["content", "en", ["cld2", "langid"]]
+		},
+		{
+			"class": "cc_emergency.functional.io.JsonWriter",
+			"args": ["$output"]
+		}
+	]
+}

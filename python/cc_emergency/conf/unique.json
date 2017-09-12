@@ -1,0 +1,26 @@
+{
+	"pipeline": [
+		{
+			"class": "cc_emergency.functional.io.JsonReader",
+			"kwargs": {
+				"input_file": "$input",
+				"add_id": "record_id"
+			}
+		},
+		{
+			"class": "cc_emergency.functional.transforms.FilterDocument",
+			"kwargs": {
+				"expression": "obj['record_id'] in s",
+				"set_file": "unique.tsv"
+			}
+		},
+		{
+			"class": "cc_emergency.functional.transforms.DeleteFields",
+			"args": [["record_id"]]
+		},
+		{
+			"class": "cc_emergency.functional.io.JsonWriter",
+			"args": ["$output"]
+		}
+	]
+}

@@ -1,0 +1,24 @@
+{
+	"pipeline": [
+		{
+			"class": "cc_emergency.functional.io.JsonReader",
+			"args": ["$input"]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.FilterDictField",
+			"kwargs": {
+			    "field" :"counts",
+			    "expression": "k in s",
+			    "set_file": "news_df.lst"
+			}
+		},
+		{
+			"class": "cc_emergency.functional.transforms.FilterEmpty",
+			"args": [["counts"]]
+		},
+		{
+			"class": "cc_emergency.functional.io.JsonWriter",
+			"args": ["$output"]
+		}
+	]
+}

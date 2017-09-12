@@ -1,0 +1,43 @@
+{
+	"pipeline": [
+		{
+			"class": "cc_emergency.functional.io.JsonReader",
+			"kwargs": {
+				"input_file": "$input",
+				"add_id": "record_id"
+			}
+		},
+		{
+			"class": "cc_emergency.functional.transforms.CoNLLToList",
+			"args": [
+				{"content_corenlp": ["lemma", true, "NNP", true, "lemmas"]}
+			]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.FilterEmpty",
+			"args": [["lemmas"]]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.MinHash",
+			"kwargs": {
+				"fields": ["lemmas"],
+				"shingles": 5
+			}
+		},
+		{
+			"class": "cc_emergency.functional.transforms.RetainFields",
+			"args": [["url", "record_id", "minhash"]]
+		},
+		{
+			"class": "cc_emergency.functional.collectors.ListCollector"
+		}
+	],
+	"reducer": {
+			"class": "cc_emergency.functional.collectors.LSH",
+			"kwargs": {
+				"id_field": "url",
+				"threshold": 0.85,
+				"out_field": "record_id"
+			}
+	}
+}
