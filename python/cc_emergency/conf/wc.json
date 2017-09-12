@@ -10,12 +10,12 @@
 		},
 		{
 			"class": "cc_emergency.functional.collectors.DictAggregator",
-			"args": ["lines", "words", "chars"]
+			"args": [["lines", "words", "chars"]]
 		}
 	],
 	"reducer": {
 		"class": "cc_emergency.functional.collectors.DictAggregator",
-		"args": ["lines", "words", "chars"]
+		"args": [["lines", "words", "chars"]]
 	}
 }
 
