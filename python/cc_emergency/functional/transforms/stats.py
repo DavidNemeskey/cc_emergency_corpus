@@ -25,3 +25,5 @@ class WC(Map):
                 'words': len(field_text.split()),
                 'chars': len(field_text)
             }
+        else:
+            return {'lines': 0, 'words': 0, 'chars': 0}
