@@ -7,14 +7,14 @@ import static jnr.posix.LinuxIoPrio.*;
 
 /** Auxiliary functions for java.lang.System. */
 public class System {
-    /** Nices the process + io. Only works for Linux. */
+    /** Nices the process + io. Tries the latter only on Linux. */
     public static boolean fullNice() {
         POSIX posix = POSIXFactory.getNativePOSIX();
         boolean ret = posix.setpriority(1, 0, 20) == 0;
         if (posix instanceof Linux) {
-            Linux lp = (Linux)posix;
-            ret &= lp.ioprio_set(IOPRIO_WHO_PROCESS, 0,
-                                 IOPRIO_PRIO_VALUE(IOPRIO_CLASS_BE, 7)) == 0;
+            Linux l = (Linux)posix;
+            ret &= l.ioprio_set(IOPRIO_WHO_PROCESS, 0,
+                                IOPRIO_PRIO_VALUE(IOPRIO_CLASS_BE, 7)) == 0;
         }
         return ret;
     }
