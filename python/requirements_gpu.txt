@@ -1,0 +1,2 @@
+--pre
+tensorflow-gpu>=1.0
