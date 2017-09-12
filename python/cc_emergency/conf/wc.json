@@ -9,13 +9,11 @@
 			"args": ["text"]
 		},
 		{
-			"class": "cc_emergency.functional.collectors.DictAggregator",
-			"args": [["lines", "words", "chars"]]
+			"class": "cc_emergency.functional.collectors.DictAggregator"
 		}
 	],
 	"reducer": {
-		"class": "cc_emergency.functional.collectors.DictAggregator",
-		"args": [["lines", "words", "chars"]]
+		"class": "cc_emergency.functional.collectors.DictAggregator"
 	}
 }
 
