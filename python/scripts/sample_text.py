@@ -70,10 +70,10 @@ def main():
     for text_id, text in enumerate(
         iterate_inputs(args.input_file, args.field, args.ratio)
     ):
-        write_output(op.join(args.output_dir, out_file.format(text_id)),
-                     text, args.extension)
         if text_id == args.number:
             break
+        write_output(op.join(args.output_dir, out_file.format(text_id)),
+                     text, args.extension)
 
 
 if __name__ == '__main__':
