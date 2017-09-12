@@ -40,6 +40,7 @@ class Sorter(Collector):
         super(Sorter, self).__init__()
         self.fields = fields
         self.num_records = num_records
+        self.logger.info('Num records: {}'.format(self.num_records))
 
     def __key(self, obj):
         return [-obj.get(f) if r else obj.get(f) for f, r in self.fields]

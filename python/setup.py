@@ -12,7 +12,7 @@ def readme():
         return f.read()
 
 setup(name='cc_emergency',
-      version='0.9',
+      version='0.9.1',
       description='Scripts and tools for emergency corpus building',
       long_description=readme(),
       url='https://github.com/DavidNemeskey/cc_emergency_corpus',
