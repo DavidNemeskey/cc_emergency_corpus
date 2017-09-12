@@ -81,6 +81,7 @@ def process_file(config_str, queue, logging_level=None, logging_queue=None):
                     logger.info('Done processing {}'.format(infile))
             except Empty:
                 logger.debug('Queue depleted.')
+                logger.debug('Holding {} records'.format(len(results)))
                 return results
             except:
                 logger.exception('Exception in file {}'.format(

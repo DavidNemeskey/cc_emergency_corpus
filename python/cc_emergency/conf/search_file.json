@@ -44,11 +44,12 @@
 			"args": [["url", "score", "content"]]
 		},
 		{
-			"class": "cc_emergency.functional.collectors.ListCollector"
+			"class": "cc_emergency.functional.collectors.Sorter",
+			"args": [[["score", true]], $num_docs1]
 		}
 	],
 	"reducer": {
 		"class": "cc_emergency.functional.collectors.Sorter",
-		"args": [[["score", true]], 100000]
+		"args": [[["score", true]], $num_docs2]
 	}
 }
