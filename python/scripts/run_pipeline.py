@@ -63,21 +63,24 @@ def process_file(config_str, queue, logging_level=None, logging_queue=None):
     logger = setup_queue_logger(logging_level, logging_queue, 'cc_emergency')
     results = []
     try:
+        # First, the transforms are initialized, only once (see #47)
         configuration = json.loads(config_str)
-        processors = [create_resource(desc) for desc in
+        transforms = [create_resource(desc) for desc in
                       configuration['pipeline'][1:-1]]
         connections = [desc.get('connection') for desc
                        in configuration['pipeline']][1:-1]
-        with Pipeline(*processors):
+        with Pipeline(*transforms):
             while True:
                 try:
+                    # Then, the source and collector are initialized per file
                     infile, outfile = queue.get_nowait()
                     configuration = json.loads(Template(config_str).safe_substitute(
                         input=infile, output=outfile))
                     inres = create_resource(configuration['pipeline'][0])
                     outres = create_resource(configuration['pipeline'][-1])
                     with Pipeline(inres, outres):
-                        resources = [inres] + processors + [outres]
+                        # The whole pipeline -- just map and filter objects
+                        resources = [inres] + transforms + [outres]
                         collector, pipe = build_pipeline(resources, connections)
                         logger.info('Started processing {}'.format(infile))
                         res = collector(pipe)
