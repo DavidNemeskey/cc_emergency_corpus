@@ -63,7 +63,7 @@ def process_file(config_str, queue, logging_level=None, logging_queue=None):
     logger = setup_queue_logger(logging_level, logging_queue, 'cc_emergency')
     results = []
     try:
-        configuration = json.loads(Template(config_str))
+        configuration = json.loads(config_str)
         processors = [create_resource(desc) for desc in
                       configuration['pipeline'][1:-1]]
         connections = [desc.get('connection') for desc
