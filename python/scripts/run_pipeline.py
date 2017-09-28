@@ -76,7 +76,7 @@ def process_file(config_str, queue, logging_level=None, logging_queue=None):
                         input=infile, output=outfile))
                     inres = create_resource(configuration['pipeline'][0])
                     outres = create_resource(configuration['pipeline'][-1])
-                    with Pipeline([inres, outres]):
+                    with Pipeline(inres, outres):
                         resources = [inres] + processors + [outres]
                         collector, pipe = build_pipeline(resources, connections)
                         logger.info('Started processing {}'.format(infile))
