@@ -3,6 +3,7 @@
 
 """Useful Transforms."""
 
+from .bigrams import CreateBigrams
 from .conll_converter import CoNLLToCounts, CoNLLToList, CoNLLToLists
 from .conll_converter import CoNLLToSet, CoNLLToText
 from .corenlp import CoreNLP
@@ -11,7 +12,7 @@ from .dict_transforms import FilterDocument, FilterEmpty, NewField
 from .language_filter import LanguageFilter, DomainFilter
 from .minhash import MinHash
 from .search import Search
-from .stats import WC
+from .stats import WC, Counts
 
 
 __all__ = [CoreNLP, DeleteFields, RetainFields, FilterDictField,

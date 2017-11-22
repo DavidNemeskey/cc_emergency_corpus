@@ -17,7 +17,7 @@
 			"args": [["lemmas"]]
 		},
 		{
-			"class": "cc_emergency.functional.transforms.bigrams.CreateBigrams",
+			"class": "cc_emergency.functional.transforms.CreateBigrams",
 			"args": [["lemmas"]]
 		},
 		{
