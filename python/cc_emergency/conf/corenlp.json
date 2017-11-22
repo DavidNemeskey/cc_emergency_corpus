@@ -15,7 +15,7 @@
 			"kwargs": {
 				"props": {
 					"server": {
-						"directory": "/mnt/store/hlt/Tool/Stanford_CoreNLP/stanford-corenlp-full-2016-10-31/",
+						"directory": "/mnt/permanent/Tool/stanford-corenlp-full-2017-06-09/",
 						"port": "9${process}73",
 						"memory": "15g"
 					},
