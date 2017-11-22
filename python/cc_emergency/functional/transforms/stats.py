@@ -4,6 +4,7 @@
 """Collects statistics from the corpus."""
 
 from __future__ import absolute_import, division, print_function
+from collections import Counter
 
 from cc_emergency.functional.core import Map
 
@@ -27,3 +28,16 @@ class WC(Map):
             }
         else:
             return {'lines': 0, 'words': 0, 'chars': 0}
+
+
+class Counts(Map):
+    """Word counts in specific fields."""
+    def __init__(self, fields):
+        super(Counts, self).__init__()
+        self.fields = fields
+
+    def transform(self, obj):
+        for field in self.fields:
+            if field in obj:
+                obj['{}_counts'.format(field)] = Counter(field)
+        return obj
