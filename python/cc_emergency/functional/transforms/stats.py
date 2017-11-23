@@ -39,5 +39,5 @@ class Counts(Map):
     def transform(self, obj):
         for field in self.fields:
             if field in obj:
-                obj['{}_counts'.format(field)] = Counter(field)
+                obj['{}_counts'.format(field)] = Counter(obj[field])
         return obj
