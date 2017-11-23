@@ -11,6 +11,10 @@
 			}
 		},
 		{
+			"class": "cc_emergency.functional.transforms.RetainFields",
+			"args": [["url", "lemmas_counts", "lemmas_bigrams_counts", "content"]]
+		},
+		{
 			"class": "cc_emergency.functional.io.JsonWriter",
 			"args": ["$output"]
 		}
