@@ -6,7 +6,7 @@
 		},
 		{
 			"class": "cc_emergency.functional.transforms.Counts",
-			"args": {
+			"kwargs": {
 				"fields": ["lemmas", "lemmas_bigrams"]
 			}
 		},
