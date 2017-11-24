@@ -50,5 +50,4 @@ class TFDFWriter(TFDFCollector, JsonWriter):
             field_weights, tf_df_names, output_file)
 
     def __call__(self, it):
-        counts = super(TFDFWriter, self).__call__(it)
-        JsonWriter.__call__(self, [counts])
+        return JsonWriter.__call__(self, [super(TFDFWriter, self).__call__(it)])
