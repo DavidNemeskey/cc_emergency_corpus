@@ -47,9 +47,3 @@ class DictAggregator(Collector):
             else:
                 collected[key] = value
         return collected
-
-
-print(DictAggregator(['head'])([
-    {'head': {'TF': {'a': 1, 'b': 2}, 'DF': {'a': 1, 'b': 1}}, 'body': {'b': 5}},
-    {'head': {'TF': {'b': 1, 'c': 2}, 'DF': {'b': 1, 'c': 1}}, 'body': {'b': 3}},
-]))
