@@ -6,6 +6,8 @@ Aggregates dictionaries. Aggregation is done with the + operator, so everything
 that supports it (numbers, strings, lists) are valid as value types.
 """
 
+from functools import reduce
+
 from cc_emergency.functional.core import Collector
 
 
@@ -25,10 +27,7 @@ class DictAggregator(Collector):
             return self.__collect_obj(it)
 
     def __collect_obj(self, it):
-        collected = {}
-        for obj in it:
-            self.__aggregate(collected, obj)
-        return [collected]
+        return reduce(self.__aggregate, it, {})
 
     def __collect_fields(self, it):
         collected = {field: {} for field in self.fields}
@@ -41,6 +40,16 @@ class DictAggregator(Collector):
     def __aggregate(collected, obj):
         for key, value in obj.items():
             if key in collected:
-                collected[key] += value
+                if isinstance(value, dict):
+                    DictAggregator.__aggregate(collected[key], value)
+                else:
+                    collected[key] += value
             else:
                 collected[key] = value
+        return collected
+
+
+print(DictAggregator(['head'])([
+    {'head': {'TF': {'a': 1, 'b': 2}, 'DF': {'a': 1, 'b': 1}}, 'body': {'b': 5}},
+    {'head': {'TF': {'b': 1, 'c': 2}, 'DF': {'b': 1, 'c': 1}}, 'body': {'b': 3}},
+]))
