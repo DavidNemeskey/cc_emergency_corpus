@@ -3,8 +3,10 @@
 """Adds bigram versions of fields to the documents."""
 
 from itertools import tee
+import re
 
 from cc_emergency.functional.core import Map
+from cc_emergency.utils import openall
 
 class CreateBigrams(Map):
     """
@@ -35,3 +37,43 @@ class CreateBigrams(Map):
         a, b = tee(iterable)
         next(b, None)
         return zip(a, b)
+
+
+class BigramFilter(Map):
+    """
+    Removes all bigrams from the bigram fields whose parts are not in the
+    unigram set provided.
+    """
+    US_P = re.compile('_')
+
+    def __init__(self, fields, set_file):
+        super(BigramFilter, self).__init__()
+        self.fields = fields
+        with openall(set_file) as inf:
+            self.s = set(inf.read().split('\n'))
+
+    def transform(self, obj):
+        for field in self.fields:
+            if field in obj:
+                obj[field] = {
+                    bigram: freq for bigram, freq in obj[field].items()
+                    if self.has_valid_split(bigram)
+                }
+        return obj
+
+    def has_valid_split(self, bigram):
+        """
+        Checks if a (_-joined bigram) has a valid split, i.e. both of its
+        components are in the unigram set.
+        """
+        for w1, w2 in self.all_splits(bigram):
+            if w1 in self.s and w2 in self.s:
+                return True
+        else:
+            return False
+
+    @staticmethod
+    def all_splits(bigram):
+        """Returns all possible splits of a(n underscore-joined) bigram."""
+        for m in BigramFilter.US_P.finditer(bigram):
+            yield bigram[:m.span()[0]], bigram[m.span()[1]:]
