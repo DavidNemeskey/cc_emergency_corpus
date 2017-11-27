@@ -77,3 +77,43 @@ class BigramFilter(Map):
         """Returns all possible splits of a(n underscore-joined) bigram."""
         for m in BigramFilter.US_P.finditer(bigram):
             yield bigram[:m.span()[0]], bigram[m.span()[1]:]
+
+
+class BigramFilter2(Map):
+    """
+    Removes all bigrams from the bigram fields whose parts are not in the
+    document as unigrams.
+    """
+    US_P = re.compile('_')
+
+    def __init__(self, fields):
+        """fields here is a map: bigram field -> unigram field it is based on."""
+        super(BigramFilter2, self).__init__()
+        self.fields = fields
+
+    def transform(self, obj):
+        for bif, unif in self.fields.items():
+            if bif in obj:
+                unigrams = unif.keys()
+                obj[bif] = {
+                    bigram: freq for bigram, freq in obj[bif].items()
+                    if self.has_valid_split(bigram, unigrams)
+                }
+        return obj
+
+    def has_valid_split(self, bigram, unigrams):
+        """
+        Checks if a (_-joined bigram) has a valid split, i.e. both of its
+        components are in the unigram set.
+        """
+        for w1, w2 in self.all_splits(bigram):
+            if w1 in self.s and w2 in unigrams:
+                return True
+        else:
+            return False
+
+    @staticmethod
+    def all_splits(bigram):
+        """Returns all possible splits of a(n underscore-joined) bigram."""
+        for m in BigramFilter.US_P.finditer(bigram):
+            yield bigram[:m.span()[0]], bigram[m.span()[1]:]

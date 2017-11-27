@@ -3,7 +3,7 @@
 
 """Useful Transforms."""
 
-from .bigrams import CreateBigrams, BigramFilter
+from .bigrams import CreateBigrams, BigramFilter, BigramFilter2
 from .conll_converter import CoNLLToCounts, CoNLLToList, CoNLLToLists
 from .conll_converter import CoNLLToSet, CoNLLToText
 from .corenlp import CoreNLP
