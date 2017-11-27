@@ -94,7 +94,7 @@ class BigramFilter2(Map):
     def transform(self, obj):
         for bif, unif in self.fields.items():
             if bif in obj:
-                unigrams = unif.keys()
+                unigrams = obj[unif].keys()
                 obj[bif] = {
                     bigram: freq for bigram, freq in obj[bif].items()
                     if self.has_valid_split(bigram, unigrams)
@@ -107,7 +107,7 @@ class BigramFilter2(Map):
         components are in the unigram set.
         """
         for w1, w2 in self.all_splits(bigram):
-            if w1 in self.s and w2 in unigrams:
+            if w1 in unigrams and w2 in unigrams:
                 return True
         else:
             return False
