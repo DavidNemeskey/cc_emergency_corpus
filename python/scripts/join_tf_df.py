@@ -39,6 +39,7 @@ def main():
                 if not args.field or field in args.field:
                     data['TF'].update(j[stats['TF']])
                     data['DF'].update(j[stats['DF']])
+    print(json.dumps(data))
 
 
 if __name__ == '__main__':
