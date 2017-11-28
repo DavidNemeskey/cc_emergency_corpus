@@ -15,10 +15,10 @@ class DocCount(Collector):
         super(DocCount, self).__init__()
 
     def __call__(self, it):
-        return sum(1 for _ in it)
+        return [sum(1 for _ in it)]
 
 
 class Sum(Collector):
     """Sums ints."""
     def __call__(self, it):
-        return reduce(add, it)
+        return [reduce(add, it)]
