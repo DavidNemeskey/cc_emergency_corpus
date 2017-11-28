@@ -31,14 +31,14 @@ def parse_arguments():
 def main():
     args = parse_arguments()
 
-    data = {'TF': Counter(int), 'DF': Counter(int)}
+    data = {'TF': Counter(), 'DF': Counter()}
     for f in args.freq_file:
         with openall(f) as inf:
             j = json.load(inf)
             for field, stats in j.items():
                 if not args.field or field in args.field:
-                    data['TF'].update(j[stats['TF']])
-                    data['DF'].update(j[stats['DF']])
+                    data['TF'].update(stats.get('TF', {}))
+                    data['DF'].update(stats.get('DF', {}))
     print(json.dumps(data))
 
 
