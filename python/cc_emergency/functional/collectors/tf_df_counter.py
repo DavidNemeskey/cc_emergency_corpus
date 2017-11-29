@@ -36,7 +36,7 @@ class TFDFCollector(Collector):
                 counts[field][self.tf_df_names[0]].update(
                     {w: f * weight for w, f in field_counts.items()})
                 counts[field][self.tf_df_names[1]].update(viewkeys(field_counts))
-        return counts
+        return [counts]
 
 
 class TFDFWriter(TFDFCollector, JsonWriter):
