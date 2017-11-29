@@ -13,6 +13,12 @@
 			]
 		},
 		{
+			"class": "cc_emergency.functional.transforms.FilterStopwords",
+			"kwargs": {
+				"fields": ["lemmas"]
+			}
+		},
+		{
 			"class": "cc_emergency.functional.transforms.FilterEmpty",
 			"args": [["lemmas"]]
 		},
@@ -30,4 +36,3 @@
 		}
 	]
 }
-
