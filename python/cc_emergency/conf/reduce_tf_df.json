@@ -8,14 +8,14 @@
 			"class": "cc_emergency.functional.collectors.TFDFCollector",
 			"kwargs": {
 				"field_weights": {
-					"lemmas_counts": 1,
-					"lemmas_bigrams_counts": 1
+					"lemmas": 1,
+					"lemmas_bigrams": 1
 				}
 			}
 		}
 	],
 	"reducer": {
 		"class": "cc_emergency.functional.collectors.DictAggregator",
-		"args": [["TF", "DF"]]
+		"args": [["lemmas", "lemmas_bigrams"]]
 	}
 }
