@@ -11,6 +11,7 @@ from .dict_transforms import DeleteFields, RetainFields, FilterDictField
 from .dict_transforms import FilterDocument, FilterEmpty, NewField
 from .language_filter import LanguageFilter, DomainFilter
 from .minhash import MinHash
+from .nlp import FilterStopwords
 from .search import Search
 from .stats import WC, Counts
 
@@ -18,4 +19,4 @@ from .stats import WC, Counts
 __all__ = [CoreNLP, DeleteFields, RetainFields, FilterDictField,
            FilterDocument, FilterEmpty, NewField, LanguageFilter, DomainFilter,
            CoNLLToCounts, CoNLLToList, CoNLLToLists, CoNLLToSet,
-           CoNLLToText, MinHash, Search, WC]
+           CoNLLToText, MinHash, FilterStopwords, Search, WC]
