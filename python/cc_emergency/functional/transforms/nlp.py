@@ -3,22 +3,22 @@
 
 """NLP-related transformations."""
 
-import nltk
-
 from cc_emergency.functional.core import Map
+from cc_emergency.utils.nlp import AllFilter
 
 
-class FilterStopwords(Map):
-    def __init__(self, fields, language='english'):
-        super(FilterStopwords, self).__init__()
+class FilterFields(Map):
+    """Filters the content of select fields using the specified filters."""
+    def __init__(self, fields, filters=None):
+        super(FilterFields, self).__init__()
         self.fields = fields
-        self.language = language
+        self.filter_confs = filters or []
 
     def __enter__(self):
-        self.s = nltk.corpus.stopwords.words(self.language)
+        self.filter = AllFilter(self.filter_confs)
 
     def transform(self, obj):
         for field in self.fields:
             if field in obj:
-                obj[field] = [w for w in obj[field] if w not in self.s]
+                obj[field] = [w for w in obj[field] if self.filter.valid(w)]
         return obj

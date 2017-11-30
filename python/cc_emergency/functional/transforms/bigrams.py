@@ -7,6 +7,7 @@ import re
 
 from cc_emergency.functional.core import Map
 from cc_emergency.utils import openall
+from cc_emergency.utils.nlp import AllFilter
 
 class CreateBigrams(Map):
     """
@@ -16,19 +17,28 @@ class CreateBigrams(Map):
 
     The name of the new field will be {field}_bigrams. If it already exists,
     it is left alone, unless the overwrite argument is True.
+
+    The class also accepts a set of filters. If any of the two component words
+    does not pass the filter, the bigram is skipped.
     """
-    def __init__(self, fields, overwrite=False):
+    def __init__(self, fields, overwrite=False, filters=None):
         super(CreateBigrams, self).__init__()
         self.fields = fields
         self.overwrite = overwrite
+        self.filter_confs = filters or []
+
+    def __enter__(self):
+        self.filter = AllFilter(self.filter_confs)
 
     def transform(self, obj):
         for field in self.fields:
             new_field = '{}_bigrams'.format(field)
             if field in obj:
                 if new_field not in obj or self.overwrite:
-                    obj[new_field] = ['_'.join(bigram) for bigram in
-                                      self.pairwise(obj[field])]
+                    obj[new_field] = [
+                        '_'.join(bigram) for bigram in self.pairwise(obj[field])
+                        if all(map(self.filter.valid, bigram))
+                    ]
         return obj
 
     @staticmethod

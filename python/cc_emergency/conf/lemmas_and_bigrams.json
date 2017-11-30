@@ -13,9 +13,21 @@
 			]
 		},
 		{
-			"class": "cc_emergency.functional.transforms.FilterStopwords",
+			"class": "cc_emergency.functional.transforms.FilterFields",
 			"kwargs": {
 				"fields": ["lemmas"]
+				"filters": [
+					{
+						"class": "cc_emergency.utils.nlp.StopWordFilter"
+					},
+					{
+						"class": "cc_emergency.utils.nlp.LongWordFilter",
+						"args": [30]
+					},
+					{
+						"class": "cc_emergency.utils.nlp.AlnumFilter"
+					}
+				]
 			}
 		},
 		{
