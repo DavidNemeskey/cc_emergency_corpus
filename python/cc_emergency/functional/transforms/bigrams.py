@@ -111,6 +111,7 @@ class BigramFilter2(Map):
                 }
         return obj
 
+    @staticmethod
     def has_valid_split(self, bigram, unigrams):
         """
         Checks if a (_-joined bigram) has a valid split, i.e. both of its
