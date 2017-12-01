@@ -59,6 +59,7 @@ def main():
     args = parse_arguments()
     with openall(args.input_file) as inf:
         j = json.load(inf)
+
     for field in args.fields:
         uni_dfs = j[field]['DF']
         bi_dfs = j[field + '_bigrams']['DF']
@@ -88,6 +89,11 @@ def main():
                 args.bigram, len(bi_dfs)))
             print('  Filtered bigram tokens ({}): {}'.format(
                 args.bigram, sum(bi_tfs.values())))
+        j[field] = {'DF': uni_dfs, 'TF': uni_tfs}
+        j[field + '_bigrams'] = {'DF': bi_dfs, 'TF': bi_tfs}
+
+    with openall(args.output_file, 'wt') as outf:
+        json.dump(j, outf)
 
 
 if __name__ == '__main__':
