@@ -105,12 +105,29 @@ class BigramFilter2(Map):
     def transform(self, obj):
         for bif, unif in self.fields.items():
             if bif in obj:
-                unigrams = obj[unif].keys()
-                obj[bif] = {
-                    bigram: freq for bigram, freq in obj[bif].items()
-                    if self.has_valid_split(bigram, unigrams)
-                }
+                if isinstance(obj[unif], dict):
+                    unigrams = obj[unif].keys()
+                else:
+                    unigrams = set(obj[unif])
+                if isinstance(obj[bif], dict):
+                    filter_fn = self.filter_dict
+                else:
+                    filter_fn = self.filter_list
+
+                obj[bif] = filter_fn(obj[bif], unigrams)
         return obj
+
+    def filter_dict(self, bigram_dict, unigrams):
+        return {
+            bigram: freq for bigram, freq in bigram_dict.items()
+            if self.has_valid_split(bigram, unigrams)
+        }
+
+    def filter_list(self, bigram_list, unigrams):
+        return [
+            bigram for bigram in bigram_list
+            if self.has_valid_split(bigram, unigrams)
+        ]
 
     @staticmethod
     def has_valid_split(self, bigram, unigrams):
