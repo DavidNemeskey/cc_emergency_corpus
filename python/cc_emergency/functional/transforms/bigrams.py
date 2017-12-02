@@ -135,11 +135,8 @@ class BigramFilter2(Map):
         Checks if a (_-joined bigram) has a valid split, i.e. both of its
         components are in the unigram set.
         """
-        for w1, w2 in bigram.split(' '):
-            if w1 in unigrams and w2 in unigrams:
-                return True
-        else:
-            return False
+        w1, w2 = bigram.split(' ')
+        return w1 in unigrams and w2 in unigrams
 
     @staticmethod
     def all_splits(bigram):
