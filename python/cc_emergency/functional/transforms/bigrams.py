@@ -130,7 +130,7 @@ class BigramFilter2(Map):
         ]
 
     @staticmethod
-    def has_valid_split(self, bigram, unigrams):
+    def has_valid_split(bigram, unigrams):
         """
         Checks if a (_-joined bigram) has a valid split, i.e. both of its
         components are in the unigram set.
