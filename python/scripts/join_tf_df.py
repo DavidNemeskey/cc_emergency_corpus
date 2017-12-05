@@ -48,7 +48,7 @@ def main():
             j = json.load(inf)
             for field, stats in j.items():
                 if args.aggregate:
-                    if not args.field or field in args.field:
+                    if not args.fields or field in args.fields:
                         data['TF'].update(stats.get('TF', {}))
                         data['DF'].update(stats.get('DF', {}))
                 else:

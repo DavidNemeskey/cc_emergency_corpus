@@ -49,6 +49,12 @@
 			}
 		},
 		{
+			"class": "cc_emergency.functional.transforms.BigramFilter2",
+			"kwargs": {
+				"fields": {"lemmas_bigrams": "lemmas"}
+			}
+		},
+		{
 			"class": "cc_emergency.functional.transforms.FilterEmpty",
 			"args": [["lemmas"]]
 		},

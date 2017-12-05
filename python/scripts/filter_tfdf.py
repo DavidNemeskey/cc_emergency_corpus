@@ -8,7 +8,7 @@ import argparse
 import json
 
 from cc_emergency.utils import openall
-from cc_emergency.functional.transform.bigrams import BigramFilter2
+from cc_emergency.functional.transforms.bigrams import BigramFilter2
 
 
 def parse_arguments():
@@ -80,9 +80,9 @@ def main():
             if args.cross_filter:
                 bi_dfs, bi_tfs = cross_filter(uni_dfs, bi_dfs, bi_tfs)
                 print('  Cross-filtered bigrams: {}'.format(
-                    args.bigram, len(bi_dfs)))
+                    len(bi_dfs)))
                 print('  Cross-filtered bigram tokens: {}'.format(
-                    args.bigram, sum(bi_tfs.values())))
+                    sum(bi_tfs.values())))
         if args.bigram:
             bi_dfs, bi_tfs = filter_dicts(bi_dfs, bi_tfs, args.bigram)
             print('  Filtered bigrams ({}): {}'.format(
