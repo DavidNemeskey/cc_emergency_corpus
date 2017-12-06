@@ -14,7 +14,10 @@
 		{
 			"class": "cc_emergency.functional.collectors.TFDFCollector",
 			"kwargs": {
-				"field_weights" : {"counts": 1}
+				"field_weights" : {
+				    "lemmas": 1,
+				    "lemmas_bigrams": 1
+				}
 			}
 		}
 	],
