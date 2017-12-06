@@ -23,6 +23,6 @@
 	],
 	"reducer": {
 		"class": "cc_emergency.functional.collectors.DictAggregator",
-		"args": [["TF", "DF"]]
+		"args": [["lemmas", "lemmas_bigrams"]]
 	}
 }
