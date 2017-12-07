@@ -40,12 +40,12 @@ def main():
     data = read_input(args.input_file)
     for item in data:
         min_r, min_df, max_df = get_thresholds(args, ' ' in item[0])
-        if min_r is not None and item[1] < min_r:
+        if min_r is not None and float(item[1]) < min_r:
             continue
         if len(item) > 2:
-            if min_df is not None and item[-1] < min_df:
+            if min_df is not None and int(item[-1]) < min_df:
                 continue
-            if max_df is not None and max_df < item[-1]:
+            if max_df is not None and max_df < int(item[-1]):
                 continue
         print('\t'.join(map(str, item)))
 
