@@ -39,7 +39,7 @@ def main():
     args = parse_arguments()
     data = read_input(args.input_file)
     for item in data:
-        min_r, min_df, max_df = get_thresholds(args, ' ' in item[0])
+        min_r, min_df, max_df = get_thresholds(args, ' ' not in item[0])
         if min_r is not None and float(item[1]) < min_r:
             continue
         if len(item) > 2:
