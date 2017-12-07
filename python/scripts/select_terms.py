@@ -24,7 +24,7 @@ def parse_arguments():
 
 def read_input(input_file):
     with openall(input_file) as inf:
-        return [line.strip().split() for line in inf]
+        return [line.strip().split('\t') for line in inf]
 
 
 def get_thresholds(args, unigram):
