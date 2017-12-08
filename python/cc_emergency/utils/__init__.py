@@ -266,3 +266,28 @@ def read_conll(instream):
 def write_conll(sentence, outstream):
     print(u'\n'.join(u'\t'.join(word) for word in sentence) + '\n',
           file=outstream)
+
+
+def itemgetter(*items, defaults=None):
+    """
+    An itemgetter with defaults. If defaults are not provided, falls back to
+    the regular itemgetter.
+    """
+    def f(obj, item, default):
+        try:
+            return obj[item]
+        except:
+            return default
+
+    if not defaults:
+        from operator import itemgetter
+        return itemgetter(*items)
+    if len(items) != len(defaults):
+        raise ValueError('Each item must have a default.')
+
+    queries = list(zip(items, defaults))
+
+    def g(obj):
+        ret = tuple(f(obj, item, default) for item, default in queries)
+        return ret[0] if len(ret) == 1 else ret
+    return g
