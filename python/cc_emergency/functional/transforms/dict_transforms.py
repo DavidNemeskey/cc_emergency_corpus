@@ -39,6 +39,17 @@ class RetainFields(FilterKeys):
         return key in self.fields
 
 
+class GetField(Map):
+    """Replaces the document with one of its single fields."""
+    def __init__(self, field):
+        super(GetField, self).__init__()
+        self.field = field
+
+    def transform(self, obj):
+        if self.field in obj:
+            return obj[self.field]
+
+
 class LambdaBase(object):
     """
     Initialization for lambda expression-based transforms. It reads the
