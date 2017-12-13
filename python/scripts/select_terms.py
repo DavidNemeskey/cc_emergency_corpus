@@ -37,6 +37,14 @@ def parse_arguments():
     parser.add_argument('--max-bdf', type=int, help='the maximum bigram df.')
     parser.add_argument('--min-ur', type=float, help='the minimum unigram ratio.')
     parser.add_argument('--min-br', type=float, help='the minimum bigram ratio.')
+    parser.add_argument('--min-eudf', type=int,
+                        help='the minimum unigram df in the emergency subset.')
+    parser.add_argument('--max-eudf', type=int,
+                        help='the maximum unigram df in the emergency subset.')
+    parser.add_argument('--min-ebdf', type=int,
+                        help='the minimum bigram df in the emergency subset.')
+    parser.add_argument('--max-ebdf', type=int,
+                        help='the maximum bigram df in the emergency subset.')
     parser.add_argument('--min-udfr', type=int,
                         help='the minimum unigram df ratio.')
     parser.add_argument('--max-udfr', type=int,
@@ -82,6 +90,8 @@ def get_thresholds(args, unigram):
         getattr(args, 'min_{}r'.format(prefix)),
         getattr(args, 'min_{}df'.format(prefix)),
         getattr(args, 'max_{}df'.format(prefix)),
+        getattr(args, 'min_e{}df'.format(prefix)),
+        getattr(args, 'max_e{}df'.format(prefix)),
         getattr(args, 'min_{}dfr'.format(prefix)),
         getattr(args, 'max_{}dfr'.format(prefix)),
     )
@@ -108,6 +118,7 @@ def filter_token(word):
 
 
 def main():
+    TOKEN, SCORE, EDF, DF = range(4)
     args = parse_arguments()
     data = read_input(args.input_file)
     if args.query_file:
@@ -119,25 +130,29 @@ def main():
     for item in data:
         if not args.all and not filter_item(item):
             continue
-        min_r, min_df, max_df, min_dfr, max_dfr = get_thresholds(
-            args, ' ' not in item[0])
-        if min_r is not None and float(item[1]) < min_r:
+        min_r, min_df, max_df, min_edf, max_edf, min_dfr, max_dfr = get_thresholds(
+            args, ' ' not in item[TOKEN])
+        if min_r is not None and float(item[SCORE]) < min_r:
             continue
         if len(item) > 2:
-            if min_df is not None and item[-1] < min_df:
+            if min_df is not None and item[DF] < min_df:
                 continue
-            if max_df is not None and max_df < item[-1]:
+            if max_df is not None and max_df < item[DF]:
                 continue
-            if min_dfr is not None and float(item[-1]) / item[-2] < min_dfr:
+            if min_edf is not None and item[EDF] < min_df:
                 continue
-            if max_dfr is not None and max_dfr < float(item[-1]) / item[-2]:
+            if max_edf is not None and max_df < item[EDF]:
                 continue
-        if queries and item[0] in queries:
+            if min_dfr is not None and float(item[DF]) / item[EDF] < min_dfr:
+                continue
+            if max_dfr is not None and max_dfr < float(item[DF]) / item[EDF]:
+                continue
+        if queries and item[TOKEN] in queries:
             sorted_data['query'].append(item)
         else:
             sorted_data['new'].append(item)
     if queries:
-        have_it = set(map(itemgetter(0), queries))
+        have_it = set(map(itemgetter(TOKEN), queries))
         sorted_data['missing'] = queries - have_it
 
     if queries:
