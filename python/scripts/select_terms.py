@@ -45,6 +45,8 @@ def parse_arguments():
                         help='the minimum bigram df ratio.')
     parser.add_argument('--max-bdfr', type=int,
                         help='the maximum bigram df ratio.')
+    parser.add_argument('--all', '-a', action='store_true',
+                        help='do NOT filter NNPs, numbers, tags, etc.')
     args = parser.parse_args()
 
     if not re.match('^[rdw]{1,3}$', args.sort_by):
@@ -67,6 +69,7 @@ def sorter(pattern):
     defaults = [{'w': None, 'r': 0, 'd': 0}[c] for c in pattern]
 
     ig = itemgetter(*indices, defaults=defaults)
+
     def key(obj):
         return tuple(v if isinstance(v, str) else neg(v)
                      for v in ig(obj))
@@ -88,6 +91,22 @@ def read_queries(query_file):
     with openall(query_file) as inf:
         return set(l.strip() for l in inf.readlines())
 
+
+def filter_item(item):
+    return all(filter_token(w) for w in item[0].split())
+
+
+def filter_token(word):
+    if all(c.isalpha() or c in ['.', '-'] for c in word):
+        if word.startswith('-') or word.endswith('-'):
+            return False
+        if word == 'NNP':
+            return False
+        return True
+    else:
+        return False
+
+
 def main():
     args = parse_arguments()
     data = read_input(args.input_file)
@@ -98,6 +117,8 @@ def main():
 
     sorted_data = {'new': [], 'query': []}
     for item in data:
+        if not args.all and not filter_item(item):
+            continue
         min_r, min_df, max_df, min_dfr, max_dfr = get_thresholds(
             args, ' ' not in item[0])
         if min_r is not None and float(item[1]) < min_r:
