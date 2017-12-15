@@ -139,9 +139,9 @@ def main():
                 continue
             if max_df is not None and max_df < item[DF]:
                 continue
-            if min_edf is not None and item[EDF] < min_df:
+            if min_edf is not None and item[EDF] < min_edf:
                 continue
-            if max_edf is not None and max_df < item[EDF]:
+            if max_edf is not None and max_edf < item[EDF]:
                 continue
             if min_dfr is not None and float(item[DF]) / item[EDF] < min_dfr:
                 continue
@@ -152,7 +152,7 @@ def main():
         else:
             sorted_data['new'].append(item)
     if queries:
-        have_it = set(map(itemgetter(TOKEN), queries))
+        have_it = set(map(itemgetter(TOKEN), sorted_data['query']))
         sorted_data['missing'] = queries - have_it
 
     if queries:
