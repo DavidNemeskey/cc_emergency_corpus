@@ -1,0 +1,21 @@
+{
+	"pipeline": [
+		{
+			"class": "cc_emergency.functional.io.JsonReader",
+			"args": ["$input"]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.business.ExtractFromNews",
+			"kwargs": {
+				"keyword_file": "$kw_file",
+				"conll_field": "content_corenlp",
+				"min_keywords": 2
+			}
+		},
+		{
+			"class": "cc_emergency.functional.io.JsonWriter",
+			"args": ["$output"]
+		}
+	]
+}
+
