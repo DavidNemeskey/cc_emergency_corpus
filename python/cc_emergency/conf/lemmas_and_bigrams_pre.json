@@ -1,0 +1,50 @@
+{
+	"pipeline": [
+		{
+			"class": "cc_emergency.functional.io.JsonReader",
+			"kwargs": {
+				"input_file": "$input"
+			}
+		},
+		{
+			"class": "cc_emergency.functional.transforms.CoNLLToList",
+			"args": [
+				{"content_corenlp": ["lemma", true, "NNP", true, "lemmas"]}
+			]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.FilterFields",
+			"kwargs": {
+				"fields": ["lemmas"],
+				"filters": [
+					{
+						"class": "cc_emergency.utils.nlp.StopWordFilter"
+					},
+					{
+						"class": "cc_emergency.utils.nlp.LongWordFilter",
+						"args": [30]
+					},
+					{
+						"class": "cc_emergency.utils.nlp.AlnumFilter"
+					}
+				]
+			}
+		},
+		{
+			"class": "cc_emergency.functional.transforms.FilterEmpty",
+			"args": [["lemmas"]]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.CreateBigrams",
+			"args": [["lemmas"]]
+		},
+		{
+			"class": "cc_emergency.functional.transforms.RetainFields",
+			"args": [["url", "lemmas", "lemmas_bigrams", "content"]]
+		},
+		{
+			"class": "cc_emergency.functional.io.JsonWriter",
+			"args": ["$output"]
+		}
+	]
+}

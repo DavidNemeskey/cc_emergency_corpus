@@ -76,9 +76,9 @@ class JsonReader(Source, FileWrapper):
 
 class JsonWriter(Collector, FileWrapper):
     """Writes a text file that has a JSON object on each line."""
-    def __init__(self, output_file):
+    def __init__(self, output_file, *args, **kwargs):
         super(JsonWriter, self).__init__(
-            self.replace_extension(output_file, 'json'), 'wt')
+            self.replace_extension(output_file, 'json'), 'wt', *args, **kwargs)
 
     def __call__(self, it):
         for obj in it:

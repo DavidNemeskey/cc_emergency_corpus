@@ -9,8 +9,8 @@ from cc_emergency.functional.core import Collector
 
 
 class ListCollector(Collector):
-    """Collects the elements into a list."""
-    def __init__(self, fields, num_records=None):
+    """Collects (optionally the first n) elements into a list."""
+    def __init__(self, num_records=None):
         super(ListCollector, self).__init__()
         self.num_records = num_records
 

@@ -74,7 +74,7 @@ class ConvertCoNLL(Map):
             'format is not implemented; use one of the subclasses.')
 
     def __convert(self, token, column, lower, convert_nnps):
-        ret = token[column]
+        ret = '_'.join(token[column].split())
         if lower:
             ret = ret.lower()
         if convert_nnps and token[ConvertCoNLL.POS].startswith('NNP'):
