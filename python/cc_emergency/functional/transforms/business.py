@@ -38,4 +38,4 @@ class ExtractFromNews(Extractor):
             intersection = len(doc & self.keywords)
             if intersection >= self.min_keywords:
                 obj[self.conll_field + '_match'] = intersection
-                yield obj
+                return obj
