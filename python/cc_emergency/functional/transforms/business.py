@@ -26,8 +26,8 @@ class Extractor(Map):
 
 class ExtractFromNews(Extractor):
     """Extracts the documents from the news collections."""
-    def __init__(self, keyword_file, conll_field):
-        super(ExtractFromNews, self).__init__(keyword_file)
+    def __init__(self, keyword_file, min_keywords, conll_field):
+        super(ExtractFromNews, self).__init__(keyword_file, min_keywords)
         self.conll_field = conll_field
 
     def transform(self, obj):
