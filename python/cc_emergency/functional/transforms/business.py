@@ -4,6 +4,7 @@
 """Business vocabulary-related classes."""
 
 from __future__ import absolute_import, division, print_function
+import re
 
 from cc_emergency.functional.core import Map
 from cc_emergency.utils import openall
@@ -29,7 +30,26 @@ class GetEntitiesFromConll(object):
     Gets entities (word bursts whose kth CoNLL field matches a regex) from
     CoNLL-formatted data.
     """
-    def __init__(self, 
+    def __init__(self, word_field, type_field, type_regex):
+        self.word_field = word_field
+        self.type_field = type_field
+        self.type_regex = type_regex
+        self.p = re.compile(type_regex)
+
+    def get_entities(self, conll):
+        wf, tf, p = self.word_field, self.type_field, self.p
+        entities = set()
+        for sentence in conll:
+            entity = []
+            for token in sentence:
+                if p.match(token[tf]):
+                    entity.append(token[wf].lower())
+                elif entity:
+                    entities.add(tuple(entity))
+                    entity = []
+            if entity:
+                entities.add(tuple(entity))
+        return entities
 
 
 class ExtractFromNews(Extractor):
