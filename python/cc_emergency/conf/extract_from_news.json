@@ -5,11 +5,14 @@
 			"args": ["$input"]
 		},
 		{
-			"class": "cc_emergency.functional.transforms.business.ExtractFromNews",
+			"class": "cc_emergency.functional.transforms.business.EntityExtractor",
 			"kwargs": {
 				"keyword_file": "$kw_file",
 				"conll_field": "content_corenlp",
-				"min_keywords": 2
+				"min_keywords": 1,
+				"word_field": 0,
+				"type_field": 2,
+				"type_regex": "^NNPS?"
 			}
 		},
 		{

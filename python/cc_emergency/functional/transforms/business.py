@@ -48,7 +48,7 @@ class EntityExtractor(Map):
         self.keywords = self.read_kw_file(keyword_file)
         self.min_keywords = min_keywords
         self.conll_field = conll_field
-        self.ner = GetEntitiesFromConll(word_field, type_regex, type_regex)
+        self.ner = GetEntitiesFromConll(word_field, type_field, type_regex)
 
     def read_kw_file(self, keyword_file):
         with openall(keyword_file) as inf:
