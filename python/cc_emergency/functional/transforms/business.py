@@ -24,6 +24,14 @@ class Extractor(Map):
             return set(tuple(line.strip().lower().split('\t')) for line in inf)
 
 
+class GetEntitiesFromConll(object):
+    """
+    Gets entities (word bursts whose kth CoNLL field matches a regex) from
+    CoNLL-formatted data.
+    """
+    def __init__(self, 
+
+
 class ExtractFromNews(Extractor):
     """Extracts the documents from the news collections."""
     def __init__(self, keyword_file, min_keywords, conll_field):
