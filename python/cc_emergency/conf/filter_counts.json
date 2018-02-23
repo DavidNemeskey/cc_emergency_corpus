@@ -7,14 +7,21 @@
 		{
 			"class": "cc_emergency.functional.transforms.FilterDictField",
 			"kwargs": {
-			    "field" :"counts",
+			    "field" :"lemmas_counts",
 			    "expression": "k in s",
-			    "set_file": "news_df.lst"
+			    "set_file": "$set_file"
+			}
+		},
+		{
+			"class": "cc_emergency.functional.transforms.BigramFilter",
+			"kwargs": {
+				"fields": ["lemmas_bigrams_counts"],
+				"set_file": "$set_file"
 			}
 		},
 		{
 			"class": "cc_emergency.functional.transforms.FilterEmpty",
-			"args": [["counts"]]
+			"args": [["lemmas_counts"]]
 		},
 		{
 			"class": "cc_emergency.functional.io.JsonWriter",

@@ -15,8 +15,6 @@ TODO: check out PyFunctional. It seems to have implemented this already, but
 
 from builtins import filter, map
 from contextlib2 import ExitStack
-import importlib
-import json
 import logging
 
 
@@ -123,27 +121,6 @@ class Pipeline(ExitStack):
         for resource in self.resources:
             self.enter_context(resource)
         return self.resources
-
-
-def create_resource(config):
-    """
-    Creates a Resource object from the specified configuration dictionary.
-    Its format is:
-
-        class: The fully qualified path name.
-        args: A list of positional arguments (optional).
-        kwargs: A dictionary of keyword arguments (optional).
-    """
-    try:
-        module_name, _, class_name = config['class'].rpartition('.')
-        module = importlib.import_module(module_name)
-        cls = getattr(module, class_name)
-        return cls(*config.get('args', []), **config.get('kwargs', {}))
-    except Exception as e:
-        raise Exception(
-            'Could not create resource\n{}'.format(json.dumps(config, indent=4)),
-            e
-        )
 
 
 def build_pipeline(resources, connections=None):

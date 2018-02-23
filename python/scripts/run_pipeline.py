@@ -15,10 +15,10 @@ import re
 from string import Template
 import sys
 
-from cc_emergency.functional.core import Pipeline, create_resource, build_pipeline
+from cc_emergency.functional.core import Pipeline, build_pipeline
 from cc_emergency.utils import openall, run_queued
 from cc_emergency.utils import setup_queue_logger, setup_stream_logger
-from cc_emergency.utils.config import get_config_file
+from cc_emergency.utils.config import create_object, get_config_file
 
 
 def parse_arguments():
@@ -65,7 +65,7 @@ def process_file(config_str, queue, logging_level=None, logging_queue=None):
     try:
         # First, the transforms are initialized, only once (see #47)
         configuration = json.loads(config_str)
-        transforms = [create_resource(desc) for desc in
+        transforms = [create_object(desc) for desc in
                       configuration['pipeline'][1:-1]]
         connections = [desc.get('connection') for desc
                        in configuration['pipeline']][1:-1]
@@ -76,8 +76,8 @@ def process_file(config_str, queue, logging_level=None, logging_queue=None):
                     infile, outfile = queue.get_nowait()
                     configuration = json.loads(Template(config_str).safe_substitute(
                         input=infile, output=outfile))
-                    inres = create_resource(configuration['pipeline'][0])
-                    outres = create_resource(configuration['pipeline'][-1])
+                    inres = create_object(configuration['pipeline'][0])
+                    outres = create_object(configuration['pipeline'][-1])
                     with Pipeline(inres, outres):
                         # The whole pipeline -- just map and filter objects
                         resources = [inres] + transforms + [outres]
@@ -143,7 +143,7 @@ def get_reducer(args, config_str):
               'specified in the configuration file, and vice versa.')
         sys.exit(1)
     if reducer:
-        return create_resource(reducer)
+        return create_object(reducer)
     else:
         return None
 

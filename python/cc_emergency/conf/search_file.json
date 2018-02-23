@@ -23,14 +23,14 @@
 		{
 			"class": "cc_emergency.functional.transforms.Search",
 			"kwargs": {
-				"field_weights": {"counts": 1},
+				"field_weights": {"lemmas_counts": 1},
 				"query_file": "$query_file",
 				"scorer": {
 					"scorer": "okapi",
 					"params": {
 						"k1": 2,
 						"b": 0.75,
-						"avgdl": 498.4
+						"avgdl": $avgdl
 					}
 				}
 			}
@@ -41,7 +41,7 @@
 		},
 		{
 			"class": "cc_emergency.functional.transforms.RetainFields",
-			"args": [["url", "score", "content"]]
+			"args": [["url", "score"]]
 		},
 		{
 			"class": "cc_emergency.functional.collectors.Sorter",

@@ -5,22 +5,14 @@
 			"args": ["$input"]
 		},
 		{
-			"class": "cc_emergency.functional.transforms.CoNLLToCounts",
-			"args": [
-				{
-				    "content_corenlp": {
-					"column": "lemma",
-					"lower": true,
-					"convert_nnps": "NNP",
-					"delete": true,
-					"new_field": "counts"
-				    }
-				}
-			]
+			"class": "cc_emergency.functional.transforms.Counts",
+			"kwargs": {
+				"fields": ["lemmas", "lemmas_bigrams"]
+			}
 		},
 		{
 			"class": "cc_emergency.functional.transforms.RetainFields",
-			"args": [["url", "counts", "content"]]
+			"args": [["url", "lemmas_counts", "lemmas_bigrams_counts", "content"]]
 		},
 		{
 			"class": "cc_emergency.functional.io.JsonWriter",
