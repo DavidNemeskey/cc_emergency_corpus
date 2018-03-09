@@ -46,14 +46,13 @@ def parse_arguments():
 
 
 def vector_stuff(vector_file, bev_files, normalize):
-    colors = {1: 'r^', 2: 'g^', 4: 'b^', 3: 'yo', 5: 'mo', 6: 'co', 7: 'ks'}
     points = defaultdict(int)
     if bev_files:
         for i, bev_file in enumerate(bev_files):
             with open(bev_file) as inf:
                 for word in set(inf.read().strip().split('\n')):
                     points[word] |= pow(2, i)
-        points = {w: colors[c] for w, c in points.items()}
+        points = {w: style for w, style in points.items()}
     words, vectors = read_vectors(
         vector_file, normalize, keep_words=points.keys())
     return words, vectors, points
@@ -74,6 +73,16 @@ def main():
     if args.write_vectors:
         write_vectors(words, vectors, args.write_vectors)
     else:
+        styles = {
+            1: {'c': '#006DDB', 'marker': '+', 'ls': '', 'mew': 2},  # blue
+            2: {'c': '#920000', 'marker': 'x', 'ls': '', 'mew': 3},  # red
+            4: {'c': '#FFFF6D', 'marker': '^', 'ls': ''},  # yellow
+            3: {'c': '#490092', 'marker': '*', 'ls': ''},  # purple
+            5: {'c': '#DBD100', 'marker': 's', 'ls': ''},  # orange
+            6: {'c': '#24FF24', 'marker': 'p', 'ls': ''},  # green
+            7: {'c': 'k', 'marker': 'h', 'ls': ''}  # black
+        }
+
         coords = compute_mds(vectors, args.distance)
 
         # Plotting -- ungh...
@@ -88,11 +97,13 @@ def main():
         if points:
             per_color_indices = defaultdict(list)
             for i, word in enumerate(words):
-                color = points[word]
-                per_color_indices[color].append(i)
-            for color, indices in per_color_indices.items():
+                style = points[word]
+                per_color_indices[style].append(i)
+            for style, indices in sorted(per_color_indices.items()):
+                print(style)
                 ccoords = coords[indices]
-                art = ax.plot(ccoords[:, 0], ccoords[:, 1], color, picker=3)[0]
+                art = ax.plot(ccoords[:, 0], ccoords[:, 1], picker=3,
+                              **styles[style])[0]
                 artist_indices[art] = indices
         else:
             ax.plot(coords[:, 0], coords[:, 1], 'rx', picker=3)
@@ -101,7 +112,9 @@ def main():
         ax.set_ylim(y_min - 0.1, y_max + 0.1)
         op = partial(onpick, artist_indices=artist_indices, words=words)
         fig.canvas.mpl_connect('pick_event', op)
-        plt.show()
+        # plt.show()
+        plt.savefig('bev_vs_bv.eps', bbox_inches='tight', transparent=True, pad_inches=0)
+        plt.savefig('bev_vs_bv.svg', bbox_inches='tight', transparent=True, pad_inches=0)
 
 
 if __name__ == '__main__':
